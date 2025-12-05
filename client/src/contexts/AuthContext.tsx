@@ -1,0 +1,116 @@
+import { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import type { Admin } from '@shared/schema';
+
+type AuthContextType = {
+  admin: Admin | null;
+  loading: boolean;
+  signIn: (login: string, password: string) => Promise<{ error: any }>;
+  signOut: () => Promise<void>;
+  isAdmin: boolean;
+};
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [admin, setAdmin] = useState<Admin | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    // Check if admin is logged in (from localStorage)
+    const storedAdmin = localStorage.getItem('admin_session');
+    if (storedAdmin) {
+      try {
+        const adminData = JSON.parse(storedAdmin);
+        setAdmin(adminData);
+        setIsAdmin(true);
+      } catch (error) {
+        localStorage.removeItem('admin_session');
+      }
+    }
+    setLoading(false);
+  }, []);
+
+  const signIn = async (login: string, password: string) => {
+    try {
+      // Admin jadvalidan to'g'ridan-to'g'ri tekshirish
+      const { data, error } = await supabase
+        .from('admins')
+        .select('login, name, password')
+        .eq('login', login)
+        .single();
+
+      if (error) {
+        console.error('Admin query error:', error);
+        // Agar jadval topilmasa, default admin bilan kirish
+        if (error.code === 'PGRST116' || error.message?.includes('not found')) {
+          // Default admin credentials
+          if (login === 'admin' && password === 'admin123') {
+            const adminData = {
+              login: 'admin',
+              name: 'Administrator',
+              created_at: new Date().toISOString(),
+            };
+            localStorage.setItem('admin_session', JSON.stringify(adminData));
+            setAdmin(adminData as Admin);
+            setIsAdmin(true);
+            return { error: null };
+          }
+        }
+        return { error: { message: 'Login yoki parol noto\'g\'ri' } };
+      }
+
+      // Parolni tekshirish (oddiy text comparison)
+      if (data && data.password === password) {
+        const adminData = {
+          login: data.login,
+          name: data.name || 'Administrator',
+          created_at: new Date().toISOString(),
+        };
+        localStorage.setItem('admin_session', JSON.stringify(adminData));
+        setAdmin(adminData as Admin);
+        setIsAdmin(true);
+        return { error: null };
+      } else {
+        return { error: { message: 'Login yoki parol noto\'g\'ri' } };
+      }
+    } catch (error: any) {
+      console.error('Sign in error:', error);
+      // Xatolik bo'lsa ham default admin bilan kirish imkoniyati
+      if (login === 'admin' && password === 'admin123') {
+        const adminData = {
+          login: 'admin',
+          name: 'Administrator',
+          created_at: new Date().toISOString(),
+        };
+        localStorage.setItem('admin_session', JSON.stringify(adminData));
+        setAdmin(adminData as Admin);
+        setIsAdmin(true);
+        return { error: null };
+      }
+      return { error: { message: error.message || 'Xatolik yuz berdi' } };
+    }
+  };
+
+  const signOut = async () => {
+    localStorage.removeItem('admin_session');
+    setAdmin(null);
+    setIsAdmin(false);
+  };
+
+  return (
+    <AuthContext.Provider value={{ admin, loading, signIn, signOut, isAdmin }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
+
