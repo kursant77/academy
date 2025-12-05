@@ -50,7 +50,55 @@ Build natijasi `dist/` papkasida yaratiladi.
 **Sitemap yangilash:**
 Har safar yangi kontent qo'shganda `public/sitemap.xml` ni yangilang.
 
-### 5. Server Configuration
+### 5. Vercel Deployment
+
+#### Environment Variables
+
+Vercel dashboard'da quyidagi environment variables'ni sozlash kerak:
+
+1. **Project Settings > Environment Variables** ga kiring
+2. Quyidagi variables'ni qo'shing:
+
+```
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGci... (Supabase dashboard'dan oling)
+```
+
+3. Har bir variable uchun **Production, Preview, Development** ni tanlang
+4. Save qiling va project'ni qayta deploy qiling
+
+#### Supabase Credentials Qayerdan Olinadi:
+
+1. Supabase dashboard: https://app.supabase.com
+2. Project'ni tanlang
+3. **Settings > API**
+4. `Project URL` → `VITE_SUPABASE_URL`
+5. `anon public` key → `VITE_SUPABASE_ANON_KEY`
+
+#### Vercel Configuration
+
+`vercel.json` fayli allaqachon yaratilgan va quyidagilarni o'z ichiga oladi:
+- `site.webmanifest` uchun to'g'ri headers
+- Security headers
+- CORS sozlamalari
+
+#### Deploy Qilish:
+
+```bash
+# Vercel CLI orqali
+npm i -g vercel
+vercel
+
+# Yoki GitHub orqali
+# 1. GitHub'ga push qiling
+# 2. Vercel dashboard'da project'ni import qiling
+# 3. Environment variables'ni sozlang
+# 4. Deploy qiling
+```
+
+**Muhim:** Deploy qilgandan keyin browser console'da xatolik bo'lmasligi kerak. Agar `Supabase URL va Anon Key topilmadi` xatosi chiqsa, environment variables'ni tekshiring.
+
+### 6. Server Configuration
 
 #### Nginx Configuration
 
@@ -152,7 +200,7 @@ server {
 </IfModule>
 ```
 
-### 6. Performance Optimizatsiyasi
+### 7. Performance Optimizatsiyasi
 
 **Qilingan optimizatsiyalar:**
 - ✅ Code splitting (vendor chunks)
@@ -168,7 +216,7 @@ server {
 - Image CDN (Cloudinary, Imgix)
 - Service Worker (PWA)
 
-### 7. Monitoring va Analytics
+### 8. Monitoring va Analytics
 
 **Google Analytics:**
 `.env` faylida `VITE_GA_MEASUREMENT_ID` ni qo'shing.
@@ -178,7 +226,7 @@ server {
 - LogRocket
 - Bugsnag
 
-### 8. Database Setup
+### 9. Database Setup
 
 Supabase'da quyidagi SQL fayllarni ishga tushiring:
 
@@ -187,7 +235,7 @@ Supabase'da quyidagi SQL fayllarni ishga tushiring:
 3. `SYSTEM_OPTIONS_SETUP.sql` - Sozlamalar
 4. `SUPABASE_TELEGRAM_TRIGGER.sql` - Telegram integratsiyasi
 
-### 9. Pre-deployment Checklist
+### 10. Pre-deployment Checklist
 
 - [ ] `.env` fayl to'ldirilgan
 - [ ] `VITE_SITE_URL` to'g'ri
@@ -200,7 +248,7 @@ Supabase'da quyidagi SQL fayllarni ishga tushiring:
 - [ ] Analytics sozlangan
 - [ ] Build test qilingan (`npm run build && npm run preview`)
 
-### 10. Post-deployment
+### 11. Post-deployment
 
 1. **SEO tekshirish:**
    - Google Search Console ga qo'shing
@@ -216,7 +264,7 @@ Supabase'da quyidagi SQL fayllarni ishga tushiring:
    - SSL Labs
    - Security Headers
 
-### 11. CI/CD (Optional)
+### 12. CI/CD (Optional)
 
 GitHub Actions yoki GitLab CI/CD orqali avtomatik deploy qilish mumkin.
 
