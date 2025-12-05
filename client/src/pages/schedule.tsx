@@ -71,79 +71,80 @@ export default function Schedule() {
         url="/schedule"
       />
       <div className="min-h-screen py-12 md:py-16">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-        <div className="mb-8 md:mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("schedule.title")}</h1>
-          <p className="text-lg text-muted-foreground">{t("schedule.subtitle")}</p>
-        </div>
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="mb-8 md:mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("schedule.title")}</h1>
+            <p className="text-lg text-muted-foreground">{t("schedule.subtitle")}</p>
+          </div>
 
-        {loading ? (
-          <div className="text-center py-16 text-muted-foreground">Yuklanmoqda...</div>
-        ) : (
-          <div className="grid gap-6">
-            {grouped.map(({ day, entries }) => {
-              if (entries.length === 0) return null;
+          {loading ? (
+            <div className="text-center py-16 text-muted-foreground">Yuklanmoqda...</div>
+          ) : (
+            <div className="grid gap-6">
+              {grouped.map(({ day, entries }) => {
+                if (entries.length === 0) return null;
 
-              return (
-                <Card key={day}>
-                  <CardHeader>
-                    <CardTitle className="text-2xl">{dayLabel(day)}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      {entries.map((item) => (
-                        <div
-                          key={item.id}
-                          className="flex items-start gap-4 p-4 rounded-lg border bg-muted/30"
-                        >
-                          <div className="flex-1 space-y-2">
-                            <div className="font-semibold text-lg">
-                              {i18n.language === "ru"
-                                ? item.title_ru
-                                : i18n.language === "en"
-                                ? item.title_en
-                                : item.title_uz}
-                            </div>
-                            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-4 w-4" />
-                                <span>
-                                  {item.start_time} - {item.end_time}
-                                </span>
+                return (
+                  <Card key={day}>
+                    <CardHeader>
+                      <CardTitle className="text-2xl">{dayLabel(day)}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        {entries.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex items-start gap-4 p-4 rounded-lg border bg-muted/30"
+                          >
+                            <div className="flex-1 space-y-2">
+                              <div className="font-semibold text-lg">
+                                {i18n.language === "ru"
+                                  ? item.title_ru
+                                  : i18n.language === "en"
+                                  ? item.title_en
+                                  : item.title_uz}
                               </div>
-                              {item.room && (
+                              <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                                 <div className="flex items-center gap-1">
-                                  <MapPin className="h-4 w-4" />
+                                  <Clock className="h-4 w-4" />
                                   <span>
-                                    {t("schedule.room")} {item.room}
+                                    {item.start_time} - {item.end_time}
                                   </span>
                                 </div>
-                              )}
-                            {item.teacher_name && (
-                              <div className="text-xs text-muted-foreground">
-                                {item.teacher_name}
+                                {item.room && (
+                                  <div className="flex items-center gap-1">
+                                    <MapPin className="h-4 w-4" />
+                                    <span>
+                                      {t("schedule.room")} {item.room}
+                                    </span>
+                                  </div>
+                                )}
+                                {item.teacher_name && (
+                                  <div className="text-xs text-muted-foreground">
+                                    {item.teacher_name}
+                                  </div>
+                                )}
                               </div>
-                            )}
+                              <Badge
+                                variant={item.format === "online" ? "default" : "secondary"}
+                                className="gap-1"
+                              >
+                                {item.format === "online" && <Globe className="h-3 w-3" />}
+                                {item.format === "online"
+                                  ? t("schedule.online")
+                                  : t("schedule.offline")}
+                              </Badge>
                             </div>
-                            <Badge
-                              variant={item.format === "online" ? "default" : "secondary"}
-                              className="gap-1"
-                            >
-                              {item.format === "online" && <Globe className="h-3 w-3" />}
-                              {item.format === "online"
-                                ? t("schedule.online")
-                                : t("schedule.offline")}
-                            </Badge>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </>
   );

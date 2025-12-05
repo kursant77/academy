@@ -47,44 +47,45 @@ export default function Teachers() {
         url="/teachers"
       />
       <div className="min-h-screen py-12 md:py-16">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-        <div className="mb-8 md:mb-12 animate-fade-in-up">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("teachers.title")}</h1>
-          <p className="text-lg text-muted-foreground">{t("teachers.subtitle")}</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {allTeachers.map((teacher, index) => (
-            <div key={teacher.id} className="animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
-              <TeacherCard
-                id={teacher.id}
-                name={teacher.name}
-                specialty={
-                  i18n.language === "uz" ? teacher.specialty_uz :
-                  i18n.language === "ru" ? teacher.specialty_ru :
-                  teacher.specialty_en
-                }
-                experience={teacher.experience}
-                bio={
-                  i18n.language === "uz" ? teacher.bio_uz :
-                  i18n.language === "ru" ? teacher.bio_ru :
-                  teacher.bio_en
-                }
-                imageUrl={teacher.image_url || undefined}
-                linkedIn={teacher.linked_in || undefined}
-                telegram={teacher.telegram || undefined}
-                instagram={teacher.instagram || undefined}
-                isFeatured={teacher.featured || false}
-              />
-            </div>
-          ))}
-        </div>
-
-        {allTeachers.length === 0 && (
-          <div className="text-center py-12 animate-fade-in">
-            <p className="text-muted-foreground text-lg">{t("teachers.noTeachers") || "O'qituvchilar topilmadi"}</p>
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="mb-8 md:mb-12 animate-fade-in-up">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("teachers.title")}</h1>
+            <p className="text-lg text-muted-foreground">{t("teachers.subtitle")}</p>
           </div>
-        )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {allTeachers.map((teacher, index) => (
+              <div key={teacher.id} className="animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
+                <TeacherCard
+                  id={teacher.id}
+                  name={teacher.name}
+                  specialty={
+                    i18n.language === "uz" ? teacher.specialty_uz :
+                    i18n.language === "ru" ? teacher.specialty_ru :
+                    teacher.specialty_en
+                  }
+                  experience={teacher.experience}
+                  bio={
+                    i18n.language === "uz" ? teacher.bio_uz :
+                    i18n.language === "ru" ? teacher.bio_ru :
+                    teacher.bio_en
+                  }
+                  imageUrl={teacher.image_url || undefined}
+                  linkedIn={teacher.linked_in || undefined}
+                  telegram={teacher.telegram || undefined}
+                  instagram={teacher.instagram || undefined}
+                  isFeatured={teacher.featured || false}
+                />
+              </div>
+            ))}
+          </div>
+
+          {allTeachers.length === 0 && (
+            <div className="text-center py-12 animate-fade-in">
+              <p className="text-muted-foreground text-lg">{t("teachers.noTeachers") || "O'qituvchilar topilmadi"}</p>
+            </div>
+          )}
+        </div>
       </div>
     </>
   );

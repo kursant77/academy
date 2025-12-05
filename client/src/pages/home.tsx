@@ -216,7 +216,7 @@ export default function Home() {
         <Hero />
         <StatsBar />
 
-      <section className="w-full py-20 md:py-24 animate-fade-in">
+        <section className="w-full py-20 md:py-24 animate-fade-in">
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12 md:mb-16 gap-4">
             <div className="animate-slide-in-left space-y-3">

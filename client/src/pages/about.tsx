@@ -90,91 +90,92 @@ export default function About() {
         structuredData={structuredData}
       />
       <div className="min-h-screen py-12 md:py-16">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-        <div className="mb-12 md:mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("about.title")}</h1>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-8 mb-16">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Target className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle className="text-2xl">{t("about.mission")}</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                {missionText}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Eye className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle className="text-2xl">{t("about.vision")}</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                {visionText}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-8">{t("about.advantages")}</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {advantages.map((advantage, index) => (
-              <Card key={index} className="text-center">
-                <CardContent className="pt-6 space-y-4">
-                  <div className="flex justify-center">
-                    <div className="p-3 rounded-lg bg-primary/10">
-                      {advantage.icon}
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2">
-                    {advantage.titleOverride
-                      ? advantage.titleOverride
-                      : i18n.language === "ru"
-                      ? advantage.titleRu
-                      : i18n.language === "en"
-                      ? advantage.titleEn
-                      : advantage.titleUz}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                    {advantage.descOverride
-                      ? advantage.descOverride
-                      : i18n.language === "ru"
-                      ? advantage.descRu
-                      : i18n.language === "en"
-                      ? advantage.descEn
-                      : advantage.descUz}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="mb-12 md:mb-16">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("about.title")}</h1>
           </div>
-        </div>
 
-        <div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-8">{t("about.history")}</h2>
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-muted-foreground leading-relaxed">
-                {historyText}
-              </p>
-            </CardContent>
-          </Card>
+          <div className="grid md:grid-cols-2 gap-8 mb-16">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Target className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle className="text-2xl">{t("about.mission")}</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  {missionText}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Eye className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle className="text-2xl">{t("about.vision")}</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  {visionText}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-8">{t("about.advantages")}</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {advantages.map((advantage, index) => (
+                <Card key={index} className="text-center">
+                  <CardContent className="pt-6 space-y-4">
+                    <div className="flex justify-center">
+                      <div className="p-3 rounded-lg bg-primary/10">
+                        {advantage.icon}
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg mb-2">
+                        {advantage.titleOverride
+                          ? advantage.titleOverride
+                          : i18n.language === "ru"
+                          ? advantage.titleRu
+                          : i18n.language === "en"
+                          ? advantage.titleEn
+                          : advantage.titleUz}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {advantage.descOverride
+                          ? advantage.descOverride
+                          : i18n.language === "ru"
+                          ? advantage.descRu
+                          : i18n.language === "en"
+                          ? advantage.descEn
+                          : advantage.descUz}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-8">{t("about.history")}</h2>
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-muted-foreground leading-relaxed">
+                  {historyText}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </>

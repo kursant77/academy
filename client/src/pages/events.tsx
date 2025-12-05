@@ -60,41 +60,42 @@ export default function Events() {
         url="/events"
       />
       <div className="min-h-screen py-12 md:py-16">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-        <div className="mb-8 md:mb-12 animate-fade-in-up">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("events.title")}</h1>
-          <p className="text-lg text-muted-foreground">{t("events.subtitle")}</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {allEvents.map((event, index) => (
-            <div key={event.id} className="animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
-              <EventCard
-                id={event.id}
-                title={
-                  i18n.language === "uz" ? event.title_uz :
-                  i18n.language === "ru" ? event.title_ru :
-                  event.title_en
-                }
-                description={
-                  i18n.language === "uz" ? event.description_uz :
-                  i18n.language === "ru" ? event.description_ru :
-                  event.description_en
-                }
-                date={new Date(event.date)}
-                category={event.category}
-                imageUrl={event.image_url || undefined}
-                isFeatured={event.featured || false}
-              />
-            </div>
-          ))}
-        </div>
-
-        {allEvents.length === 0 && (
-          <div className="text-center py-12 animate-fade-in">
-            <p className="text-muted-foreground text-lg">{t("events.noEvents") || "Tadbirlar topilmadi"}</p>
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="mb-8 md:mb-12 animate-fade-in-up">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("events.title")}</h1>
+            <p className="text-lg text-muted-foreground">{t("events.subtitle")}</p>
           </div>
-        )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {allEvents.map((event, index) => (
+              <div key={event.id} className="animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
+                <EventCard
+                  id={event.id}
+                  title={
+                    i18n.language === "uz" ? event.title_uz :
+                    i18n.language === "ru" ? event.title_ru :
+                    event.title_en
+                  }
+                  description={
+                    i18n.language === "uz" ? event.description_uz :
+                    i18n.language === "ru" ? event.description_ru :
+                    event.description_en
+                  }
+                  date={new Date(event.date)}
+                  category={event.category}
+                  imageUrl={event.image_url || undefined}
+                  isFeatured={event.featured || false}
+                />
+              </div>
+            ))}
+          </div>
+
+          {allEvents.length === 0 && (
+            <div className="text-center py-12 animate-fade-in">
+              <p className="text-muted-foreground text-lg">{t("events.noEvents") || "Tadbirlar topilmadi"}</p>
+            </div>
+          )}
+        </div>
       </div>
     </>
   );

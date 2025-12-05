@@ -198,125 +198,126 @@ export default function Register() {
         url="/register"
       />
       <div className="min-h-screen py-12 md:py-16">
-      <div className="max-w-2xl mx-auto px-4 md:px-6 lg:px-8">
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            {t("register.title")}
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            {t("register.subtitle")}
-          </p>
-        </div>
+        <div className="max-w-2xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="mb-8 text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              {t("register.title")}
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              {t("register.subtitle")}
+            </p>
+          </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("register.title")}</CardTitle>
-            <CardDescription>{t("register.subtitle")}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  {t("register.fullName")}
-                </label>
-                <Input
-                  value={formData.fullName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, fullName: e.target.value })
-                  }
-                  placeholder={t("register.fullName")}
-                  required
-                  data-testid="input-fullname"
-                />
-              </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("register.title")}</CardTitle>
+              <CardDescription>{t("register.subtitle")}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    {t("register.fullName")}
+                  </label>
+                  <Input
+                    value={formData.fullName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, fullName: e.target.value })
+                    }
+                    placeholder={t("register.fullName")}
+                    required
+                    data-testid="input-fullname"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  {t("register.age")}
-                </label>
-                <Input
-                  type="number"
-                  value={formData.age}
-                  onChange={(e) =>
-                    setFormData({ ...formData, age: e.target.value })
-                  }
-                  placeholder={t("register.age")}
-                  required
-                  min="10"
-                  max="100"
-                  data-testid="input-age"
-                />
-              </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    {t("register.age")}
+                  </label>
+                  <Input
+                    type="number"
+                    value={formData.age}
+                    onChange={(e) =>
+                      setFormData({ ...formData, age: e.target.value })
+                    }
+                    placeholder={t("register.age")}
+                    required
+                    min="10"
+                    max="100"
+                    data-testid="input-age"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  {t("register.phone")}
-                </label>
-                <Input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
-                  placeholder="+998 90 123 45 67"
-                  required
-                  data-testid="input-phone"
-                />
-              </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    {t("register.phone")}
+                  </label>
+                  <Input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                    placeholder="+998 90 123 45 67"
+                    required
+                    data-testid="input-phone"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  {t("register.selectCourse")}
-                </label>
-                <Select
-                  value={formData.courseId}
-                  onValueChange={(value) =>
-                    setFormData({
-                      ...formData,
-                      courseId: value === "none" ? "" : value,
-                    })
-                  }
-                >
-                  <SelectTrigger data-testid="select-course">
-                    <SelectValue placeholder={t("register.selectCourse")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {loadingOptions ? (
-                      <SelectItem value="loading" disabled>
-                        {t("common.loading") || "Yuklanmoqda..."}
-                      </SelectItem>
-                    ) : courses.length === 0 ? (
-                      <SelectItem value="no-courses" disabled>
-                        {t("courses.noCourses") || "Kurslar topilmadi"}
-                      </SelectItem>
-                    ) : (
-                      courses.map((course) => (
-                        <SelectItem key={course.id} value={course.id}>
-                          {i18n.language === "uz"
-                            ? course.name_uz
-                            : i18n.language === "ru"
-                            ? course.name_ru
-                            : course.name_en}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    {t("register.selectCourse")}
+                  </label>
+                  <Select
+                    value={formData.courseId}
+                    onValueChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        courseId: value === "none" ? "" : value,
+                      })
+                    }
+                  >
+                    <SelectTrigger data-testid="select-course">
+                      <SelectValue placeholder={t("register.selectCourse")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {loadingOptions ? (
+                        <SelectItem value="loading" disabled>
+                          {t("common.loading") || "Yuklanmoqda..."}
                         </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
+                      ) : courses.length === 0 ? (
+                        <SelectItem value="no-courses" disabled>
+                          {t("courses.noCourses") || "Kurslar topilmadi"}
+                        </SelectItem>
+                      ) : (
+                        courses.map((course) => (
+                          <SelectItem key={course.id} value={course.id}>
+                            {i18n.language === "uz"
+                              ? course.name_uz
+                              : i18n.language === "ru"
+                              ? course.name_ru
+                              : course.name_en}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <Button
-                type="submit"
-                className="w-full"
-                data-testid="button-submit"
-                disabled={submitting || loadingOptions}
-              >
-                {submitting
-                  ? t("register.loading") || "Yuborilmoqda..."
-                  : t("register.submit")}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  data-testid="button-submit"
+                  disabled={submitting || loadingOptions}
+                >
+                  {submitting
+                    ? t("register.loading") || "Yuborilmoqda..."
+                    : t("register.submit")}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </>
   );
