@@ -5,7 +5,15 @@
       "destination": "/site.webmanifest"
     },
     {
-      "source": "/(.*)",
+      "source": "/robots.txt",
+      "destination": "/robots.txt"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/sitemap.xml"
+    },
+    {
+      "source": "/((?!assets|_next|.*\\..*).*)",
       "destination": "/index.html"
     }
   ],

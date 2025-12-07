@@ -19,17 +19,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Check if admin is logged in (from localStorage)
-    const storedAdmin = localStorage.getItem('admin_session');
-    if (storedAdmin) {
+    const checkAdminSession = async () => {
       try {
-        const adminData = JSON.parse(storedAdmin);
-        setAdmin(adminData);
-        setIsAdmin(true);
+        const storedAdmin = localStorage.getItem('admin_session');
+        if (storedAdmin) {
+          try {
+            const adminData = JSON.parse(storedAdmin);
+            // Ma'lumotlarni tekshiramiz
+            if (adminData && adminData.login) {
+              setAdmin(adminData);
+              setIsAdmin(true);
+            } else {
+              localStorage.removeItem('admin_session');
+            }
+          } catch (error) {
+            console.error('Error parsing admin session:', error);
+            localStorage.removeItem('admin_session');
+          }
+        }
       } catch (error) {
-        localStorage.removeItem('admin_session');
+        console.error('Error checking admin session:', error);
+      } finally {
+        setLoading(false);
       }
-    }
-    setLoading(false);
+    };
+
+    checkAdminSession();
   }, []);
 
   const signIn = async (login: string, password: string) => {

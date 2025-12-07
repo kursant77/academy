@@ -12,16 +12,20 @@ export default function AdminLogin() {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, isAdmin } = useAuth();
+  const { signIn, isAdmin, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   // Redirect if already logged in
   useEffect(() => {
-    if (isAdmin) {
-      setLocation('/admin');
+    if (isAdmin && !authLoading) {
+      // Kichik kechikish bilan redirect qilamiz
+      const timer = setTimeout(() => {
+        setLocation('/admin');
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [isAdmin, setLocation]);
+  }, [isAdmin, setLocation, authLoading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
