@@ -49,11 +49,10 @@ function Router() {
     return (
       <Switch>
         <Route path="/admin/login" component={AdminLogin} />
-        <Route path="/admin" component={AdminDashboard} />
+        <Route path="/admin/groups/:id" component={AdminGroupDetailsPage} />
         <Route path="/admin/courses" component={AdminCourses} />
         <Route path="/admin/teachers" component={AdminTeachers} />
         <Route path="/admin/groups" component={AdminGroupsPage} />
-        <Route path="/admin/groups/:id" component={AdminGroupDetailsPage} />
         <Route path="/admin/students" component={AdminStudentsPage} />
         <Route path="/admin/events" component={AdminEvents} />
         <Route path="/admin/applications" component={AdminApplications} />
@@ -61,6 +60,7 @@ function Router() {
         <Route path="/admin/categories" component={AdminCategories} />
         <Route path="/admin/testimonials" component={AdminTestimonials} />
         <Route path="/admin/schedule" component={AdminSchedule} />
+        <Route path="/admin" component={AdminDashboard} />
         <Route component={NotFound} />
       </Switch>
     );

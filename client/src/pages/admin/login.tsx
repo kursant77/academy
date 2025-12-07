@@ -72,6 +72,7 @@ export default function AdminLogin() {
                 onChange={(e) => setLogin(e.target.value)}
                 required
                 disabled={loading}
+                autoComplete="username"
               />
             </div>
             <div className="space-y-2">
@@ -84,7 +85,13 @@ export default function AdminLogin() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
+                autoComplete="current-password"
               />
+            </div>
+            <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+              <p className="font-medium mb-1">Default ma'lumotlar:</p>
+              <p>Login: <code className="bg-background px-1 rounded">admin</code></p>
+              <p>Parol: <code className="bg-background px-1 rounded">admin123</code></p>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Kirilmoqda...' : 'Kirish'}
