@@ -126,24 +126,24 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     <SidebarProvider defaultOpen>
       <div className="flex min-h-screen w-full">
         <Sidebar collapsible="offcanvas" className="bg-gradient-to-b from-background to-muted/30 transition-all duration-300">
-          <SidebarContent>
-            <div className="px-3 sm:px-4 py-4 sm:py-5 animate-fade-in-down">
+          <SidebarContent className="overflow-y-auto">
+            <div className="px-2 sm:px-3 md:px-4 py-3 sm:py-4 md:py-5 animate-fade-in-down">
               <div className="flex items-center gap-2 sm:gap-3">
-                <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-semibold transition-all duration-300 hover:bg-primary/20 flex-shrink-0 text-xs sm:text-sm">
+                <div className="h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-semibold transition-all duration-300 hover:bg-primary/20 flex-shrink-0 text-[10px] sm:text-xs md:text-sm">
                   A+
                 </div>
                 <div className="min-w-0 flex-1 hidden sm:block">
-                  <p className="text-xs sm:text-sm text-muted-foreground truncate">A+ Academy</p>
-                  <p className="font-semibold leading-tight text-foreground text-xs sm:text-sm truncate">
+                  <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground truncate">A+ Academy</p>
+                  <p className="font-semibold leading-tight text-foreground text-[10px] sm:text-xs md:text-sm truncate">
                     Control Center
                   </p>
                 </div>
-                <SidebarTrigger className="ml-auto lg:hidden transition-opacity duration-200 hover:opacity-80 flex-shrink-0" />
+                <SidebarTrigger className="ml-auto lg:hidden transition-opacity duration-200 hover:opacity-80 flex-shrink-0 h-7 w-7 sm:h-8 sm:w-8" />
               </div>
             </div>
             {menuGroups.map((group) => (
               <SidebarGroup key={group.label}>
-                <SidebarGroupLabel className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 px-2">
+                <SidebarGroupLabel className="text-[9px] sm:text-[10px] md:text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 px-2">
                   {group.label}
                 </SidebarGroupLabel>
                 <SidebarGroupContent>
@@ -157,12 +157,12 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                             onClick={() => setLocation(item.path)} 
                             isActive={isActive} 
                             tooltip={item.title}
-                            className="transition-all duration-200 hover:translate-x-1 text-xs sm:text-sm"
+                            className="transition-all duration-200 hover:translate-x-1 text-[11px] sm:text-xs md:text-sm px-2 sm:px-3"
                           >
-                            <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-colors duration-200 flex-shrink-0" />
+                            <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 transition-colors duration-200 flex-shrink-0" />
                             <span className="truncate">{item.title}</span>
                             {item.count !== null && (
-                              <Badge variant="outline" className="ml-auto rounded-full text-[10px] sm:text-xs px-1.5 sm:px-2 py-0 transition-all duration-200 group-hover:bg-primary/10 group-hover:border-primary/30 flex-shrink-0">
+                              <Badge variant="outline" className="ml-auto rounded-full text-[9px] sm:text-[10px] md:text-xs px-1 sm:px-1.5 md:px-2 py-0 transition-all duration-200 group-hover:bg-primary/10 group-hover:border-primary/30 flex-shrink-0">
                                 {item.count}
                               </Badge>
                             )}
@@ -176,34 +176,34 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             ))}
           </SidebarContent>
           <Separator />
-          <div className="p-3 sm:p-4 space-y-2">
+          <div className="p-2 sm:p-3 md:p-4 space-y-2">
             <div className="flex items-center justify-between px-2">
-              <span className="text-xs sm:text-sm text-muted-foreground">Tema</span>
+              <span className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">Tema</span>
               <ThemeToggle />
             </div>
             <Button
               variant="outline"
-              className="w-full justify-start text-xs sm:text-sm h-9 sm:h-10"
+              className="w-full justify-start text-[11px] sm:text-xs md:text-sm h-8 sm:h-9 md:h-10"
               onClick={handleSignOut}
             >
-              <LogOut className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+              <LogOut className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1.5 sm:mr-2" />
               Chiqish
             </Button>
           </div>
         </Sidebar>
-        <main className="flex-1 flex flex-col min-w-0">
+        <main className="flex-1 flex flex-col min-w-0 w-full">
           <div className="border-b p-3 sm:p-4 backdrop-blur bg-background/70 sticky top-0 z-10 transition-all duration-300">
-            <div className="flex items-center gap-3 sm:gap-4 animate-fade-in-down">
-              <SidebarTrigger className="lg:hidden transition-opacity duration-200 hover:opacity-80 flex-shrink-0" />
+            <div className="flex items-center gap-2 sm:gap-3 md:gap-4 animate-fade-in-down">
+              <SidebarTrigger className="lg:hidden transition-opacity duration-200 hover:opacity-80 flex-shrink-0 h-8 w-8 sm:h-9 sm:w-9" />
               <div className="min-w-0 flex-1">
-                <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground truncate">
+                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-foreground truncate">
                   A+ Academy Admin
                 </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Monitoring va boshqaruv</p>
+                <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground hidden sm:block">Monitoring va boshqaruv</p>
               </div>
             </div>
           </div>
-          <div className="flex-1 p-3 sm:p-4 md:p-6 animate-fade-in overflow-x-hidden">{children}</div>
+          <div className="flex-1 p-2 sm:p-3 md:p-4 lg:p-6 animate-fade-in overflow-x-hidden w-full max-w-full">{children}</div>
         </main>
       </div>
     </SidebarProvider>

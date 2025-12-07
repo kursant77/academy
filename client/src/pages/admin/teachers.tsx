@@ -203,13 +203,13 @@ function TeachersContent() {
                 Yangi o'qituvchi
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[95vh] overflow-y-auto p-4 sm:p-6">
+            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[95vh] overflow-y-auto p-3 sm:p-4 md:p-6">
               <DialogHeader>
-                <DialogTitle>{editingTeacher ? 'O\'qituvchini tahrirlash' : 'Yangi o\'qituvchi qo\'shish'}</DialogTitle>
-                <DialogDescription>Instruktor ma\'lumotlarini to\'ldiring</DialogDescription>
+                <DialogTitle className="text-sm sm:text-base md:text-lg">{editingTeacher ? 'O\'qituvchini tahrirlash' : 'Yangi o\'qituvchi qo\'shish'}</DialogTitle>
+                <DialogDescription className="text-[11px] sm:text-xs md:text-sm">Instruktor ma\'lumotlarini to\'ldiring</DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
                     <Label>F.I.Sh</Label>
                     <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />

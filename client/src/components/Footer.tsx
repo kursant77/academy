@@ -16,9 +16,9 @@ export function Footer() {
   ];
 
   return (
-    <footer className="w-full border-t bg-gradient-to-b from-background to-muted/20 mt-20">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
+    <footer className="w-full border-t bg-gradient-to-b from-background to-muted/20 mt-12 sm:mt-16 md:mt-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 md:py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-12 md:gap-16">
           <div className="space-y-5">
             <div className="flex items-center gap-3">
               <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground font-bold text-xl tracking-tight shadow-lg">

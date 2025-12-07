@@ -401,12 +401,12 @@ function DashboardContent() {
 
   const renderFeaturedCard = (title: string, items: React.ReactNode, emptyLabel: string) => (
     <Card>
-      <CardHeader className="p-4 sm:p-6">
-        <CardTitle className="text-base sm:text-lg">{title}</CardTitle>
+      <CardHeader className="p-3 sm:p-4 md:p-6">
+        <CardTitle className="text-sm sm:text-base md:text-lg">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="p-4 sm:p-6 pt-0">
+      <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
         {items || (
-          <div className="text-center py-6 text-xs sm:text-sm text-muted-foreground">
+          <div className="text-center py-6 text-[11px] sm:text-xs md:text-sm text-muted-foreground">
             {emptyLabel}
           </div>
         )}
@@ -518,7 +518,7 @@ function DashboardContent() {
         <FinanceSnapshot snapshot={dashboardSnapshot} loading={snapshotLoading} currency={dashboardConfig.currency} />
         <GroupAnalytics snapshot={dashboardSnapshot} loading={snapshotLoading} />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
           <div className="stagger-item">
             <InsightCard
               title="Umumiy daromad"
@@ -554,7 +554,7 @@ function DashboardContent() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           {menuItems.map((item, index) => {
             const Icon = item.icon;
             return (
@@ -564,20 +564,20 @@ function DashboardContent() {
                 onClick={() => setLocation(item.path)}
                 style={{ animationDelay: `${index * 0.02}s` }}
               >
-                <CardHeader className="p-4 sm:p-6">
+                <CardHeader className="p-3 sm:p-4 md:p-6">
                   <div className="flex items-center justify-between">
-                    <div className="p-2 sm:p-3 bg-primary/10 rounded-lg">
-                      <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                    <div className="p-2 sm:p-2.5 md:p-3 bg-primary/10 rounded-lg">
+                      <Icon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary" />
                     </div>
-                    <span className="text-xl sm:text-2xl font-bold text-primary">{item.count}</span>
+                    <span className="text-lg sm:text-xl md:text-2xl font-bold text-primary">{item.count}</span>
                   </div>
-                  <CardTitle className="mt-3 sm:mt-4 text-base sm:text-lg">{item.title}</CardTitle>
-                  <CardDescription className="text-xs sm:text-sm">{item.description}</CardDescription>
+                  <CardTitle className="mt-2 sm:mt-3 md:mt-4 text-sm sm:text-base md:text-lg">{item.title}</CardTitle>
+                  <CardDescription className="text-[11px] sm:text-xs md:text-sm">{item.description}</CardDescription>
                 </CardHeader>
-                <CardContent className="p-4 sm:p-6 pt-0">
-                  <Button variant="ghost" className="w-full justify-between text-xs sm:text-sm h-9 sm:h-10">
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <Button variant="ghost" className="w-full justify-between text-[11px] sm:text-xs md:text-sm h-8 sm:h-9 md:h-10">
                     Boshqarish
-                    <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
                   </Button>
                 </CardContent>
               </Card>
@@ -585,18 +585,18 @@ function DashboardContent() {
           })}
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-4 sm:gap-6 animate-fade-in-up">
+        <div className="grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-3 sm:gap-4 md:gap-6 animate-fade-in-up">
           <Card className="col-span-1">
-            <CardHeader className="flex flex-col gap-3 sm:gap-2 md:flex-row md:items-center md:justify-between p-4 sm:p-6">
+            <CardHeader className="flex flex-col gap-3 sm:gap-2 md:flex-row md:items-center md:justify-between p-3 sm:p-4 md:p-6">
               <div className="min-w-0">
-                <CardTitle className="text-base sm:text-lg">Daromad dinamikasi</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">Tanlangan davr uchun tushum va ro'yxatlar</CardDescription>
+                <CardTitle className="text-sm sm:text-base md:text-lg">Daromad dinamikasi</CardTitle>
+                <CardDescription className="text-[11px] sm:text-xs md:text-sm">Tanlangan davr uchun tushum va ro'yxatlar</CardDescription>
               </div>
               <Select
                 value={dashboardConfig.timeRange}
                 onValueChange={(value: TimeRange) => handleDashboardConfigChange('timeRange', value)}
               >
-                <SelectTrigger className="w-full sm:w-[160px] transition-all duration-200 hover:border-primary/50">
+                <SelectTrigger className="w-full sm:w-[140px] md:w-[160px] transition-all duration-200 hover:border-primary/50 text-xs sm:text-sm">
                   <SelectValue placeholder="Davr" />
                 </SelectTrigger>
                 <SelectContent>
@@ -608,15 +608,15 @@ function DashboardContent() {
                 </SelectContent>
               </Select>
             </CardHeader>
-            <CardContent className="p-4 sm:p-6 pt-0">
+            <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
               {isFinancialLoading ? (
-                <div className="h-[240px] sm:h-[320px] animate-pulse rounded-lg bg-muted" />
+                <div className="h-[200px] sm:h-[240px] md:h-[320px] animate-pulse rounded-lg bg-muted" />
               ) : financialOverview.revenueTrend.length === 0 ? (
-                <div className="flex h-[240px] sm:h-[320px] items-center justify-center text-sm sm:text-base text-muted-foreground text-center px-4">
+                <div className="flex h-[200px] sm:h-[240px] md:h-[320px] items-center justify-center text-xs sm:text-sm md:text-base text-muted-foreground text-center px-4">
                   Tanlangan davr uchun moliyaviy maʼlumot topilmadi
                 </div>
               ) : (
-                <ChartContainer config={chartConfig} className="h-[240px] sm:h-[320px]">
+                <ChartContainer config={chartConfig} className="h-[200px] sm:h-[240px] md:h-[320px] w-full">
                   <AreaChart data={financialOverview.revenueTrend}>
                     <defs>
                       <linearGradient id="fillRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -629,12 +629,12 @@ function DashboardContent() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="4 4" strokeOpacity={0.2} />
-                    <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 12 }} />
+                    <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 10 }} />
                     <YAxis
                       tickLine={false}
                       axisLine={false}
                       tickFormatter={(value) => (value >= 1000 ? `${Math.round(value / 1000)}k` : value)}
-                      tick={{ fontSize: 12 }}
+                      tick={{ fontSize: 10 }}
                     />
                     <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
                     <Area
@@ -660,11 +660,11 @@ function DashboardContent() {
           </Card>
 
           <Card>
-            <CardHeader className="p-4 sm:p-6">
-              <CardTitle className="text-base sm:text-lg">Panel sozlamalari</CardTitle>
-              <CardDescription className="text-xs sm:text-sm">Moliyaviy ko'rsatkichlarni moslash</CardDescription>
+            <CardHeader className="p-3 sm:p-4 md:p-6">
+              <CardTitle className="text-sm sm:text-base md:text-lg">Panel sozlamalari</CardTitle>
+              <CardDescription className="text-[11px] sm:text-xs md:text-sm">Moliyaviy ko'rsatkichlarni moslash</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6 pt-0">
+            <CardContent className="space-y-3 sm:space-y-4 md:space-y-6 p-3 sm:p-4 md:p-6 pt-0">
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span>Valyuta format</span>
@@ -726,49 +726,49 @@ function DashboardContent() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           <Card className="xl:col-span-2">
-            <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between p-4 sm:p-6">
+            <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between p-3 sm:p-4 md:p-6">
               <div className="min-w-0">
-                <CardTitle className="text-base sm:text-lg">O'qituvchilar moliyaviy holati</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">Ustozlar kesimidagi tushum va to'lovlar</CardDescription>
+                <CardTitle className="text-sm sm:text-base md:text-lg">O'qituvchilar moliyaviy holati</CardTitle>
+                <CardDescription className="text-[11px] sm:text-xs md:text-sm">Ustozlar kesimidagi tushum va to'lovlar</CardDescription>
               </div>
             </CardHeader>
-            <CardContent className="overflow-x-auto p-4 sm:p-6 pt-0">
+            <CardContent className="overflow-x-auto p-3 sm:p-4 md:p-6 pt-0">
               {!dashboardConfig.showTeacherPayouts ? (
-                <div className="py-10 text-center text-muted-foreground">
+                <div className="py-8 sm:py-10 text-center text-xs sm:text-sm text-muted-foreground">
                   Moliyaviy jadval yashirilgan. Sozlamalardan qayta yoqing.
                 </div>
               ) : financialOverview.teacherSummaries.length === 0 ? (
-                <div className="py-10 text-center text-muted-foreground">
+                <div className="py-8 sm:py-10 text-center text-xs sm:text-sm text-muted-foreground">
                   Hozircha ustozlar bo'yicha to'plangan moliyaviy ma'lumot yo'q.
                 </div>
               ) : (
-                <div className="min-w-[600px]">
+                <div className="min-w-[500px] sm:min-w-[600px]">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-xs sm:text-sm">Ustoz</TableHead>
-                        <TableHead className="text-xs sm:text-sm hidden sm:table-cell">Yo'nalish</TableHead>
-                        <TableHead className="text-right text-xs sm:text-sm">Tushum</TableHead>
-                        <TableHead className="text-right text-xs sm:text-sm">To'lov</TableHead>
-                        <TableHead className="text-xs sm:text-sm">Holat</TableHead>
+                        <TableHead className="text-[11px] sm:text-xs md:text-sm">Ustoz</TableHead>
+                        <TableHead className="text-[11px] sm:text-xs md:text-sm hidden sm:table-cell">Yo'nalish</TableHead>
+                        <TableHead className="text-right text-[11px] sm:text-xs md:text-sm">Tushum</TableHead>
+                        <TableHead className="text-right text-[11px] sm:text-xs md:text-sm">To'lov</TableHead>
+                        <TableHead className="text-[11px] sm:text-xs md:text-sm">Holat</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {financialOverview.teacherSummaries.map((teacher, index) => (
                         <TableRow key={teacher.id} className="table-row-hover stagger-item" style={{ animationDelay: `${index * 0.02}s` }}>
-                          <TableCell className="font-medium text-xs sm:text-sm">
+                          <TableCell className="font-medium text-[11px] sm:text-xs md:text-sm">
                             <div>
                               <div>{teacher.name || 'Nomaʼlum'}</div>
-                              <div className="text-muted-foreground sm:hidden text-xs mt-1">{teacher.specialty || '—'}</div>
+                              <div className="text-muted-foreground sm:hidden text-[10px] mt-1">{teacher.specialty || '—'}</div>
                             </div>
                           </TableCell>
-                          <TableCell className="text-muted-foreground text-xs sm:text-sm hidden sm:table-cell">{teacher.specialty || '—'}</TableCell>
-                          <TableCell className="text-right text-xs sm:text-sm">{formatCurrency(teacher.totalRevenue)}</TableCell>
-                          <TableCell className="text-right text-xs sm:text-sm">{formatCurrency(teacher.payout)}</TableCell>
+                          <TableCell className="text-muted-foreground text-[11px] sm:text-xs md:text-sm hidden sm:table-cell">{teacher.specialty || '—'}</TableCell>
+                          <TableCell className="text-right text-[11px] sm:text-xs md:text-sm">{formatCurrency(teacher.totalRevenue)}</TableCell>
+                          <TableCell className="text-right text-[11px] sm:text-xs md:text-sm">{formatCurrency(teacher.payout)}</TableCell>
                           <TableCell>
-                            <span className={`rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium ${statusCopy[teacher.status].tone}`}>
+                            <span className={`rounded-full px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-1 text-[9px] sm:text-[10px] md:text-xs font-medium ${statusCopy[teacher.status].tone}`}>
                               {statusCopy[teacher.status].label}
                             </span>
                           </TableCell>
@@ -782,11 +782,11 @@ function DashboardContent() {
           </Card>
 
           <Card>
-            <CardHeader className="p-4 sm:p-6">
-              <CardTitle className="text-base sm:text-lg">Eng daromadli kurslar</CardTitle>
-              <CardDescription className="text-xs sm:text-sm">Tanlangan davr ichidagi TOP kurslar</CardDescription>
+            <CardHeader className="p-3 sm:p-4 md:p-6">
+              <CardTitle className="text-sm sm:text-base md:text-lg">Eng daromadli kurslar</CardTitle>
+              <CardDescription className="text-[11px] sm:text-xs md:text-sm">Tanlangan davr ichidagi TOP kurslar</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6 pt-0">
+            <CardContent className="space-y-2 sm:space-y-3 md:space-y-4 p-3 sm:p-4 md:p-6 pt-0">
               {financialOverview.topCourses.length === 0 ? (
                 <div className="py-10 text-center text-muted-foreground">
                   Kurs daromadlari hali shakllanmadi
@@ -817,40 +817,40 @@ function DashboardContent() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           <Card className="lg:col-span-2">
-            <CardHeader className="p-4 sm:p-6">
-              <CardTitle className="text-base sm:text-lg">So'nggi arizalar</CardTitle>
-              <CardDescription className="text-xs sm:text-sm">Oxirgi 5ta ro'yxatdan o'tish</CardDescription>
+            <CardHeader className="p-3 sm:p-4 md:p-6">
+              <CardTitle className="text-sm sm:text-base md:text-lg">So'nggi arizalar</CardTitle>
+              <CardDescription className="text-[11px] sm:text-xs md:text-sm">Oxirgi 5ta ro'yxatdan o'tish</CardDescription>
             </CardHeader>
-            <CardContent className="p-4 sm:p-6 pt-0 overflow-x-auto">
+            <CardContent className="p-3 sm:p-4 md:p-6 pt-0 overflow-x-auto">
               {recentApplications.length === 0 ? (
-                <div className="text-center text-sm sm:text-base text-muted-foreground py-6">
+                <div className="text-center text-xs sm:text-sm md:text-base text-muted-foreground py-6">
                   Hozircha arizalar yo'q
                 </div>
               ) : (
-                <div className="min-w-[500px]">
+                <div className="min-w-[400px] sm:min-w-[500px]">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-xs sm:text-sm">Ism</TableHead>
-                        <TableHead className="text-xs sm:text-sm hidden sm:table-cell">Kurs</TableHead>
-                        <TableHead className="text-xs sm:text-sm">Telefon</TableHead>
-                        <TableHead className="text-xs sm:text-sm">Sana</TableHead>
+                        <TableHead className="text-[11px] sm:text-xs md:text-sm">Ism</TableHead>
+                        <TableHead className="text-[11px] sm:text-xs md:text-sm hidden sm:table-cell">Kurs</TableHead>
+                        <TableHead className="text-[11px] sm:text-xs md:text-sm">Telefon</TableHead>
+                        <TableHead className="text-[11px] sm:text-xs md:text-sm">Sana</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {recentApplications.map((app, index) => (
                         <TableRow key={app.id} className="table-row-hover stagger-item" style={{ animationDelay: `${index * 0.02}s` }}>
-                          <TableCell className="font-medium text-xs sm:text-sm">
+                          <TableCell className="font-medium text-[11px] sm:text-xs md:text-sm">
                             <div>
                               <div>{app.full_name}</div>
-                              <div className="text-muted-foreground sm:hidden text-xs mt-1">{app.course_name || 'Noma\'lum'}</div>
+                              <div className="text-muted-foreground sm:hidden text-[10px] mt-1">{app.course_name || 'Noma\'lum'}</div>
                             </div>
                           </TableCell>
-                          <TableCell className="text-xs sm:text-sm hidden sm:table-cell">{app.course_name || 'Noma\'lum'}</TableCell>
-                          <TableCell className="text-xs sm:text-sm">{app.phone}</TableCell>
-                          <TableCell className="text-xs sm:text-sm">
+                          <TableCell className="text-[11px] sm:text-xs md:text-sm hidden sm:table-cell">{app.course_name || 'Noma\'lum'}</TableCell>
+                          <TableCell className="text-[11px] sm:text-xs md:text-sm">{app.phone}</TableCell>
+                          <TableCell className="text-[11px] sm:text-xs md:text-sm">
                             {new Date(app.created_at).toLocaleDateString()}
                           </TableCell>
                         </TableRow>
@@ -862,11 +862,11 @@ function DashboardContent() {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="p-4 sm:p-6">
-              <CardTitle className="text-base sm:text-lg">Yangi kurslar</CardTitle>
-              <CardDescription className="text-xs sm:text-sm">Oxirgi qo'shilgan 5 ta kurs</CardDescription>
+            <CardHeader className="p-3 sm:p-4 md:p-6">
+              <CardTitle className="text-sm sm:text-base md:text-lg">Yangi kurslar</CardTitle>
+              <CardDescription className="text-[11px] sm:text-xs md:text-sm">Oxirgi qo'shilgan 5 ta kurs</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6 pt-0">
+            <CardContent className="space-y-2 sm:space-y-3 md:space-y-4 p-3 sm:p-4 md:p-6 pt-0">
               {recentCourses.length === 0 ? (
                 <div className="text-center text-muted-foreground py-6">
                   Kurslar topilmadi
@@ -892,18 +892,18 @@ function DashboardContent() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           {renderFeaturedCard(
             'Featured kurslar',
             featuredCourses.length ? (
               <div className="space-y-2 sm:space-y-3">
                 {featuredCourses.map((course) => (
-                  <div key={course.id} className="flex items-center justify-between rounded border p-2 sm:p-3">
+                  <div key={course.id} className="flex items-center justify-between rounded border p-2 sm:p-2.5 md:p-3">
                     <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-xs sm:text-sm truncate">{course.name_uz}</p>
-                      <p className="text-xs text-muted-foreground truncate">{course.category}</p>
+                      <p className="font-semibold text-[11px] sm:text-xs md:text-sm truncate">{course.name_uz}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{course.category}</p>
                     </div>
-                    <Badge className="ml-2 flex-shrink-0 text-[10px] sm:text-xs">
+                    <Badge className="ml-2 flex-shrink-0 text-[9px] sm:text-[10px] md:text-xs">
                       <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
                       Featured
                     </Badge>
@@ -1163,15 +1163,15 @@ type InsightCardProps = {
 function InsightCard({ title, value, subLabel, icon: Icon, trend }: InsightCardProps) {
   return (
     <Card className="card-hover">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-        <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">{title}</CardTitle>
-        <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground flex-shrink-0" />
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
+        <CardTitle className="text-[11px] sm:text-xs md:text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-muted-foreground flex-shrink-0" />
       </CardHeader>
-      <CardContent className="p-4 sm:p-6 pt-0">
-        <div className="text-xl sm:text-2xl font-bold break-words">{value}</div>
-        {subLabel && <p className="text-xs text-muted-foreground mt-1 sm:mt-2">{subLabel}</p>}
+      <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+        <div className="text-lg sm:text-xl md:text-2xl font-bold break-words">{value}</div>
+        {subLabel && <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 sm:mt-2">{subLabel}</p>}
         {typeof trend === 'number' && (
-          <p className={`mt-1 sm:mt-2 text-xs font-medium ${trend >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+          <p className={`mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium ${trend >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
             {trend >= 0 ? '+' : ''}
             {trend.toFixed(1)}% o'zgarish
           </p>

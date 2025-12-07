@@ -275,17 +275,17 @@ function CoursesContent() {
                 Yangi kurs
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[95vh] overflow-y-auto p-4 sm:p-6">
-              <DialogHeader className="space-y-2">
-                <DialogTitle className="text-base sm:text-lg">
+            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[95vh] overflow-y-auto p-3 sm:p-4 md:p-6">
+              <DialogHeader className="space-y-1 sm:space-y-2">
+                <DialogTitle className="text-sm sm:text-base md:text-lg">
                   {editingCourse ? 'Kursni tahrirlash' : 'Yangi kurs qo\'shish'}
                 </DialogTitle>
-                <DialogDescription className="text-xs sm:text-sm">
+                <DialogDescription className="text-[11px] sm:text-xs md:text-sm">
                   Kurs ma'lumotlarini to'ldiring
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3 md:space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4">
                   <div className="space-y-2">
                     <Label>Nomi (UZ)</Label>
                     <Input

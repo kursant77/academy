@@ -77,14 +77,14 @@ export default function Contact() {
         keywords="bog'lanish, A+ Academy, telefon, email, manzil, Toshkent"
         url="/contact"
       />
-      <div className="min-h-screen py-12 md:py-16">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-          <div className="mb-8 md:mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("contact.title")}</h1>
-            <p className="text-lg text-muted-foreground">{t("contact.subtitle")}</p>
+      <div className="min-h-screen py-8 sm:py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          <div className="mb-6 sm:mb-8 md:mb-12">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2 sm:mb-4">{t("contact.title")}</h1>
+            <p className="text-base sm:text-lg text-muted-foreground">{t("contact.subtitle")}</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
             <div className="space-y-6">
               <Card>
                 <CardHeader>

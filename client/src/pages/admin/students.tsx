@@ -318,13 +318,13 @@ function StudentsContent() {
               Yangi talaba
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[95vh] overflow-y-auto p-4 sm:p-6">
-            <DialogHeader className="space-y-2">
-              <DialogTitle className="text-base sm:text-lg">{editingStudent ? 'Talaba ma\'lumotlarini tahrirlash' : 'Yangi talaba qo\'shish'}</DialogTitle>
-              <DialogDescription className="text-xs sm:text-sm">Ma\'lumotlarni to\'ldiring va saqlang.</DialogDescription>
+          <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[95vh] overflow-y-auto p-3 sm:p-4 md:p-6">
+            <DialogHeader className="space-y-1 sm:space-y-2">
+              <DialogTitle className="text-sm sm:text-base md:text-lg">{editingStudent ? 'Talaba ma\'lumotlarini tahrirlash' : 'Yangi talaba qo\'shish'}</DialogTitle>
+              <DialogDescription className="text-[11px] sm:text-xs md:text-sm">Ma\'lumotlarni to\'ldiring va saqlang.</DialogDescription>
             </DialogHeader>
-            <form className="space-y-3 sm:space-y-4" onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <form className="space-y-2 sm:space-y-3 md:space-y-4" onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4">
                 <div className="space-y-2">
                   <Label>F.I.Sh</Label>
                   <Input value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} required />
@@ -434,7 +434,7 @@ function StudentsContent() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mb-6 sm:mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 md:mb-8">
         <div className="stagger-item">
           <StatCard title="Jami talabalar" value={stats.total} description="Faol ro'yxat" />
         </div>
@@ -456,10 +456,10 @@ function StudentsContent() {
       </div>
 
       <Card>
-        <CardHeader className="p-4 sm:p-6">
-          <CardTitle className="text-base sm:text-lg">Guruh sig'imi</CardTitle>
+        <CardHeader className="p-3 sm:p-4 md:p-6">
+          <CardTitle className="text-sm sm:text-base md:text-lg">Guruh sig'imi</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 p-4 sm:p-6 pt-0">
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4 p-3 sm:p-4 md:p-6 pt-0">
           {stats.perGroup.length === 0 ? (
             <p className="text-sm text-muted-foreground">Guruh ma'lumotlari yo'q</p>
           ) : (
@@ -487,22 +487,22 @@ function StudentsContent() {
       </Card>
 
       <Card>
-        <CardHeader className="p-4 sm:p-6">
-          <div className="flex flex-col gap-3">
-            <CardTitle className="text-base sm:text-lg">Talabalar jadvallari</CardTitle>
-            <div className="flex flex-col lg:flex-row gap-3">
+        <CardHeader className="p-3 sm:p-4 md:p-6">
+          <div className="flex flex-col gap-2 sm:gap-3">
+            <CardTitle className="text-sm sm:text-base md:text-lg">Talabalar jadvallari</CardTitle>
+            <div className="flex flex-col lg:flex-row gap-2 sm:gap-3">
               <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
                 <Input
                   placeholder="Ism bo'yicha qidirish..."
                   value={searchValue}
                   onChange={(e) => setSearchValue(e.target.value)}
-                  className="w-full sm:w-44 text-sm"
+                  className="w-full sm:w-44 text-xs sm:text-sm"
                 />
               </div>
               <div className="flex flex-wrap gap-2 sm:gap-3">
                 <Select value={groupFilter} onValueChange={(value) => setGroupFilter(value)}>
-                  <SelectTrigger className="w-full sm:w-40 text-sm">
+                  <SelectTrigger className="w-full sm:w-40 text-xs sm:text-sm">
                     <SelectValue placeholder="Guruh" />
                   </SelectTrigger>
                   <SelectContent>
@@ -515,7 +515,7 @@ function StudentsContent() {
                   </SelectContent>
                 </Select>
                 <Select value={unpaidGroupFilter} onValueChange={(value) => setUnpaidGroupFilter(value)}>
-                  <SelectTrigger className="w-full sm:w-48 text-sm">
+                  <SelectTrigger className="w-full sm:w-48 text-xs sm:text-sm">
                     <SelectValue placeholder="Unpaid group" />
                   </SelectTrigger>
                   <SelectContent>
@@ -529,22 +529,22 @@ function StudentsContent() {
                 </Select>
                 <div className="flex items-center space-x-2 w-full sm:w-auto">
                   <Switch id="unpaid-only" checked={showUnpaidOnly} onCheckedChange={(checked) => setShowUnpaidOnly(checked)} />
-                  <Label htmlFor="unpaid-only" className="text-xs sm:text-sm">Faqat unpaid</Label>
+                  <Label htmlFor="unpaid-only" className="text-[11px] sm:text-xs md:text-sm">Faqat unpaid</Label>
                 </div>
               </div>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="overflow-x-auto p-4 sm:p-6 pt-0">
+        <CardContent className="overflow-x-auto p-3 sm:p-4 md:p-6 pt-0">
           {loading ? (
             <div className="flex items-center justify-center py-12 text-muted-foreground">
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Ma'lumotlar yuklanmoqda...
+              <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+              <span className="text-xs sm:text-sm">Ma'lumotlar yuklanmoqda...</span>
             </div>
           ) : filteredStudents.length === 0 ? (
-            <div className="text-center py-10 text-muted-foreground">Talabalar topilmadi</div>
+            <div className="text-center py-10 text-xs sm:text-sm text-muted-foreground">Talabalar topilmadi</div>
           ) : (
-            <div className="min-w-[700px]">
+            <div className="min-w-[600px] sm:min-w-[700px]">
               <Table>
                 <TableHeader>
                   <TableRow>
