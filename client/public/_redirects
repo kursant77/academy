@@ -1,0 +1,11 @@
+# Netlify Redirects for SPA
+# Barcha route'larni index.html ga yo'naltirish
+
+# Static fayllar
+/site.webmanifest  /site.webmanifest  200
+/robots.txt        /robots.txt        200
+/sitemap.xml       /sitemap.xml       200
+
+# SPA routing - barcha route'larni index.html ga yo'naltirish
+/*    /index.html   200
+
