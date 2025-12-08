@@ -28,6 +28,8 @@ import AdminCategories from "@/pages/admin/categories";
 import AdminTestimonials from "@/pages/admin/testimonials";
 import AdminSchedule from "@/pages/admin/schedule";
 import AdminStudentsPage from "@/pages/admin/students";
+import AdminStudentDetailsPage from "@/pages/admin/student-details";
+import AdminTeacherDetailsPage from "@/pages/admin/teacher-details";
 import AdminGroupsPage from "@/pages/admin/groups";
 import AdminGroupDetailsPage from "@/pages/admin/group-details";
 
@@ -50,6 +52,8 @@ function Router() {
       <Switch>
         <Route path="/admin/login" component={AdminLogin} />
         <Route path="/admin/groups/:id" component={AdminGroupDetailsPage} />
+        <Route path="/admin/students/:id" component={AdminStudentDetailsPage} />
+        <Route path="/admin/teachers/:id" component={AdminTeacherDetailsPage} />
         <Route path="/admin/courses" component={AdminCourses} />
         <Route path="/admin/teachers" component={AdminTeachers} />
         <Route path="/admin/groups" component={AdminGroupsPage} />

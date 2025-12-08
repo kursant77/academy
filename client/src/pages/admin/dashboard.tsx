@@ -151,11 +151,17 @@ function DashboardContent() {
   const [financialBase, setFinancialBase] = useState<FinancialBase | null>(null);
   const [financialOverview, setFinancialOverview] = useState<FinancialOverview>(emptyFinancialOverview);
   const [isFinancialLoading, setIsFinancialLoading] = useState(false);
-  const [dashboardConfig, setDashboardConfig] = useState<DashboardConfig>({
-    timeRange: '30d',
-    currency: 'UZS',
-    payoutRate: 0.35,
-    showTeacherPayouts: true,
+  const [dashboardConfig, setDashboardConfig] = useState<DashboardConfig>(() => {
+    // localStorage'dan payout rate'ni olish
+    const storedPayoutRate = typeof window !== 'undefined' ? localStorage.getItem('academy_payout_rate') : null;
+    const initialPayoutRate = storedPayoutRate ? parseFloat(storedPayoutRate) : 0.35;
+    
+    return {
+      timeRange: '30d',
+      currency: 'UZS',
+      payoutRate: initialPayoutRate >= 0.20 && initialPayoutRate <= 0.60 ? initialPayoutRate : 0.35,
+      showTeacherPayouts: true,
+    };
   });
   const [dashboardSnapshot, setDashboardSnapshot] = useState<DashboardSnapshot | null>(null);
   const [snapshotLoading, setSnapshotLoading] = useState(true);
@@ -170,7 +176,8 @@ function DashboardContent() {
     const loadSnapshot = async () => {
       try {
         setSnapshotLoading(true);
-        const data = await adminApi.getDashboardSnapshot();
+        // Dashboard'da belgilangan foizni uzatish
+        const data = await adminApi.getDashboardSnapshot(dashboardConfig.payoutRate);
         setDashboardSnapshot(data);
       } catch (error) {
         console.error('Dashboard snapshot error', error);
@@ -179,7 +186,7 @@ function DashboardContent() {
       }
     };
     loadSnapshot();
-  }, []);
+  }, [dashboardConfig.payoutRate]);
 
   useEffect(() => {
     loadFinancialSnapshot(dashboardConfig.timeRange);
@@ -252,13 +259,14 @@ function DashboardContent() {
     setIsFinancialLoading(true);
     try {
       const since = getRangeStart(range);
-      const [coursesRes, teachersRes, applicationsRes] = await Promise.all([
+      const [coursesRes, teachersRes, applicationsRes, groupsRes] = await Promise.all([
         supabase.from('courses').select('id, name_uz, category, price, teacher_id').eq('is_published', true),
         supabase.from('teachers').select('id, name, specialty_uz'),
         supabase
           .from('applications')
           .select('id, course_id, created_at')
           .gte('created_at', since.toISOString()),
+        supabase.from('groups').select('teacher_id, monthly_revenue'),
       ]);
 
       if (coursesRes.error) throw coursesRes.error;
@@ -271,6 +279,16 @@ function DashboardContent() {
       const teacherMap = new Map(
         (teachersRes.data || []).map((teacher) => [teacher.id, { name: teacher.name, specialty: teacher.specialty_uz }])
       );
+      
+      // O'qituvchilarning groups daromadlarini hisoblash
+      const teacherGroupsRevenueMap = new Map<string, number>();
+      (groupsRes.data || []).forEach((group: any) => {
+        if (group.teacher_id) {
+          const currentRevenue = teacherGroupsRevenueMap.get(group.teacher_id) || 0;
+          teacherGroupsRevenueMap.set(group.teacher_id, currentRevenue + parseFloat(group.monthly_revenue || '0'));
+        }
+      });
+      
       const enrollmentMap = new Map<string, number>();
       const filteredApplications = (applicationsRes.data || []).filter(
         (app) => app.course_id !== null && app.created_at
@@ -296,6 +314,36 @@ function DashboardContent() {
           revenue,
           enrollment,
         };
+      });
+
+      // O'qituvchilar revenue'larini groups daromadlaridan yig'ish (courses'dan emas)
+      // Har bir o'qituvchi uchun groups daromadlarini qo'shamiz
+      const teacherRevenueMap = new Map<string, number>();
+      (teachersRes.data || []).forEach((teacher) => {
+        const groupsRevenue = teacherGroupsRevenueMap.get(teacher.id) || 0;
+        teacherRevenueMap.set(teacher.id, groupsRevenue);
+      });
+
+      // Course financials'ga groups daromadlarini qo'shamiz
+      teacherRevenueMap.forEach((revenue, teacherId) => {
+        // Agar bu o'qituvchi courseFinancials'da bo'lmasa, qo'shamiz
+        const existingCourse = courseFinancials.find(c => c.teacherId === teacherId);
+        if (existingCourse) {
+          existingCourse.revenue = Math.max(existingCourse.revenue, revenue);
+        } else if (teacherId) {
+          // Agar course'da bo'lmasa, lekin groups'da bo'lsa, qo'shamiz
+          const teacherDetails = teacherMap.get(teacherId);
+          courseFinancials.push({
+            id: `group-revenue-${teacherId}`,
+            name: `${teacherDetails?.name || 'Noma\'lum'} - Groups`,
+            category: 'Groups',
+            teacherId,
+            teacherName: teacherDetails?.name,
+            teacherSpecialty: teacherDetails?.specialty,
+            revenue,
+            enrollment: 0,
+          });
+        }
       });
 
       const totalRevenue = courseFinancials.reduce((sum, course) => sum + course.revenue, 0);
@@ -474,10 +522,25 @@ function DashboardContent() {
   };
 
   const handleDashboardConfigChange = (key: keyof DashboardConfig, value: string | number | boolean) => {
-    setDashboardConfig((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    setDashboardConfig((prev) => {
+      const newConfig = {
+        ...prev,
+        [key]: value,
+      };
+      
+      // Agar payoutRate o'zgarsa, localStorage'ga saqlash va event yuborish
+      if (key === 'payoutRate' && typeof value === 'number') {
+        try {
+          localStorage.setItem('academy_payout_rate', value.toString());
+          // Custom event yuborish (o'z tab'i uchun)
+          window.dispatchEvent(new CustomEvent('payoutRateChanged'));
+        } catch (error) {
+          console.error('Error saving payout rate:', error);
+        }
+      }
+      
+      return newConfig;
+    });
   };
 
   const statusCopy: Record<TeacherFinancial['status'], { label: string; tone: string }> = {
@@ -515,7 +578,7 @@ function DashboardContent() {
           </div>
         </div>
 
-        <FinanceSnapshot snapshot={dashboardSnapshot} loading={snapshotLoading} currency={dashboardConfig.currency} />
+        <FinanceSnapshot snapshot={dashboardSnapshot} loading={snapshotLoading} currency={dashboardConfig.currency} payoutRate={dashboardConfig.payoutRate} />
         <GroupAnalytics snapshot={dashboardSnapshot} loading={snapshotLoading} />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
@@ -698,7 +761,8 @@ function DashboardContent() {
                   onValueChange={(value) => handleDashboardConfigChange('payoutRate', value[0] / 100)}
                 />
                 <p className="text-xs text-muted-foreground">
-                  TailAdmin uslubidagi modul har bir ustoz to'lovini shu ulush asosida hisoblaydi.
+                  Har bir o'qituvchi oyligi groups daromadlari yig'indisidan {Math.round(dashboardConfig.payoutRate * 100)}% hisoblanadi. 
+                  Bu sozlamalar barcha sahifalarda dinamik ishlatiladi.
                 </p>
               </div>
 
@@ -715,11 +779,13 @@ function DashboardContent() {
                 />
               </div>
 
-              <div className="rounded-lg bg-muted/60 p-4 text-sm">
-                <p className="font-medium">Eslatma</p>
-                <p className="text-muted-foreground">
-                  Bu sozlamalar faqat UI darajasida saqlanadi. Haqiqiy moliyaviy formulalar uchun Supabase yoki
-                  moliyaviy API bilan integratsiya qoʻshing.
+              <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 text-sm">
+                <p className="font-medium text-primary mb-2">✅ Dinamik hisoblash aktiv</p>
+                <p className="text-muted-foreground text-xs">
+                  Oyliklar avtomatik hisoblanadi: Groups daromadlari × {Math.round(dashboardConfig.payoutRate * 100)}% = O'qituvchi oyligi
+                </p>
+                <p className="text-muted-foreground text-xs mt-2">
+                  Bu sozlamalar localStorage'da saqlanadi va barcha sahifalarda ishlatiladi.
                 </p>
               </div>
             </CardContent>
@@ -1088,24 +1154,51 @@ function buildFinancialOverview(base: FinancialBase | null, payoutRate: number):
 
   const avgTicket = base.totalEnrollments ? base.totalRevenue / base.totalEnrollments : 0;
 
+  // O'qituvchilar revenue'larini groups daromadlaridan hisoblash (courses'dan emas)
+  // Bu funksiya async bo'lgani uchun, bu yerda faqat UI'da ko'rsatish uchun ma'lumotlarni qayta hisoblaymiz
+  // Real ma'lumotlar loadFinancialSnapshot'da groups'lar orqali yuklanadi
+  
   const teacherAggregate = new Map<
     string,
     { name?: string; specialty?: string; totalRevenue: number; courses: number }
   >();
 
   base.courseFinancials.forEach((course) => {
-    if (!course.teacherId) return;
-    const entry = teacherAggregate.get(course.teacherId) || {
-      name: course.teacherName,
-      specialty: course.teacherSpecialty,
-      totalRevenue: 0,
-      courses: 0,
-    };
-    entry.name = course.teacherName || entry.name;
-    entry.specialty = course.teacherSpecialty || entry.specialty;
-    entry.totalRevenue += course.revenue;
-    entry.courses += 1;
-    teacherAggregate.set(course.teacherId, entry);
+    // Agar course id `group-revenue-` bilan boshlansa, bu groups daromadlari
+    if (course.id.startsWith('group-revenue-')) {
+      // Bu groups daromadlaridan kelib chiqqan
+      const teacherId = course.teacherId;
+      if (teacherId) {
+        const entry = teacherAggregate.get(teacherId) || {
+          name: course.teacherName,
+          specialty: course.teacherSpecialty,
+          totalRevenue: 0,
+          courses: 0,
+        };
+        entry.name = course.teacherName || entry.name;
+        entry.specialty = course.teacherSpecialty || entry.specialty;
+        entry.totalRevenue += course.revenue; // Groups daromadlari
+        entry.courses += 1;
+        teacherAggregate.set(teacherId, entry);
+      }
+    } else if (course.teacherId) {
+      // Oddiy courses
+      const entry = teacherAggregate.get(course.teacherId) || {
+        name: course.teacherName,
+        specialty: course.teacherSpecialty,
+        totalRevenue: 0,
+        courses: 0,
+      };
+      entry.name = course.teacherName || entry.name;
+      entry.specialty = course.teacherSpecialty || entry.specialty;
+      // Groups daromadlari bo'lsa, uni ustun qilamiz
+      // Aks holda course revenue'ni qo'shamiz
+      if (!entry.totalRevenue || course.revenue > entry.totalRevenue) {
+        entry.totalRevenue = Math.max(entry.totalRevenue, course.revenue);
+      }
+      entry.courses += 1;
+      teacherAggregate.set(course.teacherId, entry);
+    }
   });
 
   const teacherSummaries: TeacherFinancial[] = Array.from(teacherAggregate.entries())
@@ -1114,7 +1207,7 @@ function buildFinancialOverview(base: FinancialBase | null, payoutRate: number):
       name: data.name,
       specialty: data.specialty,
       totalRevenue: data.totalRevenue,
-      payout: data.totalRevenue * payoutRate,
+      payout: data.totalRevenue * payoutRate, // Groups daromadlari × payoutRate
       courses: data.courses,
       status: determineTeacherStatus(data.totalRevenue, base.totalRevenue, teacherAggregate.size),
     }))
@@ -1185,9 +1278,10 @@ type FinanceSnapshotProps = {
   snapshot: DashboardSnapshot | null;
   loading: boolean;
   currency: DashboardConfig['currency'];
+  payoutRate: number;
 };
 
-function FinanceSnapshot({ snapshot, loading, currency }: FinanceSnapshotProps) {
+function FinanceSnapshot({ snapshot, loading, currency, payoutRate }: FinanceSnapshotProps) {
 
   const formatCurrencyLocal = (value: number) => {
     const rate = currencyRates[currency] || 1;
@@ -1212,15 +1306,41 @@ function FinanceSnapshot({ snapshot, loading, currency }: FinanceSnapshotProps) 
     );
   }
 
-  const revenueChartData = snapshot.revenueSeries.map((item) => ({
-    month: new Date(`${item.month}-01`).toLocaleDateString('default', { month: 'short', year: '2-digit' }),
-    value: item.revenue,
-  }));
+  const revenueChartData = snapshot.revenueSeries
+    .filter((item) => item.month && /^\d{4}-\d{2}$/.test(item.month))
+    .map((item) => {
+      try {
+        const date = new Date(`${item.month}-01`);
+        if (isNaN(date.getTime())) {
+          return null;
+        }
+        return {
+          month: date.toLocaleDateString('default', { month: 'short', year: '2-digit' }),
+          value: item.revenue,
+        };
+      } catch {
+        return null;
+      }
+    })
+    .filter((item) => item !== null) as { month: string; value: number }[];
 
-  const expenseChartData = snapshot.expenseSeries.map((item) => ({
-    month: new Date(`${item.month}-01`).toLocaleDateString('default', { month: 'short', year: '2-digit' }),
-    value: item.expense,
-  }));
+  const expenseChartData = snapshot.expenseSeries
+    .filter((item) => item.month && /^\d{4}-\d{2}$/.test(item.month))
+    .map((item) => {
+      try {
+        const date = new Date(`${item.month}-01`);
+        if (isNaN(date.getTime())) {
+          return null;
+        }
+        return {
+          month: date.toLocaleDateString('default', { month: 'short', year: '2-digit' }),
+          value: item.expense,
+        };
+      } catch {
+        return null;
+      }
+    })
+    .filter((item) => item !== null) as { month: string; value: number }[];
 
   const pieData = [
     { name: 'Net Profit', value: Math.max(snapshot.netProfit, 0) },
@@ -1234,7 +1354,7 @@ function FinanceSnapshot({ snapshot, loading, currency }: FinanceSnapshotProps) 
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
         <Card className="stagger-item" style={{ animationDelay: '0.02s' }}>
           <CardHeader className="pb-2 p-4 sm:p-6">
             <CardTitle className="text-xs sm:text-sm text-muted-foreground">Monthly revenue</CardTitle>
@@ -1246,14 +1366,23 @@ function FinanceSnapshot({ snapshot, loading, currency }: FinanceSnapshotProps) 
         </Card>
         <Card className="stagger-item" style={{ animationDelay: '0.04s' }}>
           <CardHeader className="pb-2 p-4 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm text-muted-foreground">O'qituvchilar oyligi</CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-6 pt-0">
+            <p className="text-xl sm:text-2xl font-bold break-words text-primary">{formatCurrencyLocal(snapshot.teacherSalaryExpense || 0)}</p>
+            <p className="text-xs text-muted-foreground mt-1">Groups daromadlari: {Math.round(payoutRate * 100)}%</p>
+          </CardContent>
+        </Card>
+        <Card className="stagger-item" style={{ animationDelay: '0.06s' }}>
+          <CardHeader className="pb-2 p-4 sm:p-6">
             <CardTitle className="text-xs sm:text-sm text-muted-foreground">Monthly expenses</CardTitle>
           </CardHeader>
           <CardContent className="p-4 sm:p-6 pt-0">
             <p className="text-xl sm:text-2xl font-bold break-words">{formatCurrencyLocal(snapshot.monthlyExpenses)}</p>
-            <p className="text-xs text-muted-foreground mt-1">Teacher salaries included</p>
+            <p className="text-xs text-muted-foreground mt-1">Teacher salaries + other expenses</p>
           </CardContent>
         </Card>
-        <Card className="stagger-item" style={{ animationDelay: '0.06s' }}>
+        <Card className="stagger-item" style={{ animationDelay: '0.08s' }}>
           <CardHeader className="pb-2 p-4 sm:p-6">
             <CardTitle className="text-xs sm:text-sm text-muted-foreground">Net profit</CardTitle>
           </CardHeader>
@@ -1262,7 +1391,7 @@ function FinanceSnapshot({ snapshot, loading, currency }: FinanceSnapshotProps) 
             <p className="text-xs text-muted-foreground mt-1">{snapshot.netProfit >= 0 ? 'Positive month' : 'Loss month'}</p>
           </CardContent>
         </Card>
-        <Card className="stagger-item" style={{ animationDelay: '0.08s' }}>
+        <Card className="stagger-item" style={{ animationDelay: '0.1s' }}>
           <CardHeader className="pb-2 p-4 sm:p-6">
             <CardTitle className="text-xs sm:text-sm text-muted-foreground">Profit margin</CardTitle>
           </CardHeader>
@@ -1279,15 +1408,21 @@ function FinanceSnapshot({ snapshot, loading, currency }: FinanceSnapshotProps) 
             <CardTitle className="text-base sm:text-lg">Monthly revenue line</CardTitle>
           </CardHeader>
           <CardContent className="h-[240px] sm:h-[300px] p-4 sm:p-6 pt-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={revenueChartData}>
-                <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={3} dot />
-              </LineChart>
-            </ResponsiveContainer>
+            {revenueChartData.length === 0 ? (
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                Ma'lumot topilmadi
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={revenueChartData}>
+                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={3} dot />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -1295,14 +1430,18 @@ function FinanceSnapshot({ snapshot, loading, currency }: FinanceSnapshotProps) 
             <CardTitle className="text-base sm:text-lg">Profit vs expenses</CardTitle>
           </CardHeader>
           <CardContent className="h-[240px] sm:h-[300px] flex items-center justify-center p-4 sm:p-6 pt-0">
-            <PieChart width={240} height={240} className="sm:w-[280px] sm:h-[280px]">
-              <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={4}>
-                {pieData.map((entry, index) => (
-                  <Cell key={entry.name} fill={index === 0 ? '#16a34a' : '#f97316'} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
+            {pieData.every(item => item.value === 0) ? (
+              <div className="text-sm text-muted-foreground">Ma'lumot topilmadi</div>
+            ) : (
+              <PieChart width={240} height={240} className="sm:w-[280px] sm:h-[280px]">
+                <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={4}>
+                  {pieData.map((entry, index) => (
+                    <Cell key={entry.name} fill={index === 0 ? '#16a34a' : '#f97316'} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -1313,15 +1452,21 @@ function FinanceSnapshot({ snapshot, loading, currency }: FinanceSnapshotProps) 
             <CardTitle className="text-base sm:text-lg">Monthly expense bar</CardTitle>
           </CardHeader>
           <CardContent className="h-[220px] sm:h-[260px] p-4 sm:p-6 pt-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={expenseChartData}>
-                <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Bar dataKey="value" fill="#6366f1" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {expenseChartData.length === 0 ? (
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                Ma'lumot topilmadi
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={expenseChartData}>
+                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="#6366f1" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -1330,15 +1475,21 @@ function FinanceSnapshot({ snapshot, loading, currency }: FinanceSnapshotProps) 
             <CardDescription className="text-xs sm:text-sm">Paid vs unpaid o'quvchilar</CardDescription>
           </CardHeader>
           <CardContent className="h-[220px] sm:h-[260px] p-4 sm:p-6 pt-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={studentStatusData}>
-                <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                <XAxis dataKey="status" tick={{ fontSize: 12 }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Bar dataKey="value" fill="#f59e0b" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {studentStatusData.length === 0 ? (
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                Ma'lumot topilmadi
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={studentStatusData}>
+                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+                  <XAxis dataKey="status" tick={{ fontSize: 12 }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="#f59e0b" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -1358,9 +1509,12 @@ function GroupAnalytics({ snapshot, loading }: { snapshot: DashboardSnapshot | n
     );
   }
 
-  const topStudents = snapshot.topGroups.byStudents;
-  const topRevenue = snapshot.topGroups.byRevenue;
-  const topAttendance = snapshot.topGroups.byAttendance;
+  const topStudents = snapshot.topGroups?.byStudents || [];
+  const topRevenue = snapshot.topGroups?.byRevenue || [];
+  const topAttendance = snapshot.topGroups?.byAttendance || [];
+  const studentsPerGroup = snapshot.studentsPerGroup || [];
+  const teachersPerGroup = snapshot.teachersPerGroup || [];
+  const capacityUsage = snapshot.capacityUsage || [];
 
   return (
     <div className="space-y-6">
@@ -1380,15 +1534,21 @@ function GroupAnalytics({ snapshot, loading }: { snapshot: DashboardSnapshot | n
             <CardTitle>O'qituvchi boshiga guruhlar</CardTitle>
           </CardHeader>
           <CardContent className="h-[220px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={snapshot.teachersPerGroup}>
-                <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                <XAxis dataKey="teacher" hide />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="value" fill="#0ea5e9" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {teachersPerGroup.length === 0 ? (
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                Ma'lumot topilmadi
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={teachersPerGroup}>
+                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+                  <XAxis dataKey="teacher" hide />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="#0ea5e9" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -1399,15 +1559,21 @@ function GroupAnalytics({ snapshot, loading }: { snapshot: DashboardSnapshot | n
             <CardTitle>Talabalar soni</CardTitle>
           </CardHeader>
           <CardContent className="h-[260px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={snapshot.studentsPerGroup}>
-                <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                <XAxis dataKey="name" />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="value" fill="#10b981" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {studentsPerGroup.length === 0 ? (
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                Ma'lumot topilmadi
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={studentsPerGroup}>
+                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+                  <XAxis dataKey="name" />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="#10b981" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -1415,15 +1581,21 @@ function GroupAnalytics({ snapshot, loading }: { snapshot: DashboardSnapshot | n
             <CardTitle>Sig'imdan foydalanish</CardTitle>
           </CardHeader>
           <CardContent className="h-[260px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={snapshot.capacityUsage}>
-                <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                <XAxis dataKey="name" />
-                <YAxis unit="%" />
-                <Tooltip />
-                <Bar dataKey="value" fill="#f97316" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {capacityUsage.length === 0 ? (
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                Ma'lumot topilmadi
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={capacityUsage}>
+                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+                  <XAxis dataKey="name" />
+                  <YAxis unit="%" />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="#f97316" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -1434,9 +1606,17 @@ function GroupAnalytics({ snapshot, loading }: { snapshot: DashboardSnapshot | n
           <CardDescription>Talaba, revenue va attendance bo'yicha</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <TopGroupList title="Talabalar" items={topStudents} suffix="talaba" />
-          <TopGroupList title="Revenue" items={topRevenue} suffix="so'm" formatter={(value) => value.toLocaleString()} />
-          <TopGroupList title="Attendance" items={topAttendance} suffix="%" />
+          {topStudents.length === 0 && topRevenue.length === 0 && topAttendance.length === 0 ? (
+            <div className="col-span-3 py-8 text-center text-sm text-muted-foreground">
+              Guruhlar bo'yicha ma'lumot topilmadi
+            </div>
+          ) : (
+            <>
+              <TopGroupList title="Talabalar" items={topStudents} suffix="talaba" />
+              <TopGroupList title="Revenue" items={topRevenue} suffix="so'm" formatter={(value) => value.toLocaleString()} />
+              <TopGroupList title="Attendance" items={topAttendance} suffix="%" />
+            </>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -1454,6 +1634,17 @@ function TopGroupList({
   suffix?: string;
   formatter?: (value: number) => string;
 }) {
+  if (items.length === 0) {
+    return (
+      <div>
+        <p className="text-sm font-semibold">{title}</p>
+        <div className="mt-3 text-center py-4 text-sm text-muted-foreground">
+          Ma'lumot topilmadi
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <p className="text-sm font-semibold">{title}</p>

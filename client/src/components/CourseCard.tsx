@@ -1,8 +1,9 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, DollarSign, Star, User, ArrowRight } from "lucide-react";
+import { Clock, DollarSign, Star, User, ArrowRight, LogIn } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useLocation } from "wouter";
 
 interface CourseCardProps {
   id: string;
@@ -18,6 +19,7 @@ interface CourseCardProps {
 }
 
 export function CourseCard({
+  id,
   name,
   description,
   category,
@@ -29,6 +31,7 @@ export function CourseCard({
   isFeatured = false,
 }: CourseCardProps) {
   const { t } = useTranslation();
+  const [, setLocation] = useLocation();
 
   const getCategoryColor = (cat: string) => {
     if (cat === "IT") return "bg-blue-500/10 text-blue-700 dark:text-blue-300";
@@ -116,8 +119,13 @@ export function CourseCard({
       </CardContent>
 
       <CardFooter className="pt-4">
-        <Button className="w-full group/btn transition-all duration-300 hover:scale-105" data-testid="button-view-course">
-          {t("courses.viewDetails")}
+        <Button 
+          className="w-full group/btn transition-all duration-300 hover:scale-105 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70" 
+          data-testid="button-enroll-course"
+          onClick={() => setLocation(`/register?courseId=${id}`)}
+        >
+          <LogIn className="h-4 w-4 mr-2 transition-transform duration-300 group-hover/btn:-translate-y-0.5" />
+          Kursga yozilish
           <ArrowRight className="h-4 w-4 ml-2 transition-transform duration-300 group-hover/btn:translate-x-1" />
         </Button>
       </CardFooter>

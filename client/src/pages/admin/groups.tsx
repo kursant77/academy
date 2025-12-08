@@ -31,15 +31,17 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/lib/supabase';
-import type { Teacher } from '@shared/schema';
-import { Loader2, MoreHorizontal, Plus } from 'lucide-react';
+import type { Teacher, Course } from '@shared/schema';
+import { Loader2, MoreHorizontal, Plus, Calendar, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Group {
   id: string;
   name: string;
   teacher_id: string;
+  course_id?: string | null;
   schedule: string;
   room: string;
   max_students: number;
@@ -50,17 +52,30 @@ interface Group {
   created_at?: string;
   updated_at?: string;
   teachers?: { name: string };
+  courses?: { name_uz: string; name_ru: string; name_en: string };
 }
 
 function GroupsContent() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+  const weekDays = [
+    { value: 'Monday', label: 'Dushanba' },
+    { value: 'Tuesday', label: 'Seshanba' },
+    { value: 'Wednesday', label: 'Chorshanba' },
+    { value: 'Thursday', label: 'Payshanba' },
+    { value: 'Friday', label: 'Juma' },
+    { value: 'Saturday', label: 'Shanba' },
+    { value: 'Sunday', label: 'Yakshanba' },
+  ];
+
   const [formData, setFormData] = useState({
     name: '',
     teacher_id: '',
+    course_id: '',
     schedule: '',
     room: '',
     max_students: 12,
@@ -68,6 +83,9 @@ function GroupsContent() {
     status: 'active' as 'active' | 'closed',
     attendance_rate: 85,
     monthly_revenue: 0,
+    selectedDays: [] as string[], // Tanlangan kunlar
+    start_time: '09:00',
+    end_time: '10:30',
   });
   const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'closed'>('all');
@@ -81,7 +99,7 @@ function GroupsContent() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [groupsRes, teachersRes] = await Promise.all([
+      const [groupsRes, teachersRes, coursesRes] = await Promise.all([
         supabase
           .from('groups')
           .select('*, teachers(name)')
@@ -90,10 +108,16 @@ function GroupsContent() {
           .from('teachers')
           .select('*')
           .order('name'),
+        supabase
+          .from('courses')
+          .select('*')
+          .order('name_uz'),
       ]);
 
       if (groupsRes.error) {
-        console.error('Groups error:', groupsRes.error);
+        if (import.meta.env.DEV) {
+          console.error('Groups error:', groupsRes.error);
+        }
         if (groupsRes.error.code === 'PGRST116' || groupsRes.error.message?.includes('does not exist')) {
           toast({
             title: 'Xatolik',
@@ -105,11 +129,27 @@ function GroupsContent() {
         }
         setGroups([]);
       } else {
-        setGroups(groupsRes.data || []);
+        // Get courses separately and map them to groups
+        const groups = groupsRes.data || [];
+        const courses = coursesRes.data || [];
+        const coursesMap = courses.reduce((acc: Record<string, any>, course: any) => {
+          acc[course.id] = course;
+          return acc;
+        }, {});
+
+        // Add course info to groups
+        const groupsWithCourses = groups.map((group: any) => ({
+          ...group,
+          courses: group.course_id ? coursesMap[group.course_id] : null,
+        }));
+
+        setGroups(groupsWithCourses);
       }
 
       if (teachersRes.error) {
-        console.error('Teachers error:', teachersRes.error);
+        if (import.meta.env.DEV) {
+          console.error('Teachers error:', teachersRes.error);
+        }
         toast({
           title: 'Xatolik',
           description: 'O\'qituvchilar yuklanmadi: ' + teachersRes.error.message,
@@ -118,6 +158,15 @@ function GroupsContent() {
         setTeachers([]);
       } else {
         setTeachers(teachersRes.data || []);
+      }
+
+      if (coursesRes.error) {
+        if (import.meta.env.DEV) {
+          console.error('Courses error:', coursesRes.error);
+        }
+        setCourses([]);
+      } else {
+        setCourses(coursesRes.data || []);
       }
     } catch (error: any) {
       toast({
@@ -130,11 +179,49 @@ function GroupsContent() {
     }
   };
 
+  // Schedule stringdan kunlarni parse qilish
+  const parseScheduleDays = (scheduleStr: string): string[] => {
+    const days: string[] = [];
+    const lower = scheduleStr.toLowerCase();
+    
+    const dayMap: Record<string, string> = {
+      'dushanba': 'Monday',
+      'seshanba': 'Tuesday',
+      'chorshanba': 'Wednesday',
+      'payshanba': 'Thursday',
+      'juma': 'Friday',
+      'shanba': 'Saturday',
+      'yakshanba': 'Sunday',
+      'dush': 'Monday',
+      'sesh': 'Tuesday',
+      'chorsh': 'Wednesday',
+      'paysh': 'Thursday',
+    };
+
+    for (const [uz, en] of Object.entries(dayMap)) {
+      if (lower.includes(uz)) {
+        days.push(en);
+      }
+    }
+    
+    return days;
+  };
+
+  // Vaqtni schedule stringdan parse qilish
+  const parseScheduleTime = (scheduleStr: string): { start: string; end: string } => {
+    const timeMatch = scheduleStr.match(/(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})/);
+    if (timeMatch) {
+      return { start: timeMatch[1], end: timeMatch[2] };
+    }
+    return { start: '09:00', end: '10:30' };
+  };
+
   const resetForm = () => {
     setEditingGroup(null);
     setFormData({
       name: '',
       teacher_id: teachers[0]?.id || '',
+      course_id: '',
       schedule: '',
       room: '',
       max_students: 12,
@@ -142,6 +229,9 @@ function GroupsContent() {
       status: 'active',
       attendance_rate: 85,
       monthly_revenue: 0,
+      selectedDays: [],
+      start_time: '09:00',
+      end_time: '10:30',
     });
   };
 
@@ -151,37 +241,95 @@ function GroupsContent() {
       toast({ title: 'Ogohlantirish', description: 'Iltimos, ustozni tanlang', variant: 'destructive' });
       return;
     }
+    if (formData.selectedDays.length === 0) {
+      toast({ title: 'Ogohlantirish', description: 'Iltimos, kamida bitta kunni tanlang', variant: 'destructive' });
+      return;
+    }
+
     try {
+      // Tanlangan kunlar ro'yxatini formatlash
+      const selectedDaysLabels = formData.selectedDays.map(day => {
+        const dayObj = weekDays.find(d => d.value === day);
+        return dayObj ? dayObj.label : day;
+      }).join(', ');
+      
+      const scheduleString = `${selectedDaysLabels} — ${formData.start_time}-${formData.end_time}`;
+
+      const selectedTeacher = teachers.find(t => t.id === formData.teacher_id);
+      const selectedCourse = courses.find(c => c.id === formData.course_id);
+
+      // selectedDays, start_time, end_time ni submitData dan olib tashlash (groups jadvalida saqlanmaydi)
+      const { selectedDays, start_time, end_time, ...restFormData } = formData;
+      
+      const submitData = {
+        ...restFormData,
+        schedule: scheduleString,
+        course_id: formData.course_id || null,
+      };
+      
+      let groupId: string;
+      
       if (editingGroup) {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('groups')
-          .update(formData)
-          .eq('id', editingGroup.id);
+          .update(submitData)
+          .eq('id', editingGroup.id)
+          .select()
+          .single();
 
         if (error) throw error;
+        groupId = editingGroup.id;
         toast({ title: 'Yangilandi', description: 'Guruh ma\'lumotlari yangilandi' });
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('groups')
-          .insert([formData]);
+          .insert([submitData])
+          .select()
+          .single();
 
         if (error) throw error;
+        groupId = data.id;
         toast({ title: 'Qo\'shildi', description: 'Yangi guruh yaratildi' });
       }
+
+      // Schedule entries ga avtomatik qo'shish
+      if (selectedTeacher && formData.selectedDays.length > 0) {
+        const courseName = selectedCourse 
+          ? (selectedCourse.name_uz || formData.name)
+          : formData.name;
+        
+        await syncGroupToScheduleEntries(
+          groupId,
+          courseName,
+          selectedTeacher.name,
+          selectedCourse?.name_uz || null,
+          formData.selectedDays,
+          formData.start_time,
+          formData.end_time,
+          formData.room
+        );
+      }
+
       setDialogOpen(false);
       resetForm();
       loadData();
     } catch (error: any) {
-      console.error(error);
+      if (import.meta.env.DEV) {
+        console.error(error);
+      }
       toast({ title: 'Xatolik', description: error.message || 'Ma\'lumotlarni saqlab bo\'lmadi', variant: 'destructive' });
     }
   };
 
   const handleEdit = (group: Group) => {
     setEditingGroup(group);
+    const parsedDays = parseScheduleDays(group.schedule);
+    const parsedTime = parseScheduleTime(group.schedule);
+    
     setFormData({
       name: group.name,
       teacher_id: group.teacher_id,
+      course_id: group.course_id || '',
       schedule: group.schedule,
       room: group.room,
       max_students: group.max_students,
@@ -189,13 +337,63 @@ function GroupsContent() {
       status: group.status,
       attendance_rate: group.attendance_rate,
       monthly_revenue: group.monthly_revenue,
+      selectedDays: parsedDays.length > 0 ? parsedDays : [],
+      start_time: parsedTime.start,
+      end_time: parsedTime.end,
     });
     setDialogOpen(true);
+  };
+
+  // Groups dan schedule_entries ga avtomatik qo'shish
+  const syncGroupToScheduleEntries = async (groupId: string, groupName: string, teacherName: string, courseName: string | null, days: string[], startTime: string, endTime: string, room: string) => {
+    try {
+      // Avval bu guruh uchun eski schedule_entries larni o'chirish
+      await supabase
+        .from('schedule_entries')
+        .delete()
+        .eq('teacher_name', teacherName)
+        .eq('title_uz', groupName);
+
+      // Har bir tanlangan kun uchun schedule_entry yaratish
+      if (days.length > 0) {
+        const entries = days.map(day => ({
+          day_of_week: day,
+          start_time: startTime,
+          end_time: endTime,
+          title_uz: groupName,
+          title_ru: groupName,
+          title_en: groupName,
+          room: room || null,
+          format: 'offline',
+          teacher_name: teacherName,
+        }));
+
+        const { error } = await supabase
+          .from('schedule_entries')
+          .insert(entries);
+
+        if (error) {
+          console.error('Error syncing schedule entries:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error in syncGroupToScheduleEntries:', error);
+    }
   };
 
   const handleDelete = async (group: Group) => {
     if (!confirm(`"${group.name}" guruhini o'chirishni istaysizmi?`)) return;
     try {
+      // Avval schedule_entries dan bu guruhga tegishli jadvallarni o'chirish
+      if (group.teachers?.name) {
+        await supabase
+          .from('schedule_entries')
+          .delete()
+          .eq('teacher_name', group.teachers.name)
+          .eq('title_uz', group.name);
+      }
+
+      // Keyin guruhni o'chirish
       const { error } = await supabase
         .from('groups')
         .delete()
@@ -255,6 +453,25 @@ function GroupsContent() {
                     <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
                   </div>
                   <div className="space-y-2">
+                    <Label>Kurs</Label>
+                    <Select
+                      value={formData.course_id || 'none'}
+                      onValueChange={(value) => setFormData({ ...formData, course_id: value === 'none' ? '' : value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Kursni tanlang" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Kurs tanlanmagan</SelectItem>
+                        {courses.map((course) => (
+                          <SelectItem key={course.id} value={course.id}>
+                            {course.name_uz}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
                     <Label>Ustoz</Label>
                     <Select
                       value={formData.teacher_id}
@@ -278,9 +495,70 @@ function GroupsContent() {
                       </SelectContent>
                     </Select>
                   </div>
+                  {/* Dars kunlari */}
                   <div className="space-y-2 md:col-span-2">
-                    <Label>Jadval</Label>
-                    <Input value={formData.schedule} onChange={(e) => setFormData({ ...formData, schedule: e.target.value })} placeholder="e.g. Dushanba & Chorshanba — 18:00-20:00" required />
+                    <Label className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-primary" />
+                      Dars kunlari <span className="text-destructive">*</span>
+                    </Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 p-4 rounded-lg border bg-muted/30">
+                      {weekDays.map((day) => (
+                        <div key={day.value} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`day-${day.value}`}
+                            checked={formData.selectedDays.includes(day.value)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setFormData({
+                                  ...formData,
+                                  selectedDays: [...formData.selectedDays, day.value],
+                                });
+                              } else {
+                                setFormData({
+                                  ...formData,
+                                  selectedDays: formData.selectedDays.filter((d) => d !== day.value),
+                                });
+                              }
+                            }}
+                          />
+                          <label
+                            htmlFor={`day-${day.value}`}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                          >
+                            {day.label}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                    {formData.selectedDays.length === 0 && (
+                      <p className="text-xs text-destructive mt-1">Kamida bitta kunni tanlang</p>
+                    )}
+                  </div>
+
+                  {/* Vaqt sozlamalari */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-primary" />
+                      Boshlanish vaqti <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      type="time"
+                      value={formData.start_time}
+                      onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-primary" />
+                      Tugash vaqti <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      type="time"
+                      value={formData.end_time}
+                      onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
+                      required
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Xona</Label>
@@ -379,6 +657,7 @@ function GroupsContent() {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="text-xs sm:text-sm">Guruh</TableHead>
+                        <TableHead className="text-xs sm:text-sm hidden lg:table-cell">Kurs</TableHead>
                         <TableHead className="text-xs sm:text-sm hidden md:table-cell">Ustoz</TableHead>
                         <TableHead className="text-xs sm:text-sm hidden lg:table-cell">Jadval</TableHead>
                         <TableHead className="text-xs sm:text-sm hidden xl:table-cell">Xona</TableHead>
@@ -393,6 +672,9 @@ function GroupsContent() {
                           <TableCell className="font-semibold text-xs sm:text-sm">
                             <div>
                               <div>{group.name}</div>
+                              <div className="lg:hidden mt-1 text-xs text-muted-foreground">
+                                {(group.courses as any)?.name_uz || 'Kurs tanlanmagan'}
+                              </div>
                               <div className="md:hidden mt-1 text-xs text-muted-foreground">
                                 {(group.teachers as any)?.name || 'Noma\'lum'}
                               </div>
@@ -400,6 +682,9 @@ function GroupsContent() {
                                 {group.schedule}
                               </div>
                             </div>
+                          </TableCell>
+                          <TableCell className="hidden lg:table-cell text-xs sm:text-sm">
+                            {(group.courses as any)?.name_uz || <span className="text-muted-foreground">Kurs tanlanmagan</span>}
                           </TableCell>
                           <TableCell className="hidden md:table-cell text-xs sm:text-sm">{(group.teachers as any)?.name || 'Noma\'lum'}</TableCell>
                           <TableCell className="hidden lg:table-cell text-xs sm:text-sm text-muted-foreground">{group.schedule}</TableCell>

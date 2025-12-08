@@ -63,6 +63,7 @@ export interface StudentProfile {
   photoUrl?: string;
   notes?: string;
   courseName?: string;
+  createdAt?: string; // O'quvchi qo'shilgan sana
   history: PaymentHistoryEntry[];
   monthlyPayments?: MonthlyPayment[]; // Oylik to'lovlar tarixi
 }
@@ -105,6 +106,8 @@ export interface GroupProfile {
   name: string;
   teacherId: string;
   teacherName: string;
+  courseId?: string | null;
+  courseName?: string;
   schedule: string;
   room: string;
   maxStudents: number;
@@ -114,7 +117,7 @@ export interface GroupProfile {
   monthlyRevenue: number;
 }
 
-export type GroupPayload = Omit<GroupProfile, 'id' | 'teacherName' | 'currentStudents'> & {
+export type GroupPayload = Omit<GroupProfile, 'id' | 'teacherName' | 'currentStudents' | 'courseName'> & {
   currentStudents?: number;
 };
 
@@ -141,6 +144,7 @@ export interface DashboardSnapshot {
   groupCount: number;
   monthlyRevenue: number;
   monthlyExpenses: number;
+  teacherSalaryExpense: number; // O'qituvchilar oyligi (foizga qarab hisoblangan)
   netProfit: number;
   profitMargin: number;
   paidStudents: number;

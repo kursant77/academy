@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'wouter';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,10 +32,10 @@ import { ImageUpload } from '@/components/ImageUpload';
 import { BriefcaseBusiness, Phone, Plus, Pencil, Trash2, Eye, Star } from 'lucide-react';
 
 function TeachersContent() {
+  const [, setLocation] = useLocation();
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [detailsTeacher, setDetailsTeacher] = useState<Teacher | null>(null);
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [formData, setFormData] = useState<InsertTeacher>({
     name: '',
@@ -356,13 +357,19 @@ function TeachersContent() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex gap-1 sm:gap-2 justify-end">
-                              <Button variant="ghost" size="sm" onClick={() => setDetailsTeacher(teacher)} className="h-8 w-8 p-0">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => setLocation(`/admin/teachers/${teacher.id}`)} 
+                                className="h-8 w-8 p-0"
+                                title="Tafsilotlar"
+                              >
                                 <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => handleEdit(teacher)} className="h-8 w-8 p-0">
+                              <Button variant="ghost" size="sm" onClick={() => handleEdit(teacher)} className="h-8 w-8 p-0" title="Tahrirlash">
                                 <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => handleDelete(teacher.id)} className="h-8 w-8 p-0">
+                              <Button variant="ghost" size="sm" onClick={() => handleDelete(teacher.id)} className="h-8 w-8 p-0" title="O'chirish">
                                 <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-destructive" />
                               </Button>
                             </div>
@@ -406,36 +413,6 @@ function TeachersContent() {
           </Card>
         </div>
       </div>
-      <Dialog open={!!detailsTeacher} onOpenChange={(open) => !open && setDetailsTeacher(null)}>
-        <DialogContent className="max-w-xl">
-          <DialogHeader>
-            <DialogTitle>{detailsTeacher?.name}</DialogTitle>
-            <DialogDescription>Ustoz tafsilotlari</DialogDescription>
-          </DialogHeader>
-          {detailsTeacher && (
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Yo'nalish</p>
-                <p className="font-semibold">{detailsTeacher.specialty_uz}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Tajriba</p>
-                <p className="font-semibold">{detailsTeacher.experience} yil</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Bio</p>
-                <p className="text-sm">{detailsTeacher.bio_uz}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Featured</p>
-                <Badge variant={detailsTeacher.featured ? 'default' : 'secondary'}>
-                  {detailsTeacher.featured ? 'Ha' : 'Yo\'q'}
-                </Badge>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </AdminLayout>
   );
 }

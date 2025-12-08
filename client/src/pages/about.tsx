@@ -89,92 +89,118 @@ export default function About() {
         url="/about"
         structuredData={structuredData}
       />
-      <div className="min-h-screen py-12 md:py-16">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-          <div className="mb-12 md:mb-16">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("about.title")}</h1>
-          </div>
+      <div className="min-h-screen relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-accent/5 rounded-full blur-3xl" />
+        </div>
 
-          <div className="grid md:grid-cols-2 gap-8 mb-16">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Target className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-2xl">{t("about.mission")}</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  {missionText}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Eye className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-2xl">{t("about.vision")}</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  {visionText}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-8">{t("about.advantages")}</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {advantages.map((advantage, index) => (
-                <Card key={index} className="text-center">
-                  <CardContent className="pt-6 space-y-4">
-                    <div className="flex justify-center">
-                      <div className="p-3 rounded-lg bg-primary/10">
-                        {advantage.icon}
-                      </div>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg mb-2">
-                        {advantage.titleOverride
-                          ? advantage.titleOverride
-                          : i18n.language === "ru"
-                          ? advantage.titleRu
-                          : i18n.language === "en"
-                          ? advantage.titleEn
-                          : advantage.titleUz}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {advantage.descOverride
-                          ? advantage.descOverride
-                          : i18n.language === "ru"
-                          ? advantage.descRu
-                          : i18n.language === "en"
-                          ? advantage.descEn
-                          : advantage.descUz}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+        <div className="relative py-12 md:py-16 lg:py-20">
+          <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+            {/* Hero Section */}
+            <div className="mb-12 md:mb-16 text-center animate-fade-in-down">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 mb-6 backdrop-blur-sm border border-primary/20 animate-bounce-in">
+                <Target className="w-10 h-10 text-primary" />
+              </div>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
+                {t("about.title")}
+              </h1>
             </div>
-          </div>
 
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-8">{t("about.history")}</h2>
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-muted-foreground leading-relaxed">
-                  {historyText}
-                </p>
-              </CardContent>
-            </Card>
+            {/* Mission & Vision Cards */}
+            <div className="grid md:grid-cols-2 gap-6 md:gap-8 mb-12 md:mb-16">
+              <Card className="group relative overflow-hidden border-2 border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-500 hover:shadow-xl animate-fade-in-up">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <CardHeader className="relative">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 group-hover:scale-110 transition-transform duration-300">
+                      <Target className="h-6 w-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-2xl">{t("about.mission")}</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="relative">
+                  <p className="text-muted-foreground leading-relaxed">
+                    {missionText}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="group relative overflow-hidden border-2 border-border/50 bg-card/50 backdrop-blur-sm hover:border-secondary/50 transition-all duration-500 hover:shadow-xl animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+                <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <CardHeader className="relative">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-secondary/20 to-secondary/10 group-hover:scale-110 transition-transform duration-300">
+                      <Eye className="h-6 w-6 text-secondary-foreground" />
+                    </div>
+                    <CardTitle className="text-2xl">{t("about.vision")}</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="relative">
+                  <p className="text-muted-foreground leading-relaxed">
+                    {visionText}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Advantages Section */}
+            <div className="mb-12 md:mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{t("about.advantages")}</h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                {advantages.map((advantage, index) => (
+                  <Card 
+                    key={index} 
+                    className="group relative overflow-hidden text-center border-2 border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-500 hover:shadow-xl animate-fade-in-up"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <CardContent className="relative pt-6 space-y-4">
+                      <div className="flex justify-center">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 group-hover:scale-110 transition-transform duration-300">
+                          {advantage.icon}
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg mb-2">
+                          {advantage.titleOverride
+                            ? advantage.titleOverride
+                            : i18n.language === "ru"
+                            ? advantage.titleRu
+                            : i18n.language === "en"
+                            ? advantage.titleEn
+                            : advantage.titleUz}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {advantage.descOverride
+                            ? advantage.descOverride
+                            : i18n.language === "ru"
+                            ? advantage.descRu
+                            : i18n.language === "en"
+                            ? advantage.descEn
+                            : advantage.descUz}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* History Section */}
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{t("about.history")}</h2>
+              <Card className="group relative overflow-hidden border-2 border-border/50 bg-card/50 backdrop-blur-sm hover:border-accent/50 transition-all duration-500 hover:shadow-xl animate-fade-in-up">
+                <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <CardContent className="relative pt-6">
+                  <p className="text-muted-foreground leading-relaxed">
+                    {historyText}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </div>

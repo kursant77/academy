@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'wouter';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,7 +29,7 @@ import { useToast } from '@/hooks/use-toast';
 import { adminApi } from '@/lib/adminApi';
 import { supabase } from '@/lib/supabase';
 import type { GroupProfile, StudentPayload, StudentProfile, MonthlyPaymentPayload } from '@/types/admin';
-import { Loader2, MoreHorizontal, Plus, Filter, Calendar, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { Loader2, MoreHorizontal, Plus, Filter, Calendar, CheckCircle2, XCircle, Clock, User } from 'lucide-react';
 import { format, addMonths, startOfMonth } from 'date-fns';
 import { uz } from 'date-fns/locale';
 import { Switch } from '@/components/ui/switch';
@@ -51,7 +52,7 @@ const monthNames: Record<string, string> = {
 };
 
 // Oy nomini olish funksiyasi
-const getMonthName = (month: string): string => {
+export const getMonthName = (month: string): string => {
   const [year, monthNum] = month.split('-');
   return `${monthNames[monthNum]} ${year}`;
 };
@@ -64,6 +65,42 @@ const getLastNMonths = (n: number): string[] => {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
     months.push(date.toISOString().slice(0, 7));
   }
+  return months;
+};
+
+// O'quvchi qo'shilgan oydan keyingi oydan boshlab oylarni olish
+// Qo'shilgan oyning o'zida to'lov so'ralmaydi, keyingi oydan boshlab so'raladi
+// Kelajakdagi oylar ham ko'rsatiladi (oldindan to'lov uchun)
+export const getMonthsFromEnrollment = (enrollmentDate: string | undefined, monthsCount: number = 12): string[] => {
+  const months: string[] = [];
+  
+  if (!enrollmentDate) {
+    // Agar qo'shilgan sana yo'q bo'lsa, oxirgi N oyni qaytarish
+    return getLastNMonths(monthsCount);
+  }
+  
+  const enrollment = new Date(enrollmentDate);
+  // Qo'shilgan oydan keyingi oyning 1-kunidan boshlash
+  const firstPaymentMonth = new Date(enrollment.getFullYear(), enrollment.getMonth() + 1, 1);
+  const now = new Date();
+  const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  
+  // Qo'shilgan oydan keyingi oydan boshlab joriy oygacha barcha oylarni olish
+  let date = new Date(firstPaymentMonth);
+  while (date <= currentMonth && months.length < monthsCount) {
+    months.push(date.toISOString().slice(0, 7));
+    date = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+  }
+  
+  // Kelajakdagi oylarni ham qo'shish (oldindan to'lov uchun)
+  // Joriy oydan keyingi oylarni qo'shamiz
+  date = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const futureMonthsCount = monthsCount - months.length;
+  for (let i = 0; i < futureMonthsCount && i < 6; i++) {
+    months.push(date.toISOString().slice(0, 7));
+    date = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+  }
+  
   return months;
 };
 
@@ -95,6 +132,7 @@ function StudentsContent() {
   const [searchValue, setSearchValue] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     loadStudents();
@@ -110,7 +148,9 @@ function StudentsContent() {
       const data = await adminApi.listStudents();
       setStudents(data);
     } catch (error) {
-      console.error(error);
+      if (import.meta.env.DEV) {
+        console.error(error);
+      }
       toast({ title: 'Xatolik', description: 'Talabalar ro\'yxatini yuklab bo\'lmadi', variant: 'destructive' });
     } finally {
       setLoading(false);
@@ -120,10 +160,11 @@ function StudentsContent() {
   const loadGroups = async () => {
     try {
       const data = await adminApi.listGroups();
-      console.log('Loaded groups:', data);
       setGroups(data);
     } catch (error) {
-      console.error('Error loading groups:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error loading groups:', error);
+      }
       toast({ title: 'Xatolik', description: 'Guruhlarni yuklab bo\'lmadi', variant: 'destructive' });
     }
   };
@@ -132,24 +173,25 @@ function StudentsContent() {
     try {
       const { data, error } = await supabase.from('courses').select('id, name_uz, price');
       if (error) throw error;
-      console.log('Loaded courses:', data);
       setCourses(data || []);
     } catch (error) {
-      console.error('Error loading courses:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error loading courses:', error);
+      }
     }
   };
 
   // Kursga qarab filterlangan guruhlar
   const filteredGroupsForForm = useMemo(() => {
     if (!formData.courseName) return groups;
-    // Guruhlarni kurs nomi bo'yicha filter qilish
-    return groups.filter(g => {
-      // Guruh nomida kurs nomi bormi tekshirish
-      const groupNameLower = g.name.toLowerCase();
-      const courseNameLower = formData.courseName?.toLowerCase() || '';
-      return groupNameLower.includes(courseNameLower) || courseNameLower.includes(groupNameLower.split(' ')[0]);
-    });
-  }, [groups, formData.courseName]);
+    
+    // Tanlangan kursni topish
+    const selectedCourse = courses.find(c => c.name_uz === formData.courseName);
+    if (!selectedCourse) return [];
+    
+    // Faqat tanlangan kursga tegishli guruhlarni qaytarish
+    return groups.filter(g => g.courseId === selectedCourse.id);
+  }, [groups, formData.courseName, courses]);
 
   const resetForm = () => {
     setEditingStudent(null);
@@ -182,7 +224,9 @@ function StudentsContent() {
       loadStudents();
       loadGroups();
     } catch (error) {
-      console.error(error);
+      if (import.meta.env.DEV) {
+        console.error(error);
+      }
       toast({ title: 'Xatolik', description: 'Saqlashda muammo yuz berdi', variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
@@ -214,14 +258,27 @@ function StudentsContent() {
       loadStudents();
       loadGroups();
     } catch (error) {
-      console.error(error);
+      if (import.meta.env.DEV) {
+        console.error(error);
+      }
       toast({ title: 'Xatolik', description: 'Talabani o\'chirishda muammo', variant: 'destructive' });
     }
   };
 
   const handleOpenPaymentDialog = (student: StudentProfile) => {
     setPaymentStudent(student);
-    setSelectedMonth(new Date().toISOString().slice(0, 7));
+    // O'quvchi qo'shilgan oydan keyingi oydan boshlab oy tanlash
+    if (student.createdAt) {
+      const enrollment = new Date(student.createdAt);
+      // Qo'shilgan oydan keyingi oyning 1-kunidan boshlash
+      const firstPaymentMonth = new Date(enrollment.getFullYear(), enrollment.getMonth() + 1, 1);
+      const firstPaymentMonthStr = firstPaymentMonth.toISOString().slice(0, 7);
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      // Agar birinchi to'lov oyi joriy oydan oldin bo'lsa, joriy oyni tanlash
+      setSelectedMonth(firstPaymentMonthStr <= currentMonth ? currentMonth : firstPaymentMonthStr);
+    } else {
+      setSelectedMonth(new Date().toISOString().slice(0, 7));
+    }
     setPaymentMethod('card');
   };
 
@@ -243,7 +300,9 @@ function StudentsContent() {
       setPaymentStudent(null);
       loadStudents();
     } catch (error) {
-      console.error(error);
+      if (import.meta.env.DEV) {
+        console.error(error);
+      }
       toast({ title: 'Xatolik', description: 'To\'lovni yozib bo\'lmadi', variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
@@ -634,6 +693,10 @@ function StudentsContent() {
                               <Calendar className="h-3 w-3 mr-2" />
                               Oylik to'lov qo'shish
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setLocation(`/admin/students/${student.id}`)} className="text-xs">
+                              <User className="h-3 w-3 mr-2" />
+                              Profil
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setHistoryStudent(student)} className="text-xs">To'lov tarixi</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleEdit(student)} className="text-xs">Tahrirlash</DropdownMenuItem>
                             <DropdownMenuItem className="text-destructive text-xs" onClick={() => handleDelete(student)}>
@@ -664,38 +727,67 @@ function StudentsContent() {
             <div className="bg-muted/50 rounded-lg p-4">
               <h4 className="font-semibold mb-3 flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                Oxirgi 6 oy to'lov holati
+                To'lov holati
+                {historyStudent?.createdAt && (
+                  <span className="text-xs font-normal text-muted-foreground ml-2">
+                    (Qo'shilgan: {getMonthName(historyStudent.createdAt.slice(0, 7))})
+                  </span>
+                )}
               </h4>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                {getLastNMonths(6).map((month) => {
-                  const isPaid = historyStudent?.monthlyPayments?.some(p => p.month === month && p.status === 'paid');
-                  const payment = historyStudent?.monthlyPayments?.find(p => p.month === month);
-                  return (
-                    <div
-                      key={month}
-                      className={`rounded-lg p-2 text-center text-xs border ${
-                        isPaid 
-                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700' 
-                          : 'bg-amber-500/10 border-amber-500/30 text-amber-700'
-                      }`}
-                    >
-                      <div className="font-semibold">{monthNames[month.slice(5, 7)]}</div>
-                      <div className="text-[10px] opacity-75">{month.slice(0, 4)}</div>
-                      <div className="mt-1">
-                        {isPaid ? (
-                          <CheckCircle2 className="h-4 w-4 mx-auto text-emerald-500" />
-                        ) : (
-                          <XCircle className="h-4 w-4 mx-auto text-amber-500" />
+                {(() => {
+                  // O'quvchi qo'shilgan oydan keyingi oydan boshlab oylarni olish + keyingi bir oy
+                  const months = getMonthsFromEnrollment(historyStudent?.createdAt, 12);
+                  // Keyingi bir oyni qo'shish
+                  if (historyStudent?.createdAt) {
+                    const now = new Date();
+                    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+                    const nextMonthStr = nextMonth.toISOString().slice(0, 7);
+                    if (!months.includes(nextMonthStr)) {
+                      months.push(nextMonthStr);
+                    }
+                  }
+                  return months.map((month) => {
+                    const isPaid = historyStudent?.monthlyPayments?.some(p => p.month === month && p.status === 'paid');
+                    const payment = historyStudent?.monthlyPayments?.find(p => p.month === month);
+                    const monthDate = new Date(month + '-01');
+                    const now = new Date();
+                    const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                    const isFutureMonth = monthDate > currentMonth;
+                    
+                    return (
+                      <div
+                        key={month}
+                        className={`rounded-lg p-2 text-center text-xs border ${
+                          isPaid 
+                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700' 
+                            : isFutureMonth
+                            ? 'bg-blue-500/10 border-blue-500/30 border-dashed text-blue-700'
+                            : 'bg-amber-500/10 border-amber-500/30 text-amber-700'
+                        }`}
+                        title={isFutureMonth ? 'Kelajakdagi oy' : ''}
+                      >
+                        <div className="font-semibold">{monthNames[month.slice(5, 7)]}</div>
+                        <div className="text-[10px] opacity-75">{month.slice(0, 4)}</div>
+                        <div className="mt-1">
+                          {isPaid ? (
+                            <CheckCircle2 className="h-4 w-4 mx-auto text-emerald-500" />
+                          ) : (
+                            <XCircle className="h-4 w-4 mx-auto text-amber-500" />
+                          )}
+                        </div>
+                        {payment && (
+                          <div className="text-[9px] mt-1 opacity-75">
+                            {(payment.amount / 1000).toFixed(0)}K
+                          </div>
+                        )}
+                        {isFutureMonth && !isPaid && (
+                          <div className="text-[9px] mt-1 opacity-75">🔮</div>
                         )}
                       </div>
-                      {payment && (
-                        <div className="text-[9px] mt-1 opacity-75">
-                          {(payment.amount / 1000).toFixed(0)}K
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                    );
+                  });
+                })()}
               </div>
             </div>
             
@@ -781,25 +873,48 @@ function StudentsContent() {
             {paymentStudent && (
               <div className="space-y-2">
                 <Label>To'lanmagan oylar</Label>
+                {paymentStudent.createdAt && (() => {
+                  const enrollment = new Date(paymentStudent.createdAt);
+                  const enrollmentMonth = getMonthName(paymentStudent.createdAt.slice(0, 7));
+                  const firstPaymentMonth = new Date(enrollment.getFullYear(), enrollment.getMonth() + 1, 1);
+                  const firstPaymentMonthStr = getMonthName(firstPaymentMonth.toISOString().slice(0, 7));
+                  return (
+                    <p className="text-xs text-muted-foreground">
+                      O'quvchi {enrollmentMonth} oyida qo'shilgan. To'lovlar {firstPaymentMonthStr} oyidan boshlanadi.
+                    </p>
+                  );
+                })()}
                 <div className="grid grid-cols-3 gap-2">
-                  {getLastNMonths(6).map((month) => {
+                  {getMonthsFromEnrollment(paymentStudent.createdAt, 12).map((month) => {
                     const isPaid = paymentStudent.monthlyPayments?.some(p => p.month === month && p.status === 'paid');
                     const isSelected = selectedMonth === month;
+                    const monthDate = new Date(month + '-01');
+                    const now = new Date();
+                    const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                    const isFutureMonth = monthDate > currentMonth;
+                    
                     return (
                       <Button
                         key={month}
-                        variant={isSelected ? 'default' : isPaid ? 'ghost' : 'outline'}
+                        variant={isSelected ? 'default' : isPaid ? 'ghost' : isFutureMonth ? 'outline' : 'outline'}
                         size="sm"
                         onClick={() => setSelectedMonth(month)}
                         disabled={isPaid}
-                        className={`text-xs ${isPaid ? 'opacity-50' : ''}`}
+                        className={`text-xs ${isPaid ? 'opacity-50' : ''} ${isFutureMonth ? 'border-dashed border-2' : ''}`}
+                        title={isFutureMonth ? 'Kelajakdagi oy (oldindan to\'lov)' : ''}
                       >
                         {isPaid && <CheckCircle2 className="h-3 w-3 mr-1" />}
                         {getMonthName(month)}
+                        {isFutureMonth && !isPaid && <span className="ml-1 text-[10px]">🔮</span>}
                       </Button>
                     );
                   })}
                 </div>
+                {paymentStudent.createdAt && getMonthsFromEnrollment(paymentStudent.createdAt, 12).length === 0 && (
+                  <p className="text-xs text-muted-foreground text-center py-2">
+                    Hali to'lov so'raladigan oy yo'q. Keyingi oydan boshlab to'lovlar ko'rsatiladi.
+                  </p>
+                )}
               </div>
             )}
             

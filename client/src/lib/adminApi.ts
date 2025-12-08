@@ -50,11 +50,13 @@ const mapTeacherToDb = (teacher: Partial<TeacherPayload>) => ({
 });
 
 // Helper function to convert database group to GroupProfile
-const mapGroupFromDb = (dbGroup: any, teacherName?: string): GroupProfile => ({
+const mapGroupFromDb = (dbGroup: any, teacherName?: string, courseName?: string): GroupProfile => ({
   id: dbGroup.id,
   name: dbGroup.name,
   teacherId: dbGroup.teacher_id,
   teacherName: teacherName || 'Unassigned',
+  courseId: dbGroup.course_id || null,
+  courseName: courseName || dbGroup.courses?.name_uz || undefined,
   schedule: dbGroup.schedule,
   room: dbGroup.room,
   maxStudents: dbGroup.max_students || 0,
@@ -68,6 +70,7 @@ const mapGroupFromDb = (dbGroup: any, teacherName?: string): GroupProfile => ({
 const mapGroupToDb = (group: Partial<GroupPayload>) => ({
   name: group.name,
   teacher_id: group.teacherId,
+  course_id: group.courseId || null,
   schedule: group.schedule,
   room: group.room,
   max_students: group.maxStudents,
@@ -80,7 +83,29 @@ const mapGroupToDb = (group: Partial<GroupPayload>) => ({
 // Helper function to convert database student to StudentProfile
 const mapStudentFromDb = (dbStudent: any, group?: GroupProfile, teacherName?: string): StudentProfile => {
   const paymentValidUntil = dbStudent.payment_valid_until;
-  const isExpired = paymentValidUntil ? new Date(paymentValidUntil) < new Date() : true;
+  const createdAt = dbStudent.created_at;
+  
+  // To'lov eskirgan deb hisoblash: kursga yozilganiga 1 oydan o'tgan, lekin hali to'lov qilmagan
+  let isExpired = false;
+  if (createdAt) {
+    const enrollmentDate = new Date(createdAt);
+    // Qo'shilgan oydan keyingi oyning 1-kunidan boshlash
+    const firstPaymentMonth = new Date(enrollmentDate.getFullYear(), enrollmentDate.getMonth() + 1, 1);
+    const now = new Date();
+    const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    // Agar birinchi to'lov oyi o'tib ketgan bo'lsa va to'lov qilinmagan bo'lsa
+    if (firstPaymentMonth < currentMonth) {
+      // Agar payment_valid_until yo'q bo'lsa yoki o'tib ketgan bo'lsa, eskirgan deb hisoblash
+      if (!paymentValidUntil || new Date(paymentValidUntil) < now) {
+        isExpired = true;
+      }
+    }
+  } else {
+    // Agar qo'shilgan sana yo'q bo'lsa, eski logikani ishlatish
+    isExpired = paymentValidUntil ? new Date(paymentValidUntil) < new Date() : true;
+  }
+  
   const daysRemaining = paymentValidUntil 
     ? Math.ceil((new Date(paymentValidUntil).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
     : 0;
@@ -103,6 +128,7 @@ const mapStudentFromDb = (dbStudent: any, group?: GroupProfile, teacherName?: st
     photoUrl: dbStudent.photo_url || undefined,
     notes: dbStudent.notes || undefined,
     courseName: dbStudent.course_name || undefined,
+    createdAt: dbStudent.created_at || undefined,
     history: [], // Will be loaded separately
     monthlyPayments: [], // Will be loaded separately
   };
@@ -194,7 +220,7 @@ const mapExpenseFromDb = (dbExpense: any): ExpenseRecord => ({
 });
 
 // Helper to sync group metrics (current_students and monthly_revenue)
-const syncGroupMetrics = async (groupId?: string) => {
+const syncGroupMetrics = async (groupId?: string | null) => {
   try {
     // Get all groups or specific group
     const groupsQuery = supabase.from('groups').select('id');
@@ -257,6 +283,143 @@ export const adminApi = {
     } catch (error: any) {
       console.error('Error listing teachers:', error);
       throw new Error(error.message || 'Failed to list teachers');
+    }
+  },
+
+  async getTeacher(id: string, payoutRate?: number): Promise<(TeacherProfile & {
+    groups?: GroupProfile[];
+    courses?: Array<{ id: string; name_uz: string; name_ru: string; name_en: string }>;
+    totalStudents?: number;
+    totalRevenue?: number;
+    calculatedSalary?: number; // Dinamik hisoblangan oylik
+    specialty_uz?: string;
+    specialty_ru?: string;
+    specialty_en?: string;
+    bio_uz?: string;
+    bio_ru?: string;
+    bio_en?: string;
+    linked_in?: string | null;
+    telegram?: string | null;
+    instagram?: string | null;
+    featured?: boolean;
+    created_at?: string;
+    updated_at?: string;
+  }) | undefined> {
+    try {
+      // Get teacher basic info
+      const { data: teacher, error } = await supabase
+        .from('teachers')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      if (!teacher) return undefined;
+
+      // Get all groups for this teacher with full details
+      const { data: groups, error: groupsError } = await supabase
+        .from('groups')
+        .select('*')
+        .eq('teacher_id', id);
+
+      if (groupsError && import.meta.env.DEV) {
+        console.warn('Error loading groups for teacher:', groupsError);
+      }
+
+      // Get courses separately if course_id exists
+      const courseIds = groups?.filter(g => g.course_id).map(g => g.course_id) || [];
+      let coursesMap: Record<string, any> = {};
+      
+      if (courseIds.length > 0) {
+        const { data: coursesData } = await supabase
+          .from('courses')
+          .select('id, name_uz, name_ru, name_en')
+          .in('id', courseIds);
+        
+        if (coursesData) {
+          coursesMap = coursesData.reduce((acc: Record<string, any>, course: any) => {
+            acc[course.id] = course;
+            return acc;
+          }, {});
+        }
+      }
+
+      // Map groups to GroupProfile
+      const teacherGroups: GroupProfile[] = (groups || []).map((g: any) => {
+        const courseName = g.course_id ? coursesMap[g.course_id]?.name_uz : undefined;
+        return mapGroupFromDb(
+          g,
+          teacher.name,
+          courseName
+        );
+      });
+
+      // Get courses taught by this teacher
+      const { data: courses } = await supabase
+        .from('courses')
+        .select('id, name_uz, name_ru, name_en')
+        .eq('teacher_id', id);
+
+      // Get all students in teacher's groups
+      const groupIds = teacherGroups.map(g => g.id);
+      let totalStudents = 0;
+      let totalRevenue = 0;
+
+      if (groupIds.length > 0) {
+        const { data: students } = await supabase
+          .from('students')
+          .select('id, monthly_payment, payment_status')
+          .in('group_id', groupIds);
+
+        totalStudents = students?.length || 0;
+        totalRevenue = students
+          ?.filter(s => s.payment_status === 'paid')
+          .reduce((sum, s) => sum + parseFloat(s.monthly_payment || '0'), 0) || 0;
+      }
+
+      // Payout rate'ni olish (parametr yoki localStorage'dan)
+      let finalPayoutRate = payoutRate;
+      if (finalPayoutRate === undefined) {
+        try {
+          const stored = typeof window !== 'undefined' ? localStorage.getItem('academy_payout_rate') : null;
+          finalPayoutRate = stored ? parseFloat(stored) : 0.35;
+          // Validatsiya
+          if (isNaN(finalPayoutRate) || finalPayoutRate < 0.20 || finalPayoutRate > 0.60) {
+            finalPayoutRate = 0.35;
+          }
+        } catch {
+          finalPayoutRate = 0.35;
+        }
+      }
+
+      // Dinamik hisoblangan oylik (groups daromadlari * payout rate)
+      const calculatedSalary = totalRevenue * finalPayoutRate;
+
+      return {
+        ...mapTeacherFromDb(teacher),
+        groups: teacherGroups,
+        courses: courses || [],
+        totalStudents,
+        totalRevenue,
+        calculatedSalary, // Dinamik hisoblangan oylik
+        specialty_uz: teacher.specialty_uz,
+        specialty_ru: teacher.specialty_ru,
+        specialty_en: teacher.specialty_en,
+        bio_uz: teacher.bio_uz,
+        bio_ru: teacher.bio_ru,
+        bio_en: teacher.bio_en,
+        linked_in: teacher.linked_in,
+        telegram: teacher.telegram,
+        instagram: teacher.instagram,
+        featured: teacher.featured || false,
+        created_at: teacher.created_at,
+        updated_at: teacher.updated_at,
+      };
+    } catch (error: any) {
+      if (import.meta.env.DEV) {
+        console.error('Error getting teacher:', error);
+      }
+      throw new Error(error.message || 'Failed to get teacher');
     }
   },
 
@@ -325,14 +488,38 @@ export const adminApi = {
 
       if (error) throw error;
 
+      // Get courses separately if course_id exists
+      const courseIds = groups?.filter(g => g.course_id).map(g => g.course_id) || [];
+      let coursesMap: Record<string, any> = {};
+      
+      if (courseIds.length > 0) {
+        const { data: courses } = await supabase
+          .from('courses')
+          .select('id, name_uz, name_ru, name_en')
+          .in('id', courseIds);
+        
+        if (courses) {
+          coursesMap = courses.reduce((acc: Record<string, any>, course: any) => {
+            acc[course.id] = course;
+            return acc;
+          }, {});
+        }
+      }
+
       // Sync metrics before returning
       await syncGroupMetrics();
 
       return (groups || []).map((g: any) =>
-        mapGroupFromDb(g, g.teachers?.name || 'Unassigned')
+        mapGroupFromDb(
+          g, 
+          g.teachers?.name || 'Unassigned',
+          g.course_id ? coursesMap[g.course_id]?.name_uz : undefined
+        )
       );
     } catch (error: any) {
-      console.error('Error listing groups:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error listing groups:', error);
+      }
       throw new Error(error.message || 'Failed to list groups');
     }
   },
@@ -353,9 +540,26 @@ export const adminApi = {
       if (error) throw error;
       if (!group) return undefined;
 
-      return mapGroupFromDb(group, group.teachers?.name || 'Unassigned');
+      // Get course separately if course_id exists
+      let courseName: string | undefined;
+      if (group.course_id) {
+        const { data: course } = await supabase
+          .from('courses')
+          .select('name_uz, name_ru, name_en')
+          .eq('id', group.course_id)
+          .single();
+        courseName = course?.name_uz;
+      }
+
+      return mapGroupFromDb(
+        group, 
+        group.teachers?.name || 'Unassigned',
+        courseName
+      );
     } catch (error: any) {
-      console.error('Error getting group:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error getting group:', error);
+      }
       throw new Error(error.message || 'Failed to get group');
     }
   },
@@ -363,17 +567,34 @@ export const adminApi = {
   async createGroup(payload: GroupPayload): Promise<GroupProfile> {
     try {
       const dbData = mapGroupToDb(payload);
-      const { data, error } = await supabase.from('groups').insert(dbData).select().single();
+      const { data, error } = await supabase.from('groups').insert(dbData).select(`
+        *,
+        teachers:teacher_id (name)
+      `).single();
 
       if (error) throw error;
 
-      // Get teacher name
-      const { data: teacher } = await supabase.from('teachers').select('name').eq('id', payload.teacherId).single();
+      // Get course separately if course_id exists
+      let courseName: string | undefined;
+      if (data.course_id) {
+        const { data: course } = await supabase
+          .from('courses')
+          .select('name_uz, name_ru, name_en')
+          .eq('id', data.course_id)
+          .single();
+        courseName = course?.name_uz;
+      }
 
       await syncGroupMetrics(data.id);
-      return mapGroupFromDb(data, teacher?.name || 'Unassigned');
+      return mapGroupFromDb(
+        data, 
+        data.teachers?.name || 'Unassigned',
+        courseName
+      );
     } catch (error: any) {
-      console.error('Error creating group:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error creating group:', error);
+      }
       throw new Error(error.message || 'Failed to create group');
     }
   },
@@ -381,19 +602,35 @@ export const adminApi = {
   async updateGroup(id: string, payload: Partial<GroupPayload>): Promise<GroupProfile> {
     try {
       const dbData = mapGroupToDb(payload as GroupPayload);
-      const { data, error } = await supabase.from('groups').update(dbData).eq('id', id).select().single();
+      const { data, error } = await supabase.from('groups').update(dbData).eq('id', id).select(`
+        *,
+        teachers:teacher_id (name)
+      `).single();
 
       if (error) throw error;
       if (!data) throw new Error('Group not found');
 
-      // Get teacher name
-      const teacherId = payload.teacherId || data.teacher_id;
-      const { data: teacher } = await supabase.from('teachers').select('name').eq('id', teacherId).single();
+      // Get course separately if course_id exists
+      let courseName: string | undefined;
+      if (data.course_id) {
+        const { data: course } = await supabase
+          .from('courses')
+          .select('name_uz, name_ru, name_en')
+          .eq('id', data.course_id)
+          .single();
+        courseName = course?.name_uz;
+      }
 
       await syncGroupMetrics(id);
-      return mapGroupFromDb(data, teacher?.name || 'Unassigned');
+      return mapGroupFromDb(
+        data, 
+        data.teachers?.name || 'Unassigned',
+        courseName
+      );
     } catch (error: any) {
-      console.error('Error updating group:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error updating group:', error);
+      }
       throw new Error(error.message || 'Failed to update group');
     }
   },
@@ -412,6 +649,64 @@ export const adminApi = {
   },
 
   // Students
+  async getStudent(id: string): Promise<StudentProfile | undefined> {
+    try {
+      const { data: student, error } = await supabase
+        .from('students')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      if (!student) return undefined;
+
+      // Get group and teacher info
+      let group: GroupProfile | undefined;
+      let teacherName: string | undefined;
+
+      if (student.group_id) {
+        const { data: groupData } = await supabase
+          .from('groups')
+          .select(`
+            *,
+            teachers:teacher_id (name)
+          `)
+          .eq('id', student.group_id)
+          .single();
+
+        if (groupData) {
+          group = mapGroupFromDb(groupData, groupData.teachers?.name);
+          teacherName = groupData.teachers?.name;
+        }
+      }
+
+      // Get payment history
+      const { data: payments } = await supabase
+        .from('payment_history')
+        .select('*')
+        .eq('student_id', id)
+        .order('date', { ascending: false });
+
+      // Get monthly payments
+      const { data: monthlyPayments } = await supabase
+        .from('monthly_payments')
+        .select('*')
+        .eq('student_id', id)
+        .order('month', { ascending: false });
+
+      return {
+        ...mapStudentFromDb(student, group, teacherName),
+        history: payments?.map(mapPaymentFromDb) || [],
+        monthlyPayments: monthlyPayments?.map(mapMonthlyPaymentFromDb) || [],
+      };
+    } catch (error: any) {
+      if (import.meta.env.DEV) {
+        console.error('Error getting student:', error);
+      }
+      throw new Error(error.message || 'Failed to get student');
+    }
+  },
+
   async listStudents(): Promise<StudentProfile[]> {
     try {
       const { data: students, error } = await supabase
@@ -429,7 +724,11 @@ export const adminApi = {
       }
 
       // Get groups and teachers
-      const groupIds = [...new Set(students?.map((s) => s.group_id).filter(Boolean) || [])];
+      const uniqueGroupIds = new Set(students?.map((s) => s.group_id).filter(Boolean) || []);
+      const groupIds: string[] = [];
+      uniqueGroupIds.forEach((id) => {
+        if (id) groupIds.push(id);
+      });
       const { data: groups } = await supabase
         .from('groups')
         .select(`
@@ -459,11 +758,16 @@ export const adminApi = {
         .order('month', { ascending: false });
 
       return (students || []).map((student) => {
-        const group = groups?.find((g) => g.id === student.group_id);
+        const group = groups?.find((g: any) => g.id === student.group_id);
         const studentPayments = payments?.filter((p) => p.student_id === student.id) || [];
         const studentMonthlyPayments = monthlyPayments?.filter((p) => p.student_id === student.id) || [];
+        const teacherName = group?.teachers 
+          ? (Array.isArray(group.teachers) 
+              ? (group.teachers[0] as any)?.name 
+              : (group.teachers as any)?.name) 
+          : undefined;
         return {
-          ...mapStudentFromDb(student, group ? mapGroupFromDb(group, group.teachers?.name) : undefined, group?.teachers?.name),
+          ...mapStudentFromDb(student, group ? mapGroupFromDb(group as any, teacherName) : undefined, teacherName),
           history: studentPayments.map(mapPaymentFromDb),
           monthlyPayments: studentMonthlyPayments.map(mapMonthlyPaymentFromDb),
         };
@@ -524,7 +828,7 @@ export const adminApi = {
       if (!data) throw new Error('Student not found');
 
       // Sync group metrics if group changed
-      if (payload.groupId !== undefined) {
+      if (payload.groupId !== undefined && payload.groupId !== null) {
         await syncGroupMetrics(payload.groupId);
       }
 
@@ -919,12 +1223,12 @@ export const adminApi = {
     }
   },
 
-  async getFinanceBreakdown(): Promise<FinanceBreakdown> {
+  async getFinanceBreakdown(payoutRate: number = 0.35): Promise<FinanceBreakdown> {
     try {
-      // Get active teachers and their salaries
+      // Get active teachers and calculate salaries from groups revenue
       const { data: teachers, error: teachersError } = await supabase
         .from('teachers')
-        .select('monthly_salary, status')
+        .select('id, monthly_salary, status')
         .eq('status', 'active');
 
       if (teachersError && teachersError.code !== 'PGRST116') {
@@ -932,8 +1236,31 @@ export const adminApi = {
         console.warn('Error loading teachers for finance:', teachersError);
       }
 
-      const teacherSalaries =
-        teachers?.reduce((sum, t) => sum + parseFloat(t.monthly_salary || '0'), 0) || 0;
+      // Calculate teacher salaries from groups revenue using payout rate
+      let teacherSalaries = 0;
+
+      if (teachers && teachers.length > 0) {
+        const teacherIds = teachers.map(t => t.id);
+        const { data: teacherGroups } = await supabase
+          .from('groups')
+          .select('teacher_id, monthly_revenue')
+          .in('teacher_id', teacherIds);
+
+        const teacherRevenueMap = new Map<string, number>();
+        (teacherGroups || []).forEach((g: any) => {
+          if (g.teacher_id) {
+            const currentRevenue = teacherRevenueMap.get(g.teacher_id) || 0;
+            teacherRevenueMap.set(g.teacher_id, currentRevenue + parseFloat(g.monthly_revenue || '0'));
+          }
+        });
+
+        // Dashboard'da belgilangan foizga qarab oylik hisoblanadi
+        teacherSalaries = teachers.reduce((sum, teacher) => {
+          const groupsRevenue = teacherRevenueMap.get(teacher.id) || 0;
+          const calculatedSalary = groupsRevenue * payoutRate;
+          return sum + calculatedSalary;
+        }, 0);
+      }
 
       // Get all expenses
       const { data: expenses, error: expensesError } = await supabase.from('expenses').select('*');
@@ -962,7 +1289,7 @@ export const adminApi = {
     }
   },
 
-  async getDashboardSnapshot(): Promise<DashboardSnapshot> {
+  async getDashboardSnapshot(payoutRate: number = 0.35): Promise<DashboardSnapshot> {
     try {
       // Get counts
       const [teachersRes, studentsRes, groupsRes] = await Promise.all([
@@ -1007,18 +1334,44 @@ export const adminApi = {
 
       const monthlyRevenue = revenueAmount + studentPayments;
 
-      // Get teacher salaries
+      // Get teacher salaries - groups daromadlaridan hisoblanadi
+      // Avval o'qituvchilarning groups'lari bo'yicha daromadlarni yig'amiz
       const { data: activeTeachers, error: teachersError } = await supabase
         .from('teachers')
-        .select('monthly_salary')
+        .select('id, name, monthly_salary')
         .eq('status', 'active');
 
       if (teachersError && teachersError.code !== 'PGRST116') {
         console.warn('Error loading teachers for dashboard:', teachersError);
       }
 
-      const teacherSalaryExpense =
-        activeTeachers?.reduce((sum, t) => sum + parseFloat(t.monthly_salary || '0'), 0) || 0;
+      // Har bir o'qituvchining groups'lari bo'yicha daromadlarni yig'amiz
+      let teacherSalaryExpense = 0;
+      if (activeTeachers && activeTeachers.length > 0) {
+        const teacherIds = activeTeachers.map(t => t.id);
+        const { data: teacherGroups } = await supabase
+          .from('groups')
+          .select('teacher_id, monthly_revenue')
+          .in('teacher_id', teacherIds);
+
+        // Har bir o'qituvchi uchun groups daromadlarini yig'amiz
+        const teacherRevenueMap = new Map<string, number>();
+        (teacherGroups || []).forEach((g: any) => {
+          if (g.teacher_id) {
+            const currentRevenue = teacherRevenueMap.get(g.teacher_id) || 0;
+            teacherRevenueMap.set(g.teacher_id, currentRevenue + parseFloat(g.monthly_revenue || '0'));
+          }
+        });
+
+        // O'qituvchilar oyligi = groups daromadlari yig'indisi * payoutRate (dashboard'da belgilangan foiz)
+        // Har bir o'qituvchining groups daromadlari yig'indisidan foiz olib hisoblanadi
+        teacherSalaryExpense = activeTeachers.reduce((sum, teacher) => {
+          const groupsRevenue = teacherRevenueMap.get(teacher.id) || 0;
+          // Dashboard'da belgilangan foizga qarab oylik hisoblanadi
+          const calculatedSalary = groupsRevenue * payoutRate;
+          return sum + calculatedSalary;
+        }, 0);
+      }
 
       // Get monthly expenses
       const { data: expenses, error: expensesError } = await supabase
@@ -1063,6 +1416,23 @@ export const adminApi = {
         console.warn('Error loading all expenses:', allExpensesError);
       }
 
+      // Har bir oy uchun o'qituvchilar oyligini hisoblash
+      // Har bir oy uchun o'qituvchilarning groups daromadlarini yig'ib, payoutRate ga ko'paytiramiz
+      const monthlyTeacherSalaries = new Map<string, number>();
+      
+      // Faqat joriy oy uchun to'liq hisob-kitob mavjud
+      // Boshqa oylar uchun o'qituvchilar oyligini faqat joriy oy uchun qo'llaymiz
+      // (Real application'da har oy uchun alohida history saqlash kerak)
+      for (const month of months) {
+        if (month === currentMonth) {
+          monthlyTeacherSalaries.set(month, teacherSalaryExpense);
+        } else {
+          // Boshqa oylar uchun o'qituvchilar oyligini joriy oy qiymatidan taxminiy hisoblaymiz
+          // yoki 0 deb qoldiramiz (real application'da history saqlash kerak)
+          monthlyTeacherSalaries.set(month, 0);
+        }
+      }
+
       const revenueSeries = months.map((month) => ({
         month,
         revenue:
@@ -1073,7 +1443,7 @@ export const adminApi = {
         month,
         expense:
           (allExpenses?.filter((e) => e.month === month).reduce((sum, e) => sum + parseFloat(e.amount || '0'), 0) ||
-            0) + teacherSalaryExpense,
+            0) + (monthlyTeacherSalaries.get(month) || 0),
       }));
 
       const profitSeries = months.map((month) => {
@@ -1087,36 +1457,72 @@ export const adminApi = {
         { status: 'unpaid', value: unpaidStudents },
       ];
 
-      // Get groups data
-      const { data: groups } = await supabase.from('groups').select('id, name, current_students, max_students, monthly_revenue, attendance_rate, teacher_id');
-      const { data: allTeachers } = await supabase.from('teachers').select('id, name');
+      // Get groups data with error handling
+      let groupsData: any[] = [];
+      let teachersData: any[] = [];
+      
+      try {
+        const { data: groups, error: groupsError } = await supabase
+          .from('groups')
+          .select('id, name, current_students, max_students, monthly_revenue, attendance_rate, teacher_id');
+        
+        if (groupsError && groupsError.code !== 'PGRST116') {
+          console.warn('Error loading groups for dashboard:', groupsError);
+        } else if (groups) {
+          groupsData = groups;
+        }
+      } catch (error) {
+        console.error('Error loading groups:', error);
+      }
 
-      const studentsPerGroup = (groups || []).map((g) => ({ name: g.name, value: g.current_students || 0 }));
+      try {
+        const { data: allTeachers, error: allTeachersError } = await supabase
+          .from('teachers')
+          .select('id, name');
+        
+        if (allTeachersError && allTeachersError.code !== 'PGRST116') {
+          console.warn('Error loading teachers for dashboard:', allTeachersError);
+        } else if (allTeachers) {
+          teachersData = allTeachers;
+        }
+      } catch (error) {
+        console.error('Error loading teachers:', error);
+      }
 
-      const teachersPerGroup = (allTeachers || []).map((teacher) => ({
-        teacher: teacher.name,
-        value: groups?.filter((g) => g.teacher_id === teacher.id).length || 0,
+      const studentsPerGroup = (groupsData || []).map((g: any) => ({ 
+        name: (g.name || 'Noma\'lum').substring(0, 20), // Truncate long names
+        value: Number(g.current_students) || 0 
       }));
 
-      const capacityUsage = (groups || []).map((g) => ({
-        name: g.name,
-        value: g.max_students === 0 ? 0 : Math.min(100, Math.round(((g.current_students || 0) / g.max_students) * 100)),
+      const teachersPerGroup = (teachersData || []).map((teacher: any) => ({
+        teacher: (teacher.name || 'Noma\'lum').substring(0, 20),
+        value: (groupsData || []).filter((g: any) => g.teacher_id === teacher.id).length || 0,
       }));
 
-      const topGroupsByStudents = [...(groups || [])]
-        .sort((a, b) => (b.current_students || 0) - (a.current_students || 0))
-        .slice(0, 5)
-        .map((g) => ({ id: g.id, name: g.name, value: g.current_students || 0 }));
+      const capacityUsage = (groupsData || []).map((g: any) => {
+        const maxStudents = Number(g.max_students) || 1;
+        const currentStudents = Number(g.current_students) || 0;
+        const percentage = maxStudents === 0 ? 0 : Math.min(100, Math.round((currentStudents / maxStudents) * 100));
+        return {
+          name: (g.name || 'Noma\'lum').substring(0, 20),
+          value: percentage,
+        };
+      });
 
-      const topGroupsByRevenue = [...(groups || [])]
-        .sort((a, b) => parseFloat(b.monthly_revenue || '0') - parseFloat(a.monthly_revenue || '0'))
+      const topGroupsByStudents = [...(groupsData || [])]
+        .sort((a: any, b: any) => (Number(b.current_students) || 0) - (Number(a.current_students) || 0))
         .slice(0, 5)
-        .map((g) => ({ id: g.id, name: g.name, value: parseFloat(g.monthly_revenue || '0') }));
+        .map((g: any) => ({ id: g.id, name: g.name || 'Noma\'lum', value: Number(g.current_students) || 0 }));
 
-      const topGroupsByAttendance = [...(groups || [])]
-        .sort((a, b) => (b.attendance_rate || 0) - (a.attendance_rate || 0))
+      const topGroupsByRevenue = [...(groupsData || [])]
+        .sort((a: any, b: any) => parseFloat(b.monthly_revenue || '0') - parseFloat(a.monthly_revenue || '0'))
         .slice(0, 5)
-        .map((g) => ({ id: g.id, name: g.name, value: g.attendance_rate || 0 }));
+        .map((g: any) => ({ id: g.id, name: g.name || 'Noma\'lum', value: parseFloat(g.monthly_revenue || '0') }));
+
+      const topGroupsByAttendance = [...(groupsData || [])]
+        .sort((a: any, b: any) => (Number(b.attendance_rate) || 0) - (Number(a.attendance_rate) || 0))
+        .slice(0, 5)
+        .map((g: any) => ({ id: g.id, name: g.name || 'Noma\'lum', value: Number(g.attendance_rate) || 0 }));
 
       return {
         teacherCount,
@@ -1124,6 +1530,7 @@ export const adminApi = {
         groupCount,
         monthlyRevenue,
         monthlyExpenses,
+        teacherSalaryExpense, // O'qituvchilar oyligi (foizga qarab hisoblangan)
         netProfit,
         profitMargin,
         paidStudents,

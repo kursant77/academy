@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -52,14 +53,86 @@ function ScheduleContent() {
 
   const loadEntries = async () => {
     try {
-      const { data, error } = await supabase
-        .from('schedule_entries')
-        .select('*')
-        .order('day_of_week')
-        .order('start_time');
+      // Schedule entries va active groups ni olib kelish
+      const [entriesRes, groupsRes] = await Promise.all([
+        supabase
+          .from('schedule_entries')
+          .select('*')
+          .order('day_of_week')
+          .order('start_time'),
+        supabase
+          .from('groups')
+          .select(`
+            *,
+            teachers:teacher_id (name),
+            courses:course_id (name_uz, name_ru, name_en)
+          `)
+          .eq('status', 'active')
+      ]);
 
-      if (error) throw error;
-      setEntries(data || []);
+      let allEntries: ScheduleEntry[] = entriesRes.data || [];
+
+      // Groups dan schedule entries ga aylantirish
+      if (!groupsRes.error && groupsRes.data) {
+        groupsRes.data.forEach((group: any) => {
+          const teacherName = group.teachers?.name || '';
+          const courseName = group.courses?.name_uz || group.name;
+
+          // Schedule stringdan kunlarni parse qilish
+          const scheduleStr = group.schedule.toLowerCase();
+          const dayMap: Record<string, string> = {
+            'dushanba': 'Monday',
+            'seshanba': 'Tuesday',
+            'chorshanba': 'Wednesday',
+            'payshanba': 'Thursday',
+            'juma': 'Friday',
+            'shanba': 'Saturday',
+            'yakshanba': 'Sunday',
+          };
+
+          const days: string[] = [];
+          for (const [uz, en] of Object.entries(dayMap)) {
+            if (scheduleStr.includes(uz)) {
+              days.push(en);
+            }
+          }
+
+          // Vaqtni parse qilish
+          const timeMatch = group.schedule.match(/(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})/);
+          if (timeMatch && days.length > 0) {
+            const startTime = timeMatch[1];
+            const endTime = timeMatch[2];
+
+            // Har bir kun uchun entry yaratish
+            days.forEach(day => {
+              allEntries.push({
+                id: `group-${group.id}-${day}`,
+                day_of_week: day,
+                start_time: startTime,
+                end_time: endTime,
+                title_uz: courseName,
+                title_ru: group.courses?.name_ru || courseName,
+                title_en: group.courses?.name_en || courseName,
+                room: group.room || null,
+                format: 'offline',
+                teacher_name: teacherName,
+                created_at: group.created_at,
+                updated_at: group.updated_at,
+              });
+            });
+          }
+        });
+      }
+
+      // Kunlar va vaqtlar bo'yicha tartiblash
+      allEntries.sort((a, b) => {
+        const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        const dayDiff = dayOrder.indexOf(a.day_of_week) - dayOrder.indexOf(b.day_of_week);
+        if (dayDiff !== 0) return dayDiff;
+        return a.start_time.localeCompare(b.start_time);
+      });
+
+      setEntries(allEntries);
     } catch (error: any) {
       toast({
         title: 'Xatolik',
@@ -111,13 +184,39 @@ function ScheduleContent() {
     if (!confirm('Bu jadval elementini o\'chirishni xohlaysizmi?')) return;
 
     try {
-      const { error } = await supabase.from('schedule_entries').delete().eq('id', id);
+      // Agar groups dan kelgan entry bo'lsa, schedule_entries dan o'chirish (guruh o'zgartirmaydi)
+      if (id.startsWith('group-')) {
+        // Group ID va day ni extract qilish
+        const parts = id.replace('group-', '').split('-');
+        const groupId = parts[0];
+        const day = parts.slice(1).join('-');
 
-      if (error) throw error;
-      toast({
-        title: 'Muvaffaqiyatli',
-        description: 'Jadval elementi o\'chirildi',
-      });
+        // Schedule_entries dan bu guruh va kun uchun entry ni topish va o'chirish
+        const entry = entries.find(e => e.id === id);
+        if (entry) {
+          const { error } = await supabase
+            .from('schedule_entries')
+            .delete()
+            .eq('teacher_name', entry.teacher_name || '')
+            .eq('title_uz', entry.title_uz)
+            .eq('day_of_week', entry.day_of_week)
+            .eq('start_time', entry.start_time)
+            .eq('end_time', entry.end_time);
+
+          if (error) throw error;
+          toast({
+            title: 'Muvaffaqiyatli',
+            description: 'Jadval elementi o\'chirildi',
+          });
+        }
+      } else {
+        const { error } = await supabase.from('schedule_entries').delete().eq('id', id);
+        if (error) throw error;
+        toast({
+          title: 'Muvaffaqiyatli',
+          description: 'Jadval elementi o\'chirildi',
+        });
+      }
       loadEntries();
     } catch (error: any) {
       toast({
@@ -299,7 +398,9 @@ function ScheduleContent() {
                     <TableHead>Kuni</TableHead>
                     <TableHead>Vaqt</TableHead>
                     <TableHead>Nomi</TableHead>
+                    <TableHead>Xona</TableHead>
                     <TableHead>O'qituvchi</TableHead>
+                    <TableHead>Manba</TableHead>
                     <TableHead>Amallar</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -311,15 +412,43 @@ function ScheduleContent() {
                         {entry.start_time} - {entry.end_time}
                       </TableCell>
                       <TableCell>{entry.title_uz}</TableCell>
+                      <TableCell>{entry.room || '-'}</TableCell>
                       <TableCell>{entry.teacher_name || '-'}</TableCell>
                       <TableCell>
+                        {entry.id.startsWith('group-') ? (
+                          <Badge variant="secondary" className="text-xs">
+                            Guruh
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs">
+                            Qo'lda
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <div className="flex gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => handleEdit(entry)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(entry.id)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                          {!entry.id.startsWith('group-') && (
+                            <>
+                              <Button variant="ghost" size="sm" onClick={() => handleEdit(entry)} title="Tahrirlash">
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => handleDelete(entry.id)} title="O'chirish">
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </>
+                          )}
+                          {entry.id.startsWith('group-') && (
+                            <>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => handleDelete(entry.id)} 
+                                title="O'chirish (faqat jadvaldan)"
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
