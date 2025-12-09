@@ -15,6 +15,16 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Table,
   TableBody,
   TableCell,
@@ -42,6 +52,8 @@ function CoursesContent() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [courseToDelete, setCourseToDelete] = useState<string | null>(null);
   const [formData, setFormData] = useState<InsertCourse>({
     name: '',
     name_uz: '',
@@ -188,11 +200,15 @@ function CoursesContent() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Bu kursni o\'chirishni xohlaysizmi?')) return;
+  const handleDeleteClick = (id: string) => {
+    setCourseToDelete(id);
+    setDeleteDialogOpen(true);
+  };
 
+  const handleDelete = async () => {
+    if (!courseToDelete) return;
     try {
-      const { error } = await supabase.from('courses').delete().eq('id', id);
+      const { error } = await supabase.from('courses').delete().eq('id', courseToDelete);
 
       if (error) throw error;
       toast({
@@ -200,6 +216,8 @@ function CoursesContent() {
         description: 'Kurs o\'chirildi',
       });
       loadCourses();
+      setDeleteDialogOpen(false);
+      setCourseToDelete(null);
     } catch (error: any) {
       toast({
         title: 'Xatolik',
@@ -520,7 +538,7 @@ function CoursesContent() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDelete(course.id)}
+                              onClick={() => handleDeleteClick(course.id)}
                               className="h-8 w-8 p-0"
                             >
                               <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-destructive" />
@@ -536,6 +554,22 @@ function CoursesContent() {
           </CardContent>
         </Card>
       </div>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Kursni o'chirish</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bu kursni o'chirishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              O'chirish
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }

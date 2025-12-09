@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Card,
@@ -35,7 +35,7 @@ import {
 
 export default function Register() {
   const { t, i18n } = useTranslation();
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
   const [formData, setFormData] = useState({
     fullName: "",
     age: "",
@@ -46,32 +46,27 @@ export default function Register() {
   const [loadingOptions, setLoadingOptions] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const isSubmittingRef = useRef(false);
+  const toastShownRef = useRef(false);
 
   useEffect(() => {
     const loadOptions = async () => {
       try {
-        console.log("Kurslarni yuklash boshlandi...");
-        
         const { data, error } = await supabase
           .from("courses")
           .select("*")
           .eq("is_published", true)
           .order("created_at", { ascending: false });
 
-        console.log("Kurslar response:", { data, error });
-
         if (error) {
-          console.error("Failed to load courses:", error);
           if (error.code === '42P01' || error.message?.includes('does not exist')) {
-            console.warn("Courses jadvali topilmadi. Database setup qiling.");
+            // Courses jadvali topilmadi
           }
           setCourses([]);
         } else if (data) {
-          console.log(`${data.length} ta kurs topildi`);
           setCourses(data || []);
         }
       } catch (error: any) {
-        console.error("Failed to load options", error);
         toast({
           title: t("register.error") || "Xatolik",
           description: error.message || "Ma'lumotlar yuklanmadi",
@@ -86,6 +81,13 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Agar allaqachon submitting bo'lsa, qaytaramiz
+    if (submitting || isSubmittingRef.current) {
+      return;
+    }
+    
+    isSubmittingRef.current = true;
 
     if (!formData.courseId) {
       toast({
@@ -169,10 +171,26 @@ export default function Register() {
       });
 
       setSuccess(true);
-      toast({
-        title: t("register.success"),
-        description: "Arizangiz muvaffaqiyatli yuborildi! Tez orada siz bilan bog'lanamiz.",
-      });
+      
+      // Toast faqat bitta marta ko'rsatilishi uchun
+      if (!toastShownRef.current) {
+        toastShownRef.current = true;
+        
+        // Barcha ochiq toast'larni yopish
+        dismiss();
+        
+        // Kichik delay bilan yangi toast ko'rsatish (barcha toast'lar yopilishi uchun)
+        setTimeout(() => {
+          toast({
+            title: t("register.success") || "Arizangiz yuborildi! Tez orada siz bilan bog'lanamiz.",
+          });
+        }, 100);
+        
+        // 3 soniyadan keyin toastShownRef'ni reset qilish
+        setTimeout(() => {
+          toastShownRef.current = false;
+        }, 3000);
+      }
 
       setTimeout(() => {
         setFormData({
@@ -193,6 +211,7 @@ export default function Register() {
       });
     } finally {
       setSubmitting(false);
+      isSubmittingRef.current = false;
     }
   };
 

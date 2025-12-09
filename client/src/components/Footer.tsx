@@ -55,7 +55,7 @@ export function Footer() {
                 variant="outline"
                 size="icon"
                 className="h-11 w-11 rounded-full transition-all duration-300 hover:scale-110 hover:bg-primary/10 hover:border-primary hover:text-primary"
-                onClick={() => console.log('Facebook clicked')}
+                onClick={() => window.open('https://facebook.com', '_blank')}
                 data-testid="button-social-facebook"
               >
                 <Facebook className="h-5 w-5" />
@@ -64,7 +64,7 @@ export function Footer() {
                 variant="outline"
                 size="icon"
                 className="h-11 w-11 rounded-full transition-all duration-300 hover:scale-110 hover:bg-primary/10 hover:border-primary hover:text-primary"
-                onClick={() => console.log('Instagram clicked')}
+                onClick={() => window.open('https://instagram.com', '_blank')}
                 data-testid="button-social-instagram"
               >
                 <Instagram className="h-5 w-5" />
@@ -73,7 +73,7 @@ export function Footer() {
                 variant="outline"
                 size="icon"
                 className="h-11 w-11 rounded-full transition-all duration-300 hover:scale-110 hover:bg-primary/10 hover:border-primary hover:text-primary"
-                onClick={() => console.log('Telegram clicked')}
+                onClick={() => window.open('https://t.me', '_blank')}
                 data-testid="button-social-telegram"
               >
                 <Send className="h-5 w-5" />
@@ -82,7 +82,7 @@ export function Footer() {
                 variant="outline"
                 size="icon"
                 className="h-11 w-11 rounded-full transition-all duration-300 hover:scale-110 hover:bg-primary/10 hover:border-primary hover:text-primary"
-                onClick={() => console.log('LinkedIn clicked')}
+                onClick={() => window.open('https://linkedin.com', '_blank')}
                 data-testid="button-social-linkedin"
               >
                 <Linkedin className="h-5 w-5" />

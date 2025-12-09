@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { uploadImage } from '@/lib/storage';
+import { useToast } from '@/hooks/use-toast';
 
 interface ImageUploadProps {
   value?: string | null;
@@ -17,6 +18,7 @@ export function ImageUpload({ value, onChange, folder, label = 'Rasm', required 
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(value || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   // Value o'zgarganda preview'ni yangilash
   useEffect(() => {
@@ -29,13 +31,21 @@ export function ImageUpload({ value, onChange, folder, label = 'Rasm', required 
 
     // Fayl turini tekshirish
     if (!file.type.startsWith('image/')) {
-      alert('Iltimos, faqat rasm faylini tanlang');
+      toast({
+        variant: 'destructive',
+        title: 'Xatolik',
+        description: 'Iltimos, faqat rasm faylini tanlang',
+      });
       return;
     }
 
     // Fayl hajmini tekshirish (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('Rasm hajmi 5MB dan katta bo\'lmasligi kerak');
+      toast({
+        variant: 'destructive',
+        title: 'Xatolik',
+        description: 'Rasm hajmi 5MB dan katta bo\'lmasligi kerak',
+      });
       return;
     }
 
@@ -51,8 +61,16 @@ export function ImageUpload({ value, onChange, folder, label = 'Rasm', required 
     try {
       const url = await uploadImage(file, folder);
       onChange(url);
+      toast({
+        title: 'Muvaffaqiyatli',
+        description: 'Rasm muvaffaqiyatli yuklandi',
+      });
     } catch (error: any) {
-      alert(error.message || 'Rasm yuklashda xatolik');
+      toast({
+        variant: 'destructive',
+        title: 'Xatolik',
+        description: error.message || 'Rasm yuklashda xatolik',
+      });
       setPreview(null);
     } finally {
       setUploading(false);

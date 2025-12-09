@@ -16,6 +16,16 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Table,
   TableBody,
   TableCell,
@@ -37,6 +47,8 @@ function TeachersContent() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [teacherToDelete, setTeacherToDelete] = useState<string | null>(null);
   const [formData, setFormData] = useState<InsertTeacher>({
     name: '',
     specialty: '',
@@ -105,17 +117,24 @@ function TeachersContent() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('O\'qituvchini o\'chirishni tasdiqlaysizmi?')) return;
+  const handleDeleteClick = (id: string) => {
+    setTeacherToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!teacherToDelete) return;
     try {
       const { error } = await supabase
         .from('teachers')
         .delete()
-        .eq('id', id);
+        .eq('id', teacherToDelete);
 
       if (error) throw error;
       toast({ title: 'O\'chirildi', description: 'O\'qituvchi muvaffaqiyatli o\'chirildi' });
       loadTeachers();
+      setDeleteDialogOpen(false);
+      setTeacherToDelete(null);
     } catch (error: any) {
       toast({ title: 'Xatolik', description: error.message, variant: 'destructive' });
     }
@@ -369,7 +388,7 @@ function TeachersContent() {
                               <Button variant="ghost" size="sm" onClick={() => handleEdit(teacher)} className="h-8 w-8 p-0" title="Tahrirlash">
                                 <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => handleDelete(teacher.id)} className="h-8 w-8 p-0" title="O'chirish">
+                              <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(teacher.id)} className="h-8 w-8 p-0" title="O'chirish">
                                 <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-destructive" />
                               </Button>
                             </div>
@@ -413,6 +432,22 @@ function TeachersContent() {
           </Card>
         </div>
       </div>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>O'qituvchini o'chirish</AlertDialogTitle>
+            <AlertDialogDescription>
+              O'qituvchini o'chirishni tasdiqlaysizmi? Bu amalni qaytarib bo'lmaydi.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              O'chirish
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }

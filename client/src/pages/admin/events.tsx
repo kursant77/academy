@@ -15,6 +15,16 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Table,
   TableBody,
   TableCell,
@@ -44,6 +54,8 @@ function EventsContent() {
   const { options: categories } = useOptions(OPTION_TYPES.EVENT_CATEGORY);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState<InsertEvent>({
     title: '',
     title_uz: '',
@@ -119,11 +131,16 @@ function EventsContent() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Bu tadbirni o\'chirishni xohlaysizmi?')) return;
+  const handleDeleteClick = (id: string) => {
+    setDeleteId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteId) return;
 
     try {
-      const { error } = await supabase.from('events').delete().eq('id', id);
+      const { error } = await supabase.from('events').delete().eq('id', deleteId);
 
       if (error) throw error;
       toast({
@@ -131,6 +148,8 @@ function EventsContent() {
         description: 'Tadbir o\'chirildi',
       });
       loadEvents();
+      setDeleteDialogOpen(false);
+      setDeleteId(null);
     } catch (error: any) {
       toast({
         title: 'Xatolik',
@@ -325,7 +344,7 @@ function EventsContent() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDelete(event.id)}
+                            onClick={() => handleDeleteClick(event.id)}
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
@@ -338,6 +357,23 @@ function EventsContent() {
             )}
           </CardContent>
         </Card>
+
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>O'chirishni tasdiqlash</AlertDialogTitle>
+              <AlertDialogDescription>
+                Bu tadbirni o'chirishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                O'chirish
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AdminLayout>
   );

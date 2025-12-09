@@ -6,7 +6,7 @@ import type {
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_REMOVE_DELAY = 5000
 
 type ToasterToast = ToastProps & {
   id: string
@@ -74,9 +74,34 @@ const addToRemoveQueue = (toastId: string) => {
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_TOAST":
+      // Barcha ochiq toast'larni yopish (faqat bitta toast ko'rsatilishi uchun)
+      const closedToasts = state.toasts.map((t) => ({
+        ...t,
+        open: false,
+      }));
+      
+      // Agar xuddi shu title (yoki title + description) bilan toast allaqachon mavjud bo'lsa, qo'shmaymiz
+      const existingToast = state.toasts.find((t) => {
+        if (!t.open) return false;
+        // Agar title bir xil bo'lsa
+        if (String(t.title) === String(action.toast.title)) {
+          // Description ham mavjud bo'lsa, ikkalasini ham tekshiramiz
+          if (action.toast.description && t.description) {
+            return String(t.description) === String(action.toast.description);
+          }
+          // Agar description yo'q bo'lsa, faqat title'ni tekshiramiz
+          return true;
+        }
+        return false;
+      });
+      
+      if (existingToast) {
+        return state;
+      }
+      
       return {
         ...state,
-        toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
+        toasts: [action.toast].slice(0, TOAST_LIMIT), // Faqat yangi toast'ni ko'rsatish
       }
 
     case "UPDATE_TOAST":
@@ -139,8 +164,29 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, "id">
 
+// Global debounce timer - bir xil toast'lar uchun
+let lastToastKey: string | null = null;
+let lastToastTime: number = 0;
+const TOAST_DEBOUNCE_MS = 1000; // 1 soniya ichida bir xil toast qo'shish mumkin emas
+
 function toast({ ...props }: Toast) {
   const id = genId()
+  
+  // Toast key yaratish (title + description kombinatsiyasi)
+  const toastKey = `${props.title || ''}-${props.description || ''}-${props.variant || 'default'}`;
+  const now = Date.now();
+  
+  // Agar so'nggi toast xuddi shu key va 1 soniya ichida bo'lsa, qo'shmaymiz
+  if (lastToastKey === toastKey && (now - lastToastTime) < TOAST_DEBOUNCE_MS) {
+    return {
+      id: id,
+      dismiss: () => {},
+      update: () => {},
+    };
+  }
+  
+  lastToastKey = toastKey;
+  lastToastTime = now;
 
   const update = (props: ToasterToast) =>
     dispatch({
@@ -179,7 +225,7 @@ function useToast() {
         listeners.splice(index, 1)
       }
     }
-  }, [state])
+  }, [])
 
   return {
     ...state,

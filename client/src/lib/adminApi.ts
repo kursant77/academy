@@ -176,7 +176,6 @@ const mapStudentToDb = (student: Partial<StudentPayload>) => {
     dbData.last_paid_month = student.lastPaidMonth;
   }
   
-  console.log('Mapping student to DB:', { input: student, output: dbData });
   return dbData;
 };
 

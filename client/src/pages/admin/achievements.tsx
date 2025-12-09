@@ -15,6 +15,16 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Table,
   TableBody,
   TableCell,
@@ -41,6 +51,8 @@ function AchievementsContent() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAchievement, setEditingAchievement] = useState<Achievement | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState<InsertAchievement>({
     title: '',
     title_uz: '',
@@ -134,11 +146,16 @@ function AchievementsContent() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Bu yutuqni o\'chirishni xohlaysizmi?')) return;
+  const handleDeleteClick = (id: string) => {
+    setDeleteId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteId) return;
 
     try {
-      const { error } = await supabase.from('achievements').delete().eq('id', id);
+      const { error } = await supabase.from('achievements').delete().eq('id', deleteId);
 
       if (error) throw error;
       toast({
@@ -146,6 +163,8 @@ function AchievementsContent() {
         description: 'Yutuq o\'chirildi',
       });
       loadAchievements();
+      setDeleteDialogOpen(false);
+      setDeleteId(null);
     } catch (error: any) {
       toast({
         title: 'Xatolik',
@@ -392,7 +411,7 @@ function AchievementsContent() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDelete(achievement.id)}
+                            onClick={() => handleDeleteClick(achievement.id)}
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
@@ -405,6 +424,23 @@ function AchievementsContent() {
             )}
           </CardContent>
         </Card>
+
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>O'chirishni tasdiqlash</AlertDialogTitle>
+              <AlertDialogDescription>
+                Bu yutuqni o'chirishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                O'chirish
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AdminLayout>
   );

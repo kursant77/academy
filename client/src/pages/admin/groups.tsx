@@ -15,6 +15,16 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Table,
   TableBody,
   TableCell,
@@ -89,6 +99,8 @@ function GroupsContent() {
   });
   const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'closed'>('all');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [groupToDelete, setGroupToDelete] = useState<Group | null>(null);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
@@ -381,8 +393,13 @@ function GroupsContent() {
     }
   };
 
-  const handleDelete = async (group: Group) => {
-    if (!confirm(`"${group.name}" guruhini o'chirishni istaysizmi?`)) return;
+  const handleDeleteClick = (group: Group) => {
+    setGroupToDelete(group);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!groupToDelete) return;
     try {
       // Avval schedule_entries dan bu guruhga tegishli jadvallarni o'chirish
       if (group.teachers?.name) {

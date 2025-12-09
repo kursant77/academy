@@ -15,6 +15,16 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Table,
   TableBody,
   TableCell,
@@ -34,6 +44,8 @@ function ScheduleContent() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<ScheduleEntry | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState<InsertScheduleEntry>({
     day_of_week: 'Monday',
     start_time: '09:00',
@@ -180,19 +192,24 @@ function ScheduleContent() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Bu jadval elementini o\'chirishni xohlaysizmi?')) return;
+  const handleDeleteClick = (id: string) => {
+    setDeleteId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteId) return;
 
     try {
       // Agar groups dan kelgan entry bo'lsa, schedule_entries dan o'chirish (guruh o'zgartirmaydi)
-      if (id.startsWith('group-')) {
+      if (deleteId.startsWith('group-')) {
         // Group ID va day ni extract qilish
-        const parts = id.replace('group-', '').split('-');
+        const parts = deleteId.replace('group-', '').split('-');
         const groupId = parts[0];
         const day = parts.slice(1).join('-');
 
         // Schedule_entries dan bu guruh va kun uchun entry ni topish va o'chirish
-        const entry = entries.find(e => e.id === id);
+        const entry = entries.find(e => e.id === deleteId);
         if (entry) {
           const { error } = await supabase
             .from('schedule_entries')
@@ -210,7 +227,7 @@ function ScheduleContent() {
           });
         }
       } else {
-        const { error } = await supabase.from('schedule_entries').delete().eq('id', id);
+        const { error } = await supabase.from('schedule_entries').delete().eq('id', deleteId);
         if (error) throw error;
         toast({
           title: 'Muvaffaqiyatli',
@@ -218,6 +235,8 @@ function ScheduleContent() {
         });
       }
       loadEntries();
+      setDeleteDialogOpen(false);
+      setDeleteId(null);
     } catch (error: any) {
       toast({
         title: 'Xatolik',
@@ -432,7 +451,7 @@ function ScheduleContent() {
                               <Button variant="ghost" size="sm" onClick={() => handleEdit(entry)} title="Tahrirlash">
                                 <Pencil className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => handleDelete(entry.id)} title="O'chirish">
+                              <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(entry.id)} title="O'chirish">
                                 <Trash2 className="h-4 w-4 text-destructive" />
                               </Button>
                             </>
@@ -442,7 +461,7 @@ function ScheduleContent() {
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                onClick={() => handleDelete(entry.id)} 
+                                onClick={() => handleDeleteClick(entry.id)} 
                                 title="O'chirish (faqat jadvaldan)"
                               >
                                 <Trash2 className="h-4 w-4 text-destructive" />
@@ -458,6 +477,23 @@ function ScheduleContent() {
             )}
           </CardContent>
         </Card>
+
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>O'chirishni tasdiqlash</AlertDialogTitle>
+              <AlertDialogDescription>
+                Bu jadval elementini o'chirishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                O'chirish
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AdminLayout>
   );

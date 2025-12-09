@@ -12,6 +12,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
@@ -49,6 +59,8 @@ function CategoriesContent() {
   const [editingOption, setEditingOption] = useState<SystemOption | null>(null);
   const [activeTab, setActiveTab] = useState('course_level');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteOption, setDeleteOption] = useState<SystemOption | null>(null);
   
   const [formData, setFormData] = useState({
     name_uz: '',
@@ -135,18 +147,25 @@ function CategoriesContent() {
     }
   };
 
-  const handleDelete = async (option: SystemOption) => {
-    if (!confirm(`"${option.name_uz}" ni o'chirishni xohlaysizmi?`)) return;
+  const handleDeleteClick = (option: SystemOption) => {
+    setDeleteOption(option);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteOption) return;
 
     try {
       const { error } = await supabase
         .from('system_options')
         .delete()
-        .eq('id', option.id);
+        .eq('id', deleteOption.id);
 
       if (error) throw error;
       toast({ title: 'O\'chirildi' });
       loadData();
+      setDeleteDialogOpen(false);
+      setDeleteOption(null);
     } catch (error: any) {
       toast({
         title: 'Xatolik',
@@ -256,7 +275,7 @@ function CategoriesContent() {
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(option)}>
                               <Pencil className="h-3 w-3" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDelete(option)}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeleteClick(option)}>
                               <Trash2 className="h-3 w-3 text-destructive" />
                             </Button>
                           </div>
@@ -322,6 +341,23 @@ function CategoriesContent() {
             </form>
           </DialogContent>
         </Dialog>
+
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>O'chirishni tasdiqlash</AlertDialogTitle>
+              <AlertDialogDescription>
+                {deleteOption && `"${deleteOption.name_uz}" ni o'chirishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi.`}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                O'chirish
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AdminLayout>
   );

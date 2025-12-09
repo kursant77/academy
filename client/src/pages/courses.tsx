@@ -65,9 +65,6 @@ export default function Courses() {
           updated_at: cat.updated_at
         }));
         setCategories(formattedCategories);
-        if (import.meta.env.DEV) {
-          console.log('Loaded categories (from system_options):', formattedCategories.length);
-        }
       }
 
       // Courses yuklash
@@ -107,18 +104,6 @@ export default function Courses() {
         });
         
         setAllCourses(coursesWithCategories);
-        
-        // Debug: filter qanday ishlayotganini ko'rsatish
-        if (import.meta.env.DEV) {
-          console.log('Loaded courses:', coursesWithCategories.length);
-          console.log('Sample course:', coursesWithCategories[0] ? {
-            id: coursesWithCategories[0].id,
-            name: coursesWithCategories[0].name_uz,
-            category: coursesWithCategories[0].category,
-            category_id: coursesWithCategories[0].category_id,
-            categories: coursesWithCategories[0].categories
-          } : null);
-        }
       }
     } catch (error) {
       console.error('Error loading courses:', error);
@@ -185,24 +170,6 @@ export default function Courses() {
       return false;
     });
     
-    // Debug
-    if (import.meta.env.DEV && selectedCategory !== "all") {
-      const sampleCourse = allCourses[0];
-      console.log('🔍 Filtering courses:', {
-        selectedCategory,
-        totalCourses: allCourses.length,
-        filteredCount: filtered.length,
-        availableCategories: categories.map(c => ({ id: c.id, name: c.name_uz })),
-        sampleCourse: sampleCourse ? {
-          id: sampleCourse.id,
-          name: sampleCourse.name_uz,
-          category_id: sampleCourse.category_id,
-          category: sampleCourse.category,
-          categories: sampleCourse.categories
-        } : null,
-        allCoursesCategoryIds: allCourses.map(c => ({ id: c.id, category_id: c.category_id, category: c.category }))
-      });
-    }
     
     return filtered;
   }, [allCourses, selectedCategory, categories, i18n.language]);

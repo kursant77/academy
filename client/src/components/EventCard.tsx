@@ -1,7 +1,6 @@
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, ArrowRight, Star } from "lucide-react";
+import { Calendar, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 
@@ -82,13 +81,6 @@ export function EventCard({
           {description}
         </p>
       </CardContent>
-
-      <CardFooter className="pt-4">
-        <Button variant="outline" className="w-full gap-2 group/btn transition-all duration-300 hover:scale-105 hover:border-primary" data-testid="button-read-more">
-          {t("events.readMore")}
-          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
-        </Button>
-      </CardFooter>
     </Card>
   );
 }

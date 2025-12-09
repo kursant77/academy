@@ -15,6 +15,16 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Table,
   TableBody,
   TableCell,
@@ -32,6 +42,8 @@ function TestimonialsContent() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Testimonial | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState<InsertTestimonial>({
     name: '',
     course: '',
@@ -102,11 +114,16 @@ function TestimonialsContent() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Bu fikrni o\'chirishni xohlaysizmi?')) return;
+  const handleDeleteClick = (id: string) => {
+    setDeleteId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteId) return;
 
     try {
-      const { error } = await supabase.from('testimonials').delete().eq('id', id);
+      const { error } = await supabase.from('testimonials').delete().eq('id', deleteId);
 
       if (error) throw error;
       toast({
@@ -114,6 +131,8 @@ function TestimonialsContent() {
         description: 'Fikr o\'chirildi',
       });
       loadTestimonials();
+      setDeleteDialogOpen(false);
+      setDeleteId(null);
     } catch (error: any) {
       toast({
         title: 'Xatolik',
@@ -277,7 +296,7 @@ function TestimonialsContent() {
                           <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}>
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)}>
+                          <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(item.id)}>
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>
@@ -289,6 +308,23 @@ function TestimonialsContent() {
             )}
           </CardContent>
         </Card>
+
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>O'chirishni tasdiqlash</AlertDialogTitle>
+              <AlertDialogDescription>
+                Bu fikrni o'chirishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                O'chirish
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AdminLayout>
   );

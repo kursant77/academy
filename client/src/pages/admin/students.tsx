@@ -18,6 +18,16 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -114,6 +124,8 @@ function StudentsContent() {
   const [paymentStudent, setPaymentStudent] = useState<StudentProfile | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string>(new Date().toISOString().slice(0, 7));
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'transfer'>('card');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState<StudentProfile | null>(null);
   const [editingStudent, setEditingStudent] = useState<StudentProfile | null>(null);
   const [formData, setFormData] = useState<StudentPayload & { courseName?: string }>({
     fullName: '',
@@ -250,13 +262,20 @@ function StudentsContent() {
     setFormOpen(true);
   };
 
-  const handleDelete = async (student: StudentProfile) => {
-    if (!confirm(`${student.fullName} ma'lumotlarini o'chirishni tasdiqlaysizmi?`)) return;
+  const handleDeleteClick = (student: StudentProfile) => {
+    setStudentToDelete(student);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!studentToDelete) return;
     try {
-      await adminApi.deleteStudent(student.id);
+      await adminApi.deleteStudent(studentToDelete.id);
       toast({ title: 'O\'chirildi', description: 'Talaba o\'chirildi' });
       loadStudents();
       loadGroups();
+      setDeleteDialogOpen(false);
+      setStudentToDelete(null);
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error(error);
@@ -699,7 +718,7 @@ function StudentsContent() {
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setHistoryStudent(student)} className="text-xs">To'lov tarixi</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleEdit(student)} className="text-xs">Tahrirlash</DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive text-xs" onClick={() => handleDelete(student)}>
+                            <DropdownMenuItem className="text-destructive text-xs" onClick={() => handleDeleteClick(student)}>
                               O'chirish
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -954,6 +973,22 @@ function StudentsContent() {
           </div>
         </DialogContent>
       </Dialog>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Talabani o'chirish</AlertDialogTitle>
+            <AlertDialogDescription>
+              {studentToDelete && `${studentToDelete.fullName} ma'lumotlarini o'chirishni tasdiqlaysizmi? Bu amalni qaytarib bo'lmaydi.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              O'chirish
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }
