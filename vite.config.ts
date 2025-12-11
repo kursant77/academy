@@ -21,22 +21,33 @@ export default defineConfig({
     outDir: "dist",
     emptyOutDir: true,
 
-    // 🔥 MUHIM: React hech qachon split qilinmaydi
+    // 🔥 MUHIM: React hech qachon split qilinmaydi - MAIN BUNDLE'DA QOLMALIDIR
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (!id.includes("node_modules")) return;
-
-          // ❗React hech qachon split qilinmasin
-          if (
-            id.includes("react") ||
-            id.includes("react-dom") ||
-            id.includes("react/jsx-runtime")
-          ) {
-            return "react"; // bitta chunk
+          if (!id.includes("node_modules")) {
+            // Source code həmişə main bundle'da qalır
+            return;
           }
 
-          // 🔥 Qolgan vendorlar xohlasang split qilinadi
+          // ❗CRITICAL: React va React-dom HEÇ VAXT SPLIT QILINMASIN!
+          // undefined qaytararaq main bundle'da qoldurur
+          // Dəqiq path yoxlaması - yalnız react və react-dom paketləri
+          if (
+            id.includes("node_modules/react/") ||
+            id.includes("node_modules/react-dom/") ||
+            id.includes("node_modules/react/jsx-runtime") ||
+            id.includes("node_modules/scheduler/")
+          ) {
+            return undefined; // Main bundle'da qalır
+          }
+          
+          // react-i18next kimi paketləri exclude et (onlar split oluna bilər)
+          if (id.includes("react-i18next")) {
+            return "i18n";
+          }
+
+          // 🔥 Qolgan vendorlar split qilinadi
           if (id.includes("wouter")) return "router";
           if (id.includes("@radix-ui")) return "ui";
           if (id.includes("framer-motion")) return "motion";
