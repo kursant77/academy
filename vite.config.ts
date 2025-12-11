@@ -27,37 +27,32 @@ export default defineConfig(({ mode }) => {
       minify: 'esbuild', // Esbuild minifier (default, terser kerak emas)
       target: 'esnext', // Modern browsers uchun
       cssMinify: 'esbuild', // CSS minification
-      // Ensure proper module format and preloading
+      // Module preloading
       modulePreload: {
         polyfill: true,
-        resolveDependencies: (filename, deps) => {
-          // Ensure React dependencies are preloaded first
-          return deps;
-        },
       },
       rollupOptions: {
         output: {
           manualChunks: (id) => {
-            // Vendor chunklar - optimal code splitting
+            // Vendor chunklar - React va React-dom asosiy bundle'da qoladi
             if (id.includes('node_modules')) {
-              // React core - DON'T split React, keep it in main bundle for reliability
-              // This ensures React is always available when code executes
-              if (id.includes('react') || id.includes('react-dom')) {
-                return undefined; // Keep React in main bundle
+              // React va React-dom - ASOSIY BUNDLE'DA QOLADI (split qilinmaydi)
+              if (id.includes('react') || id.includes('react-dom') || id.includes('react/jsx-runtime')) {
+                return; // undefined qaytaradi, main bundle'da qoladi
               }
-              // Router (depends on React) - can be split
+              // Router
               if (id.includes('wouter')) {
                 return 'router-vendor';
               }
-              // UI libraries (depend on React)
+              // UI libraries
               if (id.includes('@radix-ui')) {
                 return 'ui-vendor';
               }
-              // Animation library (heavy)
+              // Animation library
               if (id.includes('framer-motion')) {
                 return 'animation-vendor';
               }
-              // Charts library (heavy)
+              // Charts library
               if (id.includes('recharts')) {
                 return 'charts-vendor';
               }
@@ -69,11 +64,11 @@ export default defineConfig(({ mode }) => {
               if (id.includes('@supabase')) {
                 return 'supabase-vendor';
               }
-              // React Query (depends on React)
+              // React Query
               if (id.includes('@tanstack')) {
                 return 'query-vendor';
               }
-              // i18n (depends on React)
+              // i18n
               if (id.includes('i18next') || id.includes('react-i18next')) {
                 return 'i18n-vendor';
               }
