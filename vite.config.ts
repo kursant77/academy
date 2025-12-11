@@ -20,26 +20,32 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
-
+    // React-in düzgün yüklənməsi üçün
+    commonjsOptions: {
+      include: [/node_modules/],
+      transformMixedEsModules: true,
+    },
     // 🔥 MUHIM: React hech qachon split qilinmaydi - MAIN BUNDLE'DA QOLMALIDIR
     rollupOptions: {
       output: {
         manualChunks(id) {
+          // Source code həmişə main bundle'da qalır
           if (!id.includes("node_modules")) {
-            // Source code həmişə main bundle'da qalır
             return;
           }
 
           // ❗CRITICAL: React va React-dom HEÇ VAXT SPLIT QILINMASIN!
-          // undefined qaytararaq main bundle'da qoldurur
           // Dəqiq path yoxlaması - yalnız react və react-dom paketləri
-          if (
+          // undefined qaytararaq main bundle'da qoldurur
+          const isReact = 
             id.includes("node_modules/react/") ||
             id.includes("node_modules/react-dom/") ||
             id.includes("node_modules/react/jsx-runtime") ||
-            id.includes("node_modules/scheduler/")
-          ) {
-            return undefined; // Main bundle'da qalır
+            id.includes("node_modules/scheduler/") ||
+            id.includes("node_modules/use-sync-external-store/");
+          
+          if (isReact) {
+            return; // undefined = main bundle'da qalır
           }
           
           // react-i18next kimi paketləri exclude et (onlar split oluna bilər)
