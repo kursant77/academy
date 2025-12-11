@@ -17,8 +17,10 @@ import type {
   TeacherProfile,
 } from '@/types/admin';
 
+import type { DbTeacher, DbGroup, DbStudent, DbPayment, DbMonthlyPayment, DbRevenue, DbExpense } from '@/types/database';
+
 // Helper function to convert database teacher to TeacherProfile
-const mapTeacherFromDb = (dbTeacher: any): TeacherProfile => ({
+const mapTeacherFromDb = (dbTeacher: DbTeacher): TeacherProfile => ({
   id: dbTeacher.id,
   fullName: dbTeacher.name,
   subject: dbTeacher.specialty || dbTeacher.specialty_uz || '',
@@ -50,7 +52,7 @@ const mapTeacherToDb = (teacher: Partial<TeacherPayload>) => ({
 });
 
 // Helper function to convert database group to GroupProfile
-const mapGroupFromDb = (dbGroup: any, teacherName?: string, courseName?: string): GroupProfile => ({
+const mapGroupFromDb = (dbGroup: DbGroup, teacherName?: string, courseName?: string): GroupProfile => ({
   id: dbGroup.id,
   name: dbGroup.name,
   teacherId: dbGroup.teacher_id,
@@ -180,7 +182,7 @@ const mapStudentToDb = (student: Partial<StudentPayload>) => {
 };
 
 // Helper function to convert database payment history to PaymentHistoryEntry
-const mapPaymentFromDb = (dbPayment: any): PaymentHistoryEntry => ({
+const mapPaymentFromDb = (dbPayment: DbPayment): PaymentHistoryEntry => ({
   id: dbPayment.id,
   studentId: dbPayment.student_id,
   amount: parseFloat(dbPayment.amount || '0'),
@@ -200,7 +202,7 @@ const mapPaymentToDb = (payment: Omit<PaymentHistoryEntry, 'id' | 'studentId'>) 
 });
 
 // Helper function to convert database revenue to RevenueRecord
-const mapRevenueFromDb = (dbRevenue: any): RevenueRecord => ({
+const mapRevenueFromDb = (dbRevenue: DbRevenue): RevenueRecord => ({
   id: dbRevenue.id,
   source: dbRevenue.source,
   amount: parseFloat(dbRevenue.amount || '0'),
@@ -209,7 +211,7 @@ const mapRevenueFromDb = (dbRevenue: any): RevenueRecord => ({
 });
 
 // Helper function to convert database expense to ExpenseRecord
-const mapExpenseFromDb = (dbExpense: any): ExpenseRecord => ({
+const mapExpenseFromDb = (dbExpense: DbExpense): ExpenseRecord => ({
   id: dbExpense.id,
   category: dbExpense.category,
   amount: parseFloat(dbExpense.amount || '0'),
@@ -336,7 +338,7 @@ export const adminApi = {
           .in('id', courseIds);
         
         if (coursesData) {
-          coursesMap = coursesData.reduce((acc: Record<string, any>, course: any) => {
+          coursesMap = coursesData.reduce((acc: Record<string, { name_uz?: string; name_ru?: string; name_en?: string }>, course: { id: string; name_uz?: string; name_ru?: string; name_en?: string }) => {
             acc[course.id] = course;
             return acc;
           }, {});
@@ -344,7 +346,7 @@ export const adminApi = {
       }
 
       // Map groups to GroupProfile
-      const teacherGroups: GroupProfile[] = (groups || []).map((g: any) => {
+      const teacherGroups: GroupProfile[] = (groups || []).map((g: DbGroup) => {
         const courseName = g.course_id ? coursesMap[g.course_id]?.name_uz : undefined;
         return mapGroupFromDb(
           g,
@@ -498,7 +500,7 @@ export const adminApi = {
           .in('id', courseIds);
         
         if (courses) {
-          coursesMap = courses.reduce((acc: Record<string, any>, course: any) => {
+          coursesMap = courses.reduce((acc: Record<string, { name_uz?: string; name_ru?: string; name_en?: string }>, course: { id: string; name_uz?: string; name_ru?: string; name_en?: string }) => {
             acc[course.id] = course;
             return acc;
           }, {});
@@ -508,7 +510,7 @@ export const adminApi = {
       // Sync metrics before returning
       await syncGroupMetrics();
 
-      return (groups || []).map((g: any) =>
+      return (groups || []).map((g: DbGroup) =>
         mapGroupFromDb(
           g, 
           g.teachers?.name || 'Unassigned',
@@ -762,11 +764,11 @@ export const adminApi = {
         const studentMonthlyPayments = monthlyPayments?.filter((p) => p.student_id === student.id) || [];
         const teacherName = group?.teachers 
           ? (Array.isArray(group.teachers) 
-              ? (group.teachers[0] as any)?.name 
-              : (group.teachers as any)?.name) 
+              ? (Array.isArray(group.teachers) ? group.teachers[0]?.name : (group.teachers as { name: string } | null)?.name)
+              : (group.teachers as { name: string } | null)?.name) 
           : undefined;
         return {
-          ...mapStudentFromDb(student, group ? mapGroupFromDb(group as any, teacherName) : undefined, teacherName),
+          ...mapStudentFromDb(student, group ? mapGroupFromDb(group, teacherName) : undefined, teacherName),
           history: studentPayments.map(mapPaymentFromDb),
           monthlyPayments: studentMonthlyPayments.map(mapMonthlyPaymentFromDb),
         };
@@ -1488,17 +1490,17 @@ export const adminApi = {
         console.error('Error loading teachers:', error);
       }
 
-      const studentsPerGroup = (groupsData || []).map((g: any) => ({ 
+      const studentsPerGroup = (groupsData || []).map((g: DbGroup) => ({ 
         name: (g.name || 'Noma\'lum').substring(0, 20), // Truncate long names
         value: Number(g.current_students) || 0 
       }));
 
-      const teachersPerGroup = (teachersData || []).map((teacher: any) => ({
+      const teachersPerGroup = (teachersData || []).map((teacher: DbTeacher) => ({
         teacher: (teacher.name || 'Noma\'lum').substring(0, 20),
         value: (groupsData || []).filter((g: any) => g.teacher_id === teacher.id).length || 0,
       }));
 
-      const capacityUsage = (groupsData || []).map((g: any) => {
+      const capacityUsage = (groupsData || []).map((g: DbGroup) => {
         const maxStudents = Number(g.max_students) || 1;
         const currentStudents = Number(g.current_students) || 0;
         const percentage = maxStudents === 0 ? 0 : Math.min(100, Math.round((currentStudents / maxStudents) * 100));
@@ -1509,19 +1511,19 @@ export const adminApi = {
       });
 
       const topGroupsByStudents = [...(groupsData || [])]
-        .sort((a: any, b: any) => (Number(b.current_students) || 0) - (Number(a.current_students) || 0))
+        .sort((a: DbGroup, b: DbGroup) => (Number(b.current_students) || 0) - (Number(a.current_students) || 0))
         .slice(0, 5)
-        .map((g: any) => ({ id: g.id, name: g.name || 'Noma\'lum', value: Number(g.current_students) || 0 }));
+        .map((g: DbGroup) => ({ id: g.id, name: g.name || 'Noma\'lum', value: Number(g.current_students) || 0 }));
 
       const topGroupsByRevenue = [...(groupsData || [])]
-        .sort((a: any, b: any) => parseFloat(b.monthly_revenue || '0') - parseFloat(a.monthly_revenue || '0'))
+        .sort((a: DbGroup, b: DbGroup) => parseFloat(String(b.monthly_revenue || '0')) - parseFloat(String(a.monthly_revenue || '0')))
         .slice(0, 5)
-        .map((g: any) => ({ id: g.id, name: g.name || 'Noma\'lum', value: parseFloat(g.monthly_revenue || '0') }));
+        .map((g: DbGroup) => ({ id: g.id, name: g.name || 'Noma\'lum', value: parseFloat(String(g.monthly_revenue || '0')) }));
 
       const topGroupsByAttendance = [...(groupsData || [])]
-        .sort((a: any, b: any) => (Number(b.attendance_rate) || 0) - (Number(a.attendance_rate) || 0))
+        .sort((a: DbGroup, b: DbGroup) => (Number(b.attendance_rate) || 0) - (Number(a.attendance_rate) || 0))
         .slice(0, 5)
-        .map((g: any) => ({ id: g.id, name: g.name || 'Noma\'lum', value: Number(g.attendance_rate) || 0 }));
+        .map((g: DbGroup) => ({ id: g.id, name: g.name || 'Noma\'lum', value: Number(g.attendance_rate) || 0 }));
 
       return {
         teacherCount,

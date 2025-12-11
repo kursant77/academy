@@ -84,7 +84,9 @@ function EventsContent() {
 
       if (error) throw error;
       setEvents(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error in events page:', errorMessage);
       toast({
         title: 'Xatolik',
         description: error.message,
@@ -122,7 +124,9 @@ function EventsContent() {
       setIsDialogOpen(false);
       resetForm();
       loadEvents();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error in events page:', errorMessage);
       toast({
         title: 'Xatolik',
         description: error.message,
@@ -150,7 +154,9 @@ function EventsContent() {
       loadEvents();
       setDeleteDialogOpen(false);
       setDeleteId(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error in events page:', errorMessage);
       toast({
         title: 'Xatolik',
         description: error.message,
@@ -236,7 +242,7 @@ function EventsContent() {
                       <SelectContent>
                         {categories.length === 0 ? (
                           <SelectItem value="no-categories" disabled>
-                            Sozlamalar → Tadbir kategoriyalari dan qo'shing
+                            Kategoriyalar → Tadbir kategoriyalari dan qo'shing
                           </SelectItem>
                         ) : (
                           categories.map((cat) => (
@@ -317,43 +323,89 @@ function EventsContent() {
                 Hozircha tadbirlar yo'q
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Sarlavha</TableHead>
-                    <TableHead>Kategoriya</TableHead>
-                    <TableHead>Sana</TableHead>
-                    <TableHead>Amallar</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {events.map((event, index) => (
-                    <TableRow key={event.id} className="table-row-hover stagger-item" style={{ animationDelay: `${index * 0.02}s` }}>
-                      <TableCell className="font-medium">{event.title_uz}</TableCell>
-                      <TableCell>{event.category}</TableCell>
-                      <TableCell>{new Date(event.date).toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(event)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteClick(event.id)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+              <>
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-3">
+                  {events.map((event) => (
+                    <Card key={event.id} className="border-2 border-border/50 hover:border-primary/30 transition-all hover:shadow-md">
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
+                          <div>
+                            <h3 className="font-semibold text-sm mb-1">{event.title_uz}</h3>
+                            <div className="flex flex-wrap items-center gap-2 text-xs">
+                              <Badge variant="outline" className="text-xs">{event.category}</Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(event.date).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 pt-2 border-t">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 h-8 text-xs"
+                              onClick={() => handleEdit(event)}
+                            >
+                              <Pencil className="h-3 w-3 mr-1" />
+                              Tahrirlash
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 h-8 text-xs text-destructive hover:text-destructive"
+                              onClick={() => handleDeleteClick(event.id)}
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              O'chirish
+                            </Button>
+                          </div>
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </CardContent>
+                    </Card>
                   ))}
-                </TableBody>
-              </Table>
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Sarlavha</TableHead>
+                        <TableHead>Kategoriya</TableHead>
+                        <TableHead>Sana</TableHead>
+                        <TableHead>Amallar</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {events.map((event, index) => (
+                        <TableRow key={event.id} className="table-row-hover stagger-item" style={{ animationDelay: `${index * 0.02}s` }}>
+                          <TableCell className="font-medium">{event.title_uz}</TableCell>
+                          <TableCell>{event.category}</TableCell>
+                          <TableCell>{new Date(event.date).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(event)}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteClick(event.id)}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>

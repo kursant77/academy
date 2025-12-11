@@ -24,11 +24,7 @@ import {
   LayoutDashboard,
   Tag,
   Quote,
-  Clock,
-  GraduationCap,
-  UsersRound,
   Globe,
-  Building2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -49,8 +45,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     events: 0,
     applications: 0,
     achievements: 0,
-    students: 0,
-    groups: 0,
   });
 
   useEffect(() => {
@@ -59,13 +53,12 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   const loadStats = async () => {
     try {
-      const [coursesRes, teachersRes, eventsRes, applicationsRes, achievementsRes, snapshot] = await Promise.all([
+      const [coursesRes, teachersRes, eventsRes, applicationsRes, achievementsRes] = await Promise.all([
         supabase.from('courses').select('id', { count: 'exact' }),
         supabase.from('teachers').select('id', { count: 'exact' }),
         supabase.from('events').select('id', { count: 'exact' }),
         supabase.from('applications').select('id', { count: 'exact' }),
         supabase.from('achievements').select('id', { count: 'exact' }),
-        adminApi.getDashboardSnapshot(),
       ]);
 
       setStats({
@@ -74,8 +67,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         events: eventsRes.count || 0,
         applications: applicationsRes.count || 0,
         achievements: achievementsRes.count || 0,
-        students: snapshot.studentCount,
-        groups: snapshot.groupCount,
       });
     } catch (error) {
       console.error('Error loading stats:', error);
@@ -97,11 +88,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         ],
       },
       {
-        label: 'CRM Tizimi',
-        icon: Building2,
+        label: 'Boshqaruv',
+        icon: Users,
         items: [
-          { title: 'Talabalar', icon: GraduationCap, path: '/admin/students', count: stats.students },
-          { title: 'Guruhlar', icon: UsersRound, path: '/admin/groups', count: stats.groups },
           { title: "O'qituvchilar", icon: Users, path: '/admin/teachers', count: stats.teachers },
           { title: "Arizalar", icon: FileText, path: '/admin/applications', count: stats.applications },
         ],
@@ -113,9 +102,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           { title: 'Kurslar', icon: BookOpen, path: '/admin/courses', count: stats.courses },
           { title: 'Tadbirlar', icon: Calendar, path: '/admin/events', count: stats.events },
           { title: 'Yutuqlar', icon: Trophy, path: '/admin/achievements', count: stats.achievements },
-          { title: 'Jadval', icon: Clock, path: '/admin/schedule', count: null },
           { title: 'Fikrlar', icon: Quote, path: '/admin/testimonials', count: null },
-          { title: 'Sozlamalar', icon: Tag, path: '/admin/categories', count: null },
+          { title: 'Kategoriyalar', icon: Tag, path: '/admin/categories', count: null },
         ],
       },
     ],

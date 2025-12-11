@@ -42,12 +42,6 @@ interface SystemOption {
 // Kategoriya turlari
 const optionTypes = [
   { key: 'course_level', name: 'Kurs darajalari' },
-  { key: 'payment_method', name: 'To\'lov usullari' },
-  { key: 'group_status', name: 'Guruh holatlari' },
-  { key: 'teacher_status', name: 'O\'qituvchi holatlari' },
-  { key: 'payment_status', name: 'To\'lov holatlari' },
-  { key: 'application_status', name: 'Ariza holatlari' },
-  { key: 'lesson_format', name: 'Dars formatlari' },
   { key: 'course_category', name: 'Kurs kategoriyalari' },
   { key: 'event_category', name: 'Tadbir kategoriyalari' },
 ];
@@ -87,7 +81,9 @@ function CategoriesContent() {
       }
       
       setOptions(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error saving category:', errorMessage);
       console.error('Load error:', error);
     } finally {
       setLoading(false);
@@ -136,7 +132,9 @@ function CategoriesContent() {
       setIsDialogOpen(false);
       resetForm();
       loadData();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error saving category:', errorMessage);
       toast({
         title: 'Xatolik',
         description: error.message,
@@ -166,7 +164,9 @@ function CategoriesContent() {
       loadData();
       setDeleteDialogOpen(false);
       setDeleteOption(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error saving category:', errorMessage);
       toast({
         title: 'Xatolik',
         description: error.message,
@@ -217,9 +217,9 @@ function CategoriesContent() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold">Sozlamalar</h2>
+            <h2 className="text-xl sm:text-2xl font-bold">Kategoriyalar</h2>
             <p className="text-sm text-muted-foreground">
-              Select qiymatlari
+              Kurs darajalari, kurs kategoriyalari va tadbir kategoriyalari
             </p>
           </div>
           <Button onClick={handleAddNew} size="sm">

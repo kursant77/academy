@@ -83,18 +83,19 @@ export default function About() {
   return (
     <>
       <SEO
-        title="Biz haqimizda"
-        description="A+ Academy — 2012 yildan beri IT, tillar va abituriyentlar uchun zamonaviy ta'lim markazi. 2500+ talaba, 1800+ bitiruvchi, professional o'qituvchilar."
-        keywords="A+ Academy, ta'lim markazi, Toshkent, IT kurslar, ingliz tili, IELTS, CEFR, o'quv markazi"
+        title="Biz Haqimizda — A+ Academy | Toshkent O'quv Markazi | 2012 yildan"
+        description="A+ Academy — 2012 yildan beri IT, tillar va abituriyentlar uchun zamonaviy ta'lim markazi. 2500+ talaba, 1800+ bitiruvchi, professional o'qituvchilar. Toshkent. Batafsil ma'lumot."
+        keywords="A+ Academy, ta'lim markazi, Toshkent o'quv markazi, IT kurslar, ingliz tili, IELTS, CEFR, o'quv markazi, 2012 yildan, professional ta'lim, zamonaviy ta'lim, Toshkent, o'quv markazi haqida, ta'lim markazi haqida"
         url="/about"
         structuredData={structuredData}
       />
       <div className="min-h-screen relative overflow-hidden">
         {/* Animated Background Elements */}
-        <div className="absolute inset-0 -z-10">
+        <div className="fixed inset-0 -z-10 pointer-events-none">
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl animate-pulse" />
           <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-accent/5 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-accent/5 rounded-full blur-3xl animate-float" />
+          <div className="absolute inset-0 bg-pattern-dots opacity-20" />
         </div>
 
         <div className="relative py-12 md:py-16 lg:py-20">

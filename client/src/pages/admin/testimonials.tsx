@@ -35,7 +35,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import type { Testimonial, InsertTestimonial } from '@shared/schema';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Star } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 function TestimonialsContent() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -67,7 +68,9 @@ function TestimonialsContent() {
 
       if (error) throw error;
       setTestimonials(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error in testimonials page:', errorMessage);
       toast({
         title: 'Xatolik',
         description: error.message,
@@ -105,7 +108,9 @@ function TestimonialsContent() {
       setIsDialogOpen(false);
       resetForm();
       loadTestimonials();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error in testimonials page:', errorMessage);
       toast({
         title: 'Xatolik',
         description: error.message,
@@ -133,7 +138,9 @@ function TestimonialsContent() {
       loadTestimonials();
       setDeleteDialogOpen(false);
       setDeleteId(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error in testimonials page:', errorMessage);
       toast({
         title: 'Xatolik',
         description: error.message,
@@ -276,35 +283,103 @@ function TestimonialsContent() {
                 Hozircha fikrlar yo'q
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Ism</TableHead>
-                    <TableHead>Kurs</TableHead>
-                    <TableHead>Reyting</TableHead>
-                    <TableHead>Amallar</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {testimonials.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{item.name}</TableCell>
-                      <TableCell>{item.course}</TableCell>
-                      <TableCell>{item.rating}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(item.id)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+              <>
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-3">
+                  {testimonials.map((testimonial) => (
+                    <Card key={testimonial.id} className="border-2 border-border/50 hover:border-primary/30 transition-all hover:shadow-md">
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
+                          <div>
+                            <h3 className="font-semibold text-sm mb-1">{testimonial.name}</h3>
+                            <p className="text-xs text-muted-foreground mb-2">{testimonial.course}</p>
+                            <div className="flex items-center gap-1">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-3.5 w-3.5 ${
+                                    i < testimonial.rating
+                                      ? 'fill-yellow-400 text-yellow-400'
+                                      : 'text-gray-300'
+                                  }`}
+                                />
+                              ))}
+                              <span className="text-xs text-muted-foreground ml-1">({testimonial.rating}/5)</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{testimonial.text_uz}</p>
+                          </div>
+                          <div className="flex gap-2 pt-2 border-t">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 h-8 text-xs"
+                              onClick={() => handleEdit(testimonial)}
+                            >
+                              <Pencil className="h-3 w-3 mr-1" />
+                              Tahrirlash
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 h-8 text-xs text-destructive hover:text-destructive"
+                              onClick={() => handleDeleteClick(testimonial.id)}
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              O'chirish
+                            </Button>
+                          </div>
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </CardContent>
+                    </Card>
                   ))}
-                </TableBody>
-              </Table>
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Ism</TableHead>
+                        <TableHead>Kurs</TableHead>
+                        <TableHead>Reyting</TableHead>
+                        <TableHead>Amallar</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {testimonials.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell>{item.name}</TableCell>
+                          <TableCell>{item.course}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-4 w-4 ${
+                                    i < item.rating
+                                      ? 'fill-yellow-400 text-yellow-400'
+                                      : 'text-gray-300'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}>
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(item.id)}>
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>

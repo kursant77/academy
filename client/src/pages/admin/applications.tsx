@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,39 +12,24 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
-import { adminApi } from '@/lib/adminApi';
 import type { Application, Course } from '@shared/schema';
-import type { GroupProfile } from '@/types/admin';
-import { Download, UserPlus, Loader2 } from 'lucide-react';
-
-// Default oylik to'lov summasi (so'mda)
-const DEFAULT_MONTHLY_PAYMENT = 500000;
+import { Download } from 'lucide-react';
 
 function ApplicationsContent() {
   const [applications, setApplications] = useState<(Application & { course?: Course })[]>([]);
   const [loading, setLoading] = useState(true);
-  const [enrollingId, setEnrollingId] = useState<string | null>(null);
-  const [enrollDialogOpen, setEnrollDialogOpen] = useState(false);
-  const [selectedApp, setSelectedApp] = useState<(Application & { courses?: any }) | null>(null);
-  const [availableGroups, setAvailableGroups] = useState<GroupProfile[]>([]);
-  const [selectedGroupId, setSelectedGroupId] = useState<string>('');
-  const [loadingGroups, setLoadingGroups] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
   const { toast } = useToast();
 
   useEffect(() => {
@@ -53,7 +38,7 @@ function ApplicationsContent() {
 
   const loadApplications = async () => {
     try {
-      // Avval arizalarni yuklaymiz
+      // Avval arizalarni yuklaymiz (data maydonini ham olamiz)
       const { data: apps, error: appsError } = await supabase
         .from('applications')
         .select('*')
@@ -70,20 +55,39 @@ function ApplicationsContent() {
         console.warn('Kurslarni yuklashda xatolik:', coursesError);
       }
 
-      // Arizalarga kurs ma'lumotlarini qo'shamiz
+      // Arizalarga kurs ma'lumotlarini qo'shamiz va data maydonini to'g'ri parse qilamiz
       const appsWithCourses = (apps || []).map(app => {
         const course = courses?.find(c => c.id === app.course_id);
+        
+        // data maydoni JSONB bo'lishi mumkin, uni to'g'ri parse qilamiz
+        let parsedData: Record<string, any> | null = null;
+        if (app.data) {
+          if (typeof app.data === 'string') {
+            try {
+              parsedData = JSON.parse(app.data);
+            } catch {
+              // Agar parse qilishda xatolik bo'lsa, string sifatida qoldiramiz
+              parsedData = { raw: app.data };
+            }
+          } else if (typeof app.data === 'object' && app.data !== null) {
+            // Agar allaqachon object bo'lsa, to'g'ridan-to'g'ri ishlatamiz
+            parsedData = app.data as Record<string, any>;
+          }
+        }
+        
         return {
           ...app,
-          courses: course || null
+          data: parsedData,
+          course: course || null
         };
       });
 
       setApplications(appsWithCourses);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: 'Xatolik',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -91,119 +95,29 @@ function ApplicationsContent() {
     }
   };
 
-  // Guruhlarni yuklash
-  const loadGroupsForCourse = async (courseId: string) => {
-    setLoadingGroups(true);
-    try {
-      const allGroups = await adminApi.listGroups();
-      // Faqat tanlangan kursga tegishli guruhlarni filter qilish
-      const courseGroups = allGroups.filter(group => group.courseId === courseId);
-      setAvailableGroups(courseGroups);
-    } catch (error: any) {
-      if (import.meta.env.DEV) {
-        console.error('Guruhlarni yuklashda xatolik:', error);
-      }
-      setAvailableGroups([]);
-    } finally {
-      setLoadingGroups(false);
-    }
-  };
 
-  // Dialog ochish va guruhlarni yuklash
-  const handleEnrollClick = async (app: Application & { courses?: any }) => {
-    setSelectedApp(app);
-    setSelectedGroupId('');
-    setEnrollDialogOpen(true);
-    
-    // Agar kurs tanlangan bo'lsa, guruhlarni yuklash
-    if (app.course_id) {
-      await loadGroupsForCourse(app.course_id);
-    } else {
-      setAvailableGroups([]);
-    }
-  };
-
-  // O'quvchini qo'shish
-  const handleEnrollStudent = async () => {
-    if (!selectedApp) return;
-
-    try {
-      setEnrollingId(selectedApp.id);
-      
-      // Kurs ma'lumotlarini olish
-      const courseData = selectedApp.courses;
-      
-      const courseName = courseData?.name_uz || 'Noma\'lum';
-      const courseSchedule = courseData?.schedule || '';
-      let monthlyPayment = DEFAULT_MONTHLY_PAYMENT;
-      
-      // Kurs narxini olish
-      if (courseData?.price) {
-        const priceStr = String(courseData.price);
-        // Narxdan raqamlarni ajratib olish (masalan: "500,000 so'm" -> 500000)
-        const priceNumber = parseInt(priceStr.replace(/[^\d]/g, ''));
-        if (!isNaN(priceNumber) && priceNumber > 0) {
-          monthlyPayment = priceNumber;
-        }
-      }
-
-      const studentData = {
-        fullName: selectedApp.full_name,
-        groupId: selectedGroupId || null,
-        parentName: selectedApp.full_name,
-        parentContact: selectedApp.phone,
-        monthlyPayment: monthlyPayment,
-        paymentStatus: 'unpaid' as const,
-        photoUrl: '',
-        notes: `Yosh: ${selectedApp.age}\nQiziqishlar: ${selectedApp.interests}\nJadval: ${courseSchedule}`,
-        courseName: courseName,
-        history: [],
-      };
-      
-
-      // O'quvchini yaratish
-      await adminApi.createStudent(studentData);
-
-      // Arizani o'chirish
-      const { error: deleteError } = await supabase
-        .from('applications')
-        .delete()
-        .eq('id', selectedApp.id);
-
-      if (deleteError) {
-        if (import.meta.env.DEV) {
-          console.warn('Arizani o\'chirishda xatolik:', deleteError);
-        }
-      }
-
-      toast({
-        title: 'Muvaffaqiyatli',
-        description: `${selectedApp.full_name} o'quvchilar ro'yxatiga qo'shildi${selectedGroupId ? ' va guruhga biriktirildi' : ''}`,
-      });
-
-      setEnrollDialogOpen(false);
-      setSelectedApp(null);
-      setSelectedGroupId('');
-      loadApplications();
-    } catch (error: any) {
-      toast({
-        title: 'Xatolik',
-        description: error.message || 'O\'quvchini qo\'shishda xatolik yuz berdi',
-        variant: 'destructive',
-      });
-    } finally {
-      setEnrollingId(null);
-    }
-  };
+  // Pagination calculations
+  const totalPages = Math.ceil(applications.length / itemsPerPage);
+  const paginatedApplications = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return applications.slice(startIndex, endIndex);
+  }, [applications, currentPage, itemsPerPage]);
 
   const exportToCSV = () => {
-    const headers = ['Ism', 'Yosh', 'Telefon', 'Kurs', 'Narxi', 'Qiziqishlar', 'Sana'];
+    const headers = ['Ism', 'Yosh', 'Telefon', 'Ota-ona telefon', 'Kurs', 'Narxi', 'Qiziqishlar', 'Sana'];
     const rows = applications.map((app) => [
       app.full_name,
       app.age.toString(),
       app.phone,
-      (app as any).courses?.name_uz || 'Noma\'lum',
-      (app as any).courses?.price || '',
+      (() => {
+        const parentPhone = app.data && typeof app.data === 'object' && 'parent_phone' in app.data
+          ? (app.data as { parent_phone?: string }).parent_phone
+          : null;
+        return parentPhone || '';
+      })(),
+      (app.course?.name_uz as string) || 'Noma\'lum',
+      (app.course?.price as string) || '',
       app.interests,
       new Date(app.created_at).toLocaleDateString(),
     ]);
@@ -237,7 +151,14 @@ function ApplicationsContent() {
         </div>
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg">O'quvchilar ro'yxati ({applications.length})</CardTitle>
+            <CardTitle className="text-base sm:text-lg">
+              O'quvchilar ro'yxati ({applications.length})
+              {totalPages > 1 && (
+                <span className="text-sm text-muted-foreground font-normal ml-2">
+                  (Sahifa {currentPage} / {totalPages})
+                </span>
+              )}
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-4 sm:p-6 pt-0 overflow-x-auto">
             {loading ? (
@@ -247,146 +168,162 @@ function ApplicationsContent() {
                 Hozircha ro'yxatdan o'tganlar yo'q
               </div>
             ) : (
-              <div className="min-w-[700px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-xs sm:text-sm">Ism</TableHead>
-                      <TableHead className="text-xs sm:text-sm hidden md:table-cell">Yosh</TableHead>
-                      <TableHead className="text-xs sm:text-sm">Telefon</TableHead>
-                      <TableHead className="text-xs sm:text-sm hidden lg:table-cell">Kurs</TableHead>
-                      <TableHead className="text-xs sm:text-sm hidden xl:table-cell">Qiziqishlar</TableHead>
-                      <TableHead className="text-xs sm:text-sm">Sana</TableHead>
-                      <TableHead className="text-xs sm:text-sm text-right">Amallar</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {applications.map((app) => (
-                      <TableRow key={app.id}>
-                        <TableCell className="font-medium text-xs sm:text-sm">
+              <>
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-3">
+                  {paginatedApplications.map((app) => (
+                    <Card key={app.id} className="border-2 border-border/50 hover:border-primary/30 transition-all hover:shadow-md">
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
                           <div>
-                            <div>{app.full_name}</div>
-                            <div className="md:hidden mt-1 text-xs text-muted-foreground">Yosh: {app.age}</div>
-                            <div className="lg:hidden mt-1 text-xs text-muted-foreground">{(app as any).courses?.name_uz || 'Noma\'lum'}</div>
+                            <h3 className="font-semibold text-sm mb-2">{app.full_name}</h3>
+                            <div className="space-y-1.5 text-xs text-muted-foreground">
+                              <div className="flex items-center justify-between">
+                                <span>Yosh:</span>
+                                <span className="font-medium text-foreground">{app.age}</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span>Telefon:</span>
+                                <span className="font-medium text-foreground">{app.phone}</span>
+                              </div>
+                              {(() => {
+                                // data maydonini to'g'ri olish
+                                const parentPhone = app.data && typeof app.data === 'object' && 'parent_phone' in app.data
+                                  ? (app.data as { parent_phone?: string }).parent_phone
+                                  : null;
+                                return parentPhone ? (
+                                  <div className="flex items-center justify-between">
+                                    <span>Ota-ona telefon:</span>
+                                    <span className="font-medium text-foreground">{parentPhone}</span>
+                                  </div>
+                                ) : null;
+                              })()}
+                              <div className="flex items-center justify-between">
+                                <span>Kurs:</span>
+                                <span className="font-medium text-foreground">{app.course?.name_uz || 'Noma\'lum'}</span>
+                              </div>
+                              {app.course?.price && (
+                                <div className="flex items-center justify-between">
+                                  <span>Narxi:</span>
+                                  <span className="font-medium text-foreground">{app.course.price} so'm</span>
+                                </div>
+                              )}
+                              {app.interests && (
+                                <div className="pt-1 border-t">
+                                  <span className="text-muted-foreground">Qiziqishlar: </span>
+                                  <span className="text-foreground">{app.interests}</span>
+                                </div>
+                              )}
+                              <div className="flex items-center justify-between pt-1 border-t">
+                                <span>Sana:</span>
+                                <span className="font-medium text-foreground">{new Date(app.created_at).toLocaleDateString()}</span>
+                              </div>
+                            </div>
                           </div>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell text-xs sm:text-sm">{app.age}</TableCell>
-                        <TableCell className="text-xs sm:text-sm">{app.phone}</TableCell>
-                        <TableCell className="hidden lg:table-cell text-xs sm:text-sm">
-                          <div>
-                            <div>{(app as any).courses?.name_uz || 'Noma\'lum'}</div>
-                            <div className="text-xs text-muted-foreground">{(app as any).courses?.price ? `${(app as any).courses.price} so'm` : ''}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="hidden xl:table-cell max-w-xs truncate text-xs sm:text-sm">{app.interests}</TableCell>
-                        <TableCell className="text-xs sm:text-sm">{new Date(app.created_at).toLocaleDateString()}</TableCell>
-                        <TableCell className="text-right">
-                          <Button 
-                            size="sm" 
-                            onClick={() => handleEnrollClick(app)}
-                            disabled={enrollingId === app.id || !app.course_id}
-                            className="text-xs"
-                            title={!app.course_id ? 'Kurs tanlanmagan' : ''}
-                          >
-                            {enrollingId === app.id ? (
-                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                            ) : (
-                              <UserPlus className="h-3 w-3 mr-1" />
-                            )}
-                            Kursga qo'shish
-                          </Button>
-                        </TableCell>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block min-w-[700px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-xs sm:text-sm">Ism</TableHead>
+                        <TableHead className="text-xs sm:text-sm">Yosh</TableHead>
+                        <TableHead className="text-xs sm:text-sm">Telefon</TableHead>
+                        <TableHead className="text-xs sm:text-sm hidden lg:table-cell">Ota-ona telefon</TableHead>
+                        <TableHead className="text-xs sm:text-sm hidden lg:table-cell">Kurs</TableHead>
+                        <TableHead className="text-xs sm:text-sm hidden xl:table-cell">Qiziqishlar</TableHead>
+                        <TableHead className="text-xs sm:text-sm">Sana</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {paginatedApplications.map((app) => (
+                        <TableRow key={app.id}>
+                          <TableCell className="font-medium text-xs sm:text-sm">
+                            {app.full_name}
+                          </TableCell>
+                          <TableCell className="text-xs sm:text-sm">{app.age}</TableCell>
+                          <TableCell className="text-xs sm:text-sm">{app.phone}</TableCell>
+                          <TableCell className="hidden lg:table-cell text-xs sm:text-sm">
+                            {(() => {
+                              // data maydonini to'g'ri olish
+                              const parentPhone = app.data && typeof app.data === 'object' && 'parent_phone' in app.data
+                                ? (app.data as { parent_phone?: string }).parent_phone
+                                : null;
+                              return parentPhone || '—';
+                            })()}
+                          </TableCell>
+                          <TableCell className="hidden lg:table-cell text-xs sm:text-sm">
+                            <div>
+                              <div>{app.course?.name_uz || 'Noma\'lum'}</div>
+                              <div className="text-xs text-muted-foreground">{app.course?.price ? `${app.course.price} so'm` : ''}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden xl:table-cell max-w-xs truncate text-xs sm:text-sm">{app.interests}</TableCell>
+                          <TableCell className="text-xs sm:text-sm">{new Date(app.created_at).toLocaleDateString()}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                
+                {totalPages > 1 && (
+                  <div className="mt-4 flex justify-center">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious 
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                          />
+                        </PaginationItem>
+                        
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                          // Show first page, last page, current page, and pages around current
+                          if (
+                            page === 1 ||
+                            page === totalPages ||
+                            (page >= currentPage - 1 && page <= currentPage + 1)
+                          ) {
+                            return (
+                              <PaginationItem key={page}>
+                                <PaginationLink
+                                  onClick={() => setCurrentPage(page)}
+                                  isActive={currentPage === page}
+                                  className="cursor-pointer"
+                                >
+                                  {page}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          } else if (page === currentPage - 2 || page === currentPage + 2) {
+                            return (
+                              <PaginationItem key={page}>
+                                <PaginationEllipsis />
+                              </PaginationItem>
+                            );
+                          }
+                          return null;
+                        })}
+                        
+                        <PaginationItem>
+                          <PaginationNext 
+                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                            className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
-
-        {/* Guruh tanlash dialogi */}
-        <Dialog open={enrollDialogOpen} onOpenChange={setEnrollDialogOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>O'quvchini qo'shish</DialogTitle>
-              <DialogDescription>
-                {selectedApp && (
-                  <>
-                    <strong>{selectedApp.full_name}</strong> uchun guruhni tanlang
-                    {selectedApp.courses && (
-                      <div className="mt-2 text-sm text-muted-foreground">
-                        Kurs: {selectedApp.courses.name_uz}
-                      </div>
-                    )}
-                  </>
-                )}
-              </DialogDescription>
-            </DialogHeader>
-            
-            {selectedApp && (
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>Guruhni tanlang</Label>
-                  {loadingGroups ? (
-                    <div className="flex items-center justify-center py-4">
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      <span className="text-sm text-muted-foreground">Guruhlar yuklanmoqda...</span>
-                    </div>
-                  ) : availableGroups.length === 0 ? (
-                    <div className="text-sm text-muted-foreground py-4 text-center">
-                      {selectedApp.course_id 
-                        ? 'Bu kurs uchun guruhlar topilmadi. Guruhsiz qo\'shish mumkin.'
-                        : 'Kurs tanlanmagan. Guruhsiz qo\'shish mumkin.'}
-                    </div>
-                  ) : (
-                    <Select value={selectedGroupId || 'none'} onValueChange={(value) => setSelectedGroupId(value === 'none' ? '' : value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Guruhni tanlang (ixtiyoriy)" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Guruhsiz qo'shish</SelectItem>
-                        {availableGroups.map((group) => (
-                          <SelectItem key={group.id} value={group.id}>
-                            {group.name} 
-                            {group.teacherName && ` - ${group.teacherName}`}
-                            {group.schedule && ` (${group.schedule})`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      setEnrollDialogOpen(false);
-                      setSelectedApp(null);
-                      setSelectedGroupId('');
-                    }}
-                  >
-                    Bekor qilish
-                  </Button>
-                  <Button 
-                    onClick={handleEnrollStudent}
-                    disabled={enrollingId === selectedApp.id}
-                  >
-                    {enrollingId === selectedApp.id ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Qo'shilmoqda...
-                      </>
-                    ) : (
-                      'Qo\'shish'
-                    )}
-                  </Button>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
       </div>
     </AdminLayout>
   );

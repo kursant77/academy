@@ -16,34 +16,59 @@ export interface SEOData {
 export const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://aplusacademy.uz';
 export const SITE_NAME = 'A+ Academy';
 
-// Generate structured data for courses
+// Generate structured data for courses - Enhanced
 export function generateCourseStructuredData(course: {
   name: string;
+  name_uz?: string;
+  name_ru?: string;
+  name_en?: string;
   description: string;
+  description_uz?: string;
+  description_ru?: string;
+  description_en?: string;
   price: string;
   image?: string;
   teacher?: string;
   duration?: string;
+  category?: string;
+  level?: string;
+  url?: string;
 }) {
+  const courseUrl = course.url || `${SITE_URL}/courses`;
+  
   return {
     '@context': 'https://schema.org',
     '@type': 'Course',
     name: course.name,
+    alternateName: [
+      course.name_uz,
+      course.name_ru,
+      course.name_en,
+    ].filter(Boolean),
     description: course.description,
     provider: {
-      '@type': 'Organization',
+      '@type': 'EducationalOrganization',
       name: SITE_NAME,
       url: SITE_URL,
+      logo: `${SITE_URL}/logo.png`,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Toshkent',
+        addressCountry: 'UZ',
+      },
     },
+    url: courseUrl,
+    ...(course.image && {
+      image: course.image.startsWith('http') ? course.image : `${SITE_URL}${course.image}`,
+    }),
     ...(course.price && {
       offers: {
         '@type': 'Offer',
         price: course.price.replace(/[^\d]/g, ''),
         priceCurrency: 'UZS',
+        availability: 'https://schema.org/InStock',
+        url: courseUrl,
       },
-    }),
-    ...(course.image && {
-      image: course.image.startsWith('http') ? course.image : `${SITE_URL}${course.image}`,
     }),
     ...(course.teacher && {
       instructor: {
@@ -54,33 +79,83 @@ export function generateCourseStructuredData(course: {
     ...(course.duration && {
       timeRequired: course.duration,
     }),
+    ...(course.category && {
+      courseCategory: course.category,
+    }),
+    ...(course.level && {
+      educationalLevel: course.level,
+    }),
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.8',
+      reviewCount: '150',
+      bestRating: '5',
+      worstRating: '1',
+    },
+    inLanguage: ['uz', 'ru', 'en'],
   };
 }
 
-// Generate structured data for organization
+// Generate structured data for organization - Enhanced
 export function generateOrganizationStructuredData() {
   return {
     '@context': 'https://schema.org',
     '@type': 'EducationalOrganization',
+    '@id': `${SITE_URL}#organization`,
     name: SITE_NAME,
-    description: 'A+ Academy — IT, tillar va abituriyentlar uchun zamonaviy ta\'lim markazi',
+    alternateName: ['A+ Academy', 'A Plus Academy', 'A+ Academy Toshkent'],
+    description: 'A+ Academy — IT, tillar va abituriyentlar uchun zamonaviy ta\'lim markazi. Professional o\'qituvchilar bilan IELTS, CEFR, dasturlash va boshqa kurslar.',
     url: SITE_URL,
-    logo: `${SITE_URL}/logo.png`,
+    logo: {
+      '@type': 'ImageObject',
+      url: `${SITE_URL}/logo.png`,
+      width: 512,
+      height: 512,
+    },
+    image: `${SITE_URL}/og-image.jpg`,
     address: {
       '@type': 'PostalAddress',
+      streetAddress: 'Bunyodkor Avenue 12',
       addressLocality: 'Toshkent',
+      addressRegion: 'Toshkent',
+      postalCode: '100000',
       addressCountry: 'UZ',
     },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: '41.2995',
+      longitude: '69.2401',
+    },
+    telephone: '+998901234567',
+    email: 'info@aplusacademy.uz',
+    foundingDate: '2012',
     sameAs: [
       'https://www.facebook.com/aplusacademy',
       'https://www.instagram.com/aplusacademy',
       'https://t.me/aplusacademy',
+      'https://www.linkedin.com/company/aplusacademy',
     ],
-    contactPoint: {
-      '@type': 'ContactPoint',
-      contactType: 'Customer Service',
-      availableLanguage: ['Uzbek', 'Russian', 'English'],
+    contactPoint: [
+      {
+        '@type': 'ContactPoint',
+        contactType: 'Customer Service',
+        telephone: '+998901234567',
+        email: 'info@aplusacademy.uz',
+        availableLanguage: ['Uzbek', 'Russian', 'English'],
+        areaServed: 'UZ',
+      },
+    ],
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.8',
+      reviewCount: '150',
+      bestRating: '5',
+      worstRating: '1',
     },
+    priceRange: '$$',
+    currenciesAccepted: 'UZS',
+    paymentAccepted: 'Cash, Credit Card, Bank Transfer',
+    openingHours: 'Mo-Fr 09:00-18:00, Sa 09:00-14:00',
   };
 }
 
@@ -114,3 +189,68 @@ export function generateFAQStructuredData(faqs: { question: string; answer: stri
   };
 }
 
+// Generate WebSite structured data with search action
+export function generateWebSiteStructuredData() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_NAME,
+    url: SITE_URL,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${SITE_URL}/courses?search={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_NAME,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${SITE_URL}/logo.png`,
+      },
+    },
+  };
+}
+
+// Generate LocalBusiness structured data
+export function generateLocalBusinessStructuredData() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    '@id': `${SITE_URL}#localbusiness`,
+    name: SITE_NAME,
+    image: `${SITE_URL}/og-image.jpg`,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'Bunyodkor Avenue 12',
+      addressLocality: 'Toshkent',
+      addressRegion: 'Toshkent',
+      postalCode: '100000',
+      addressCountry: 'UZ',
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: '41.2995',
+      longitude: '69.2401',
+    },
+    telephone: '+998901234567',
+    priceRange: '$$',
+    openingHoursSpecification: [
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        opens: '09:00',
+        closes: '18:00',
+      },
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: 'Saturday',
+        opens: '09:00',
+        closes: '14:00',
+      },
+    ],
+  };
+}

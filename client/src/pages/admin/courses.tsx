@@ -95,7 +95,9 @@ function CoursesContent() {
 
       if (error) throw error;
       setCourses(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error loading courses:', errorMessage);
       toast({
         title: 'Xatolik',
         description: error.message,
@@ -115,7 +117,9 @@ function CoursesContent() {
 
       if (error) throw error;
       setTeachers(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error loading courses:', errorMessage);
       console.error('Error loading teachers:', error);
     }
   };
@@ -190,7 +194,9 @@ function CoursesContent() {
       setIsDialogOpen(false);
       resetForm();
       loadCourses();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error loading courses:', errorMessage);
       console.error('Submit error:', error);
       toast({
         title: 'Xatolik',
@@ -218,7 +224,9 @@ function CoursesContent() {
       loadCourses();
       setDeleteDialogOpen(false);
       setCourseToDelete(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error loading courses:', errorMessage);
       toast({
         title: 'Xatolik',
         description: error.message,
@@ -343,7 +351,7 @@ function CoursesContent() {
                         <SelectItem value="none">Kategoriya yo'q</SelectItem>
                         {categories.length === 0 ? (
                           <SelectItem value="no-categories" disabled>
-                            Sozlamalar → Kurs kategoriyalari dan qo'shing
+                            Kategoriyalar → Kurs kategoriyalari dan qo'shing
                           </SelectItem>
                         ) : (
                           categories.map((cat) => (
@@ -383,7 +391,7 @@ function CoursesContent() {
                       <SelectContent>
                         {levels.length === 0 ? (
                           <SelectItem value="no-levels" disabled>
-                            Sozlamalar → Kurs darajalari dan qo'shing
+                            Kategoriyalar → Kurs darajalari dan qo'shing
                           </SelectItem>
                         ) : (
                           levels.map((level) => (
@@ -502,54 +510,99 @@ function CoursesContent() {
                 Hozircha kurslar yo'q
               </div>
             ) : (
-              <div className="min-w-[600px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-xs sm:text-sm">Nomi</TableHead>
-                      <TableHead className="text-xs sm:text-sm hidden sm:table-cell">Kategoriya</TableHead>
-                      <TableHead className="text-xs sm:text-sm">Narxi</TableHead>
-                      <TableHead className="text-xs sm:text-sm hidden md:table-cell">Daraja</TableHead>
-                      <TableHead className="text-xs sm:text-sm text-right">Amallar</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {courses.map((course) => (
-                      <TableRow key={course.id}>
-                        <TableCell className="font-medium text-xs sm:text-sm">
+              <>
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-3">
+                  {courses.map((course) => (
+                    <Card key={course.id} className="border-2 border-border/50 hover:border-primary/30 transition-all hover:shadow-md">
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
                           <div>
-                            <div>{course.name_uz}</div>
-                            <div className="text-muted-foreground sm:hidden text-xs mt-1">{course.category}</div>
+                            <h3 className="font-semibold text-sm mb-1">{course.name_uz}</h3>
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                              <Badge variant="outline" className="text-xs">{course.category}</Badge>
+                              <Badge variant="outline" className="text-xs">{course.level}</Badge>
+                            </div>
                           </div>
-                        </TableCell>
-                        <TableCell className="text-xs sm:text-sm hidden sm:table-cell">{course.category}</TableCell>
-                        <TableCell className="text-xs sm:text-sm">{course.price}</TableCell>
-                        <TableCell className="text-xs sm:text-sm hidden md:table-cell">{course.level}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex gap-1 sm:gap-2 justify-end">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEdit(course)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteClick(course.id)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-destructive" />
-                            </Button>
+                          <div className="flex items-center justify-between pt-2 border-t">
+                            <div>
+                              <p className="text-xs text-muted-foreground">Narxi</p>
+                              <p className="font-semibold text-sm">{course.price}</p>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 text-xs"
+                                onClick={() => handleEdit(course)}
+                              >
+                                <Pencil className="h-3 w-3 mr-1" />
+                                Tahrirlash
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 text-xs text-destructive hover:text-destructive"
+                                onClick={() => handleDeleteClick(course.id)}
+                              >
+                                <Trash2 className="h-3 w-3 mr-1" />
+                                O'chirish
+                              </Button>
+                            </div>
                           </div>
-                        </TableCell>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block min-w-[600px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-xs sm:text-sm">Nomi</TableHead>
+                        <TableHead className="text-xs sm:text-sm">Kategoriya</TableHead>
+                        <TableHead className="text-xs sm:text-sm">Narxi</TableHead>
+                        <TableHead className="text-xs sm:text-sm hidden lg:table-cell">Daraja</TableHead>
+                        <TableHead className="text-xs sm:text-sm text-right">Amallar</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {courses.map((course) => (
+                        <TableRow key={course.id}>
+                          <TableCell className="font-medium text-xs sm:text-sm">
+                            {course.name_uz}
+                          </TableCell>
+                          <TableCell className="text-xs sm:text-sm">{course.category}</TableCell>
+                          <TableCell className="text-xs sm:text-sm">{course.price}</TableCell>
+                          <TableCell className="text-xs sm:text-sm hidden lg:table-cell">{course.level}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex gap-1 sm:gap-2 justify-end">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(course)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteClick(course.id)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>

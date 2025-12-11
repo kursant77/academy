@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'wouter';
+import { useEffect, useState } from 'react';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,36 +33,34 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
-import type { Teacher, InsertTeacher } from '@shared/schema';
+import type { Teacher } from '@shared/schema';
 import { ImageUpload } from '@/components/ImageUpload';
-import { BriefcaseBusiness, Phone, Plus, Pencil, Trash2, Eye, Star } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Star, User, Briefcase, Phone, Globe, Linkedin, Send, Instagram } from 'lucide-react';
 
 function TeachersContent() {
-  const [, setLocation] = useLocation();
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [teacherToDelete, setTeacherToDelete] = useState<string | null>(null);
-  const [formData, setFormData] = useState<InsertTeacher>({
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
     name: '',
-    specialty: '',
     specialty_uz: '',
     specialty_ru: '',
     specialty_en: '',
     experience: 0,
-    bio: '',
     bio_uz: '',
     bio_ru: '',
     bio_en: '',
-    image_url: null,
-    linked_in: null,
-    telegram: null,
-    instagram: null,
+    phone: '',
+    image_url: '',
+    linked_in: '',
+    telegram: '',
+    instagram: '',
     featured: false,
   });
   const { toast } = useToast();
@@ -73,8 +70,8 @@ function TeachersContent() {
   }, []);
 
   const loadTeachers = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('teachers')
         .select('*')
@@ -82,79 +79,99 @@ function TeachersContent() {
 
       if (error) throw error;
       setTeachers(data || []);
-    } catch (error: any) {
-      toast({ title: 'Xatolik', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast({
+        title: 'Xatolik',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
       if (editingTeacher) {
         const { error } = await supabase
           .from('teachers')
-          .update(formData)
+          .update({
+            name: formData.name,
+            specialty: formData.specialty_uz,
+            specialty_uz: formData.specialty_uz,
+            specialty_ru: formData.specialty_ru,
+            specialty_en: formData.specialty_en,
+            experience: formData.experience,
+            bio: formData.bio_uz,
+            bio_uz: formData.bio_uz,
+            bio_ru: formData.bio_ru,
+            bio_en: formData.bio_en,
+            phone: formData.phone || null,
+            image_url: formData.image_url || null,
+            linked_in: formData.linked_in || null,
+            telegram: formData.telegram || null,
+            instagram: formData.instagram || null,
+            featured: formData.featured,
+          })
           .eq('id', editingTeacher.id);
 
         if (error) throw error;
-        toast({ title: 'Yangilandi', description: 'O\'qituvchi ma\'lumotlari yangilandi' });
+        toast({ title: 'Yangilandi' });
       } else {
-        const { error } = await supabase
-          .from('teachers')
-          .insert([formData]);
+        const { error } = await supabase.from('teachers').insert([{
+          name: formData.name,
+          specialty: formData.specialty_uz,
+          specialty_uz: formData.specialty_uz,
+          specialty_ru: formData.specialty_ru,
+          specialty_en: formData.specialty_en,
+          experience: formData.experience,
+          bio: formData.bio_uz,
+          bio_uz: formData.bio_uz,
+          bio_ru: formData.bio_ru,
+          bio_en: formData.bio_en,
+          phone: formData.phone || null,
+          image_url: formData.image_url || null,
+          linked_in: formData.linked_in || null,
+          telegram: formData.telegram || null,
+          instagram: formData.instagram || null,
+          featured: formData.featured,
+        }]);
 
         if (error) throw error;
-        toast({ title: 'Qo\'shildi', description: 'Yangi o\'qituvchi qo\'shildi' });
+        toast({ title: 'Qo\'shildi' });
       }
+
       setIsDialogOpen(false);
       resetForm();
       loadTeachers();
-    } catch (error: any) {
-      console.error(error);
-      toast({ title: 'Xatolik', description: error.message || 'Ma\'lumotlarni saqlashda muammo', variant: 'destructive' });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast({
+        title: 'Xatolik',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     }
-  };
-
-  const handleDeleteClick = (id: string) => {
-    setTeacherToDelete(id);
-    setDeleteDialogOpen(true);
   };
 
   const handleDelete = async () => {
-    if (!teacherToDelete) return;
+    if (!deleteId) return;
     try {
-      const { error } = await supabase
-        .from('teachers')
-        .delete()
-        .eq('id', teacherToDelete);
-
+      const { error } = await supabase.from('teachers').delete().eq('id', deleteId);
       if (error) throw error;
-      toast({ title: 'O\'chirildi', description: 'O\'qituvchi muvaffaqiyatli o\'chirildi' });
-      loadTeachers();
+      toast({ title: 'O\'chirildi' });
       setDeleteDialogOpen(false);
-      setTeacherToDelete(null);
-    } catch (error: any) {
-      toast({ title: 'Xatolik', description: error.message, variant: 'destructive' });
-    }
-  };
-
-  const handleToggleFeatured = async (teacher: Teacher) => {
-    try {
-      const { error } = await supabase
-        .from('teachers')
-        .update({ featured: !teacher.featured })
-        .eq('id', teacher.id);
-
-      if (error) throw error;
-      toast({ 
-        title: 'Muvaffaqiyatli', 
-        description: teacher.featured ? 'Yulduzcha olib tashlandi' : 'Yulduzcha qo\'shildi' 
-      });
+      setDeleteId(null);
       loadTeachers();
-    } catch (error: any) {
-      toast({ title: 'Xatolik', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast({
+        title: 'Xatolik',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -162,19 +179,18 @@ function TeachersContent() {
     setEditingTeacher(teacher);
     setFormData({
       name: teacher.name,
-      specialty: teacher.specialty,
       specialty_uz: teacher.specialty_uz,
       specialty_ru: teacher.specialty_ru,
       specialty_en: teacher.specialty_en,
       experience: teacher.experience,
-      bio: teacher.bio,
       bio_uz: teacher.bio_uz,
       bio_ru: teacher.bio_ru,
       bio_en: teacher.bio_en,
-      image_url: teacher.image_url,
-      linked_in: teacher.linked_in,
-      telegram: teacher.telegram,
-      instagram: teacher.instagram,
+      phone: '',
+      image_url: teacher.image_url || '',
+      linked_in: teacher.linked_in || '',
+      telegram: teacher.telegram || '',
+      instagram: teacher.instagram || '',
       featured: teacher.featured || false,
     });
     setIsDialogOpen(true);
@@ -184,212 +200,422 @@ function TeachersContent() {
     setEditingTeacher(null);
     setFormData({
       name: '',
-      specialty: '',
       specialty_uz: '',
       specialty_ru: '',
       specialty_en: '',
       experience: 0,
-      bio: '',
       bio_uz: '',
       bio_ru: '',
       bio_en: '',
-      image_url: null,
-      linked_in: null,
-      telegram: null,
-      instagram: null,
+      phone: '',
+      image_url: '',
+      linked_in: '',
+      telegram: '',
+      instagram: '',
       featured: false,
     });
   };
 
-  const metrics = useMemo(() => {
-    const featured = teachers.filter((teacher) => teacher.featured);
-    return { total: teachers.length, featured: featured.length };
-  }, [teachers]);
-
   return (
     <AdminLayout>
-      <div className="space-y-4 sm:space-y-6 animate-fade-in">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in-down">
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="min-w-0">
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-              O'qituvchilar
-            </h2>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">O'qituvchilarni boshqaring</p>
+            <h2 className="text-2xl sm:text-3xl font-bold">O'qituvchilar</h2>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
+              O'qituvchilarni boshqaring
+            </p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>
               <Button onClick={resetForm} className="w-full sm:w-auto text-sm">
                 <Plus className="mr-2 h-4 w-4" />
                 Yangi o'qituvchi
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[95vh] overflow-y-auto p-3 sm:p-4 md:p-6">
+            <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[95vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="text-sm sm:text-base md:text-lg">{editingTeacher ? 'O\'qituvchini tahrirlash' : 'Yangi o\'qituvchi qo\'shish'}</DialogTitle>
-                <DialogDescription className="text-[11px] sm:text-xs md:text-sm">Instruktor ma\'lumotlarini to\'ldiring</DialogDescription>
+                <DialogTitle className="text-xl sm:text-2xl">
+                  {editingTeacher ? 'O\'qituvchini tahrirlash' : 'Yangi o\'qituvchi qo\'shish'}
+                </DialogTitle>
+                <DialogDescription>
+                  O'qituvchi ma'lumotlarini to'liq kiriting
+                </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>F.I.Sh</Label>
-                    <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Fan / yo'nalish (UZ)</Label>
-                    <Input value={formData.specialty_uz} onChange={(e) => setFormData({ ...formData, specialty_uz: e.target.value })} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Fan / yo'nalish (RU)</Label>
-                    <Input value={formData.specialty_ru} onChange={(e) => setFormData({ ...formData, specialty_ru: e.target.value })} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Fan / yo'nalish (EN)</Label>
-                    <Input value={formData.specialty_en} onChange={(e) => setFormData({ ...formData, specialty_en: e.target.value })} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Tajriba (yil)</Label>
-                    <Input type="number" value={formData.experience} onChange={(e) => setFormData({ ...formData, experience: Number(e.target.value) })} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Asosiy fan</Label>
-                    <Input value={formData.specialty} onChange={(e) => setFormData({ ...formData, specialty: e.target.value })} required />
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <ImageUpload
-                      value={formData.image_url}
-                      onChange={(url) => setFormData({ ...formData, image_url: url })}
-                      folder="teachers"
-                      label="Profil surati"
+                    <Label className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      Ism *
+                    </Label>
+                    <Input
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="To'liq ism"
+                      required
+                      className="h-10"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Bio (UZ)</Label>
-                    <Textarea rows={3} value={formData.bio_uz} onChange={(e) => setFormData({ ...formData, bio_uz: e.target.value })} required />
+                    <Label className="flex items-center gap-2">
+                      <Briefcase className="h-4 w-4 text-muted-foreground" />
+                      Tajriba (yil) *
+                    </Label>
+                    <Input
+                      type="number"
+                      value={formData.experience}
+                      onChange={(e) => setFormData({ ...formData, experience: parseInt(e.target.value) || 0 })}
+                      placeholder="Masalan: 5"
+                      required
+                      min="0"
+                      className="h-10"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>Mutaxassislik (UZ) *</Label>
+                    <Input
+                      value={formData.specialty_uz}
+                      onChange={(e) => setFormData({ ...formData, specialty_uz: e.target.value })}
+                      placeholder="Masalan: Frontend Developer"
+                      required
+                      className="h-10"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Mutaxassislik (RU)</Label>
+                    <Input
+                      value={formData.specialty_ru}
+                      onChange={(e) => setFormData({ ...formData, specialty_ru: e.target.value })}
+                      placeholder="Например: Frontend Developer"
+                      className="h-10"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Mutaxassislik (EN)</Label>
+                    <Input
+                      value={formData.specialty_en}
+                      onChange={(e) => setFormData({ ...formData, specialty_en: e.target.value })}
+                      placeholder="e.g. Frontend Developer"
+                      className="h-10"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Bio (UZ) *</Label>
+                    <Textarea
+                      value={formData.bio_uz}
+                      onChange={(e) => setFormData({ ...formData, bio_uz: e.target.value })}
+                      placeholder="O'qituvchi haqida qisqacha ma'lumot..."
+                      required
+                      rows={3}
+                      className="resize-none"
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Bio (RU)</Label>
-                    <Textarea rows={3} value={formData.bio_ru} onChange={(e) => setFormData({ ...formData, bio_ru: e.target.value })} required />
+                    <Textarea
+                      value={formData.bio_ru}
+                      onChange={(e) => setFormData({ ...formData, bio_ru: e.target.value })}
+                      placeholder="Краткая информация о преподавателе..."
+                      rows={3}
+                      className="resize-none"
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Bio (EN)</Label>
-                    <Textarea rows={3} value={formData.bio_en} onChange={(e) => setFormData({ ...formData, bio_en: e.target.value })} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Asosiy bio</Label>
-                    <Textarea rows={3} value={formData.bio} onChange={(e) => setFormData({ ...formData, bio: e.target.value })} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>LinkedIn</Label>
-                    <Input value={formData.linked_in || ''} onChange={(e) => setFormData({ ...formData, linked_in: e.target.value || null })} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Telegram</Label>
-                    <Input value={formData.telegram || ''} onChange={(e) => setFormData({ ...formData, telegram: e.target.value || null })} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Instagram</Label>
-                    <Input value={formData.instagram || ''} onChange={(e) => setFormData({ ...formData, instagram: e.target.value || null })} />
-                  </div>
-                  <div className="space-y-2 flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="featured"
-                      checked={formData.featured}
-                      onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                      className="h-4 w-4"
+                    <Textarea
+                      value={formData.bio_en}
+                      onChange={(e) => setFormData({ ...formData, bio_en: e.target.value })}
+                      placeholder="Brief information about the teacher..."
+                      rows={3}
+                      className="resize-none"
                     />
-                    <Label htmlFor="featured" className="cursor-pointer">Asosiy sahifada ko'rsatish (Featured)</Label>
                   </div>
                 </div>
-                <div className="flex justify-end gap-2">
+
+                <div className="space-y-4">
+                  <ImageUpload
+                    value={formData.image_url}
+                    onChange={(url) => setFormData({ ...formData, image_url: url || '' })}
+                    folder="teachers"
+                    label="O'qituvchi rasmi"
+                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        Telefon
+                      </Label>
+                      <Input
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="+998 XX XXX XX XX"
+                        className="h-10"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Linkedin className="h-4 w-4 text-muted-foreground" />
+                      LinkedIn
+                    </Label>
+                    <Input
+                      value={formData.linked_in}
+                      onChange={(e) => setFormData({ ...formData, linked_in: e.target.value })}
+                      placeholder="https://linkedin.com/..."
+                      className="h-10"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Send className="h-4 w-4 text-muted-foreground" />
+                      Telegram
+                    </Label>
+                    <Input
+                      value={formData.telegram}
+                      onChange={(e) => setFormData({ ...formData, telegram: e.target.value })}
+                      placeholder="https://t.me/..."
+                      className="h-10"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Instagram className="h-4 w-4 text-muted-foreground" />
+                      Instagram
+                    </Label>
+                    <Input
+                      value={formData.instagram}
+                      onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                      placeholder="https://instagram.com/..."
+                      className="h-10"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30">
+                  <div className="flex items-center gap-3">
+                    <Star className="h-5 w-5 text-primary" />
+                    <div>
+                      <Label htmlFor="featured" className="cursor-pointer font-medium">
+                        Asosiy sahifada ko'rsatish
+                      </Label>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Featured o'qituvchi sifatida ko'rsatish
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    id="featured"
+                    checked={formData.featured}
+                    onCheckedChange={(checked) => setFormData({ ...formData, featured: checked })}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-4">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Bekor qilish
+                    Bekor
                   </Button>
-                  <Button type="submit">
-                    {editingTeacher ? 'Yangilash' : 'Qo\'shish'}
-                  </Button>
+                  <Button type="submit">{editingTeacher ? 'Saqlash' : 'Qo\'shish'}</Button>
                 </div>
               </form>
             </DialogContent>
           </Dialog>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          <div className="stagger-item">
-            <MetricCard title="Jami o'qituvchilar" value={metrics.total} subtitle="A+ Academy faculty" />
-          </div>
-          <div className="stagger-item">
-            <MetricCard title="Featured" value={metrics.featured} subtitle="Asosiy sahifada ko'rsatiladiganlar" accent="bg-emerald-500/10 text-emerald-600" />
-          </div>
-        </div>
+        <Card className="border-2 border-border/50 bg-card/50 backdrop-blur-sm">
+          <CardHeader className="p-4 sm:p-6 border-b">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg sm:text-xl font-bold">O'qituvchilar ro'yxati</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Jami: <span className="font-semibold text-foreground">{teachers.length}</span> ta o'qituvchi
+                </p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-6 pt-0 overflow-x-auto">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
+                <p className="text-sm text-muted-foreground">Yuklanmoqda...</p>
+              </div>
+            ) : teachers.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <User className="h-12 w-12 text-muted-foreground/50 mb-3" />
+                <p className="text-sm font-medium text-foreground mb-1">Hozircha o'qituvchilar yo'q</p>
+                <p className="text-xs text-muted-foreground">Yangi o'qituvchi qo'shish uchun yuqoridagi tugmani bosing</p>
+              </div>
+            ) : (
+              <>
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-3">
+                  {teachers.map((teacher) => (
+                    <Card key={teacher.id} className="border-2 border-border/50 hover:border-primary/30 transition-all hover:shadow-md">
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          {teacher.image_url ? (
+                            <img
+                              src={teacher.image_url}
+                              alt={teacher.name}
+                              className="h-14 w-14 rounded-full object-cover border-2 border-border flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="h-14 w-14 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center border-2 border-border flex-shrink-0">
+                              <User className="h-7 w-7 text-primary" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-sm truncate">{teacher.name}</h3>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Briefcase className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                                  <span className="text-xs text-muted-foreground truncate">{teacher.specialty_uz}</span>
+                                </div>
+                              </div>
+                              {teacher.featured && (
+                                <Badge variant="default" className="text-xs gap-1 flex-shrink-0">
+                                  <Star className="h-3 w-3 fill-current" />
+                                  Featured
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="space-y-1.5 text-xs text-muted-foreground">
+                              <div className="flex items-center gap-2">
+                                <Briefcase className="h-3 w-3" />
+                                <span>Tajriba: {teacher.experience} yil</span>
+                              </div>
+                              {teacher.phone && (
+                                <div className="flex items-center gap-2">
+                                  <Phone className="h-3 w-3" />
+                                  <span className="truncate">{teacher.phone}</span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex gap-2 mt-3 pt-3 border-t">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex-1 h-8 text-xs"
+                                onClick={() => handleEdit(teacher)}
+                              >
+                                <Pencil className="h-3 w-3 mr-1" />
+                                Tahrirlash
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex-1 h-8 text-xs text-destructive hover:text-destructive"
+                                onClick={() => {
+                                  setDeleteId(teacher.id);
+                                  setDeleteDialogOpen(true);
+                                }}
+                              >
+                                <Trash2 className="h-3 w-3 mr-1" />
+                                O'chirish
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
-          <Card className="xl:col-span-2">
-            <CardHeader className="p-4 sm:p-6">
-              <CardTitle className="text-base sm:text-lg">O'qituvchilar ro'yxati</CardTitle>
-            </CardHeader>
-            <CardContent className="overflow-x-auto p-4 sm:p-6 pt-0">
-              {loading ? (
-                <div className="text-center py-8">Yuklanmoqda...</div>
-              ) : teachers.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">Hozircha o'qituvchilar yo'q</div>
-              ) : (
-                <div className="min-w-[600px]">
+                {/* Desktop Table View */}
+                <div className="hidden md:block min-w-[700px]">
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead className="text-xs sm:text-sm">Ism</TableHead>
-                        <TableHead className="text-xs sm:text-sm hidden md:table-cell">Yo'nalish</TableHead>
-                        <TableHead className="text-xs sm:text-sm hidden lg:table-cell">Tajriba</TableHead>
-                        <TableHead className="text-xs sm:text-sm">Featured</TableHead>
-                        <TableHead className="text-right text-xs sm:text-sm">Amallar</TableHead>
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className="text-xs sm:text-sm font-semibold">O'qituvchi</TableHead>
+                        <TableHead className="text-xs sm:text-sm font-semibold">Mutaxassislik</TableHead>
+                        <TableHead className="text-xs sm:text-sm font-semibold hidden lg:table-cell">Tajriba</TableHead>
+                        <TableHead className="text-xs sm:text-sm font-semibold hidden xl:table-cell">Telefon</TableHead>
+                        <TableHead className="text-xs sm:text-sm font-semibold">Holat</TableHead>
+                        <TableHead className="text-xs sm:text-sm font-semibold text-right">Amallar</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {teachers.map((teacher, index) => (
-                        <TableRow key={teacher.id} className="table-row-hover stagger-item" style={{ animationDelay: `${index * 0.02}s` }}>
-                          <TableCell className="flex items-center gap-2 sm:gap-3">
-                            <Avatar className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
-                              <AvatarImage src={teacher.image_url || undefined} />
-                              <AvatarFallback className="text-xs">{teacher.name.slice(0, 2).toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <div className="min-w-0 flex-1">
-                              <p className="font-semibold text-xs sm:text-sm truncate">{teacher.name}</p>
-                              <p className="text-xs text-muted-foreground truncate">{teacher.bio_uz || '—'}</p>
-                              <div className="md:hidden mt-1">
-                                <p className="text-xs">{teacher.specialty_uz}</p>
-                                <p className="text-xs text-muted-foreground">{teacher.experience} yil</p>
+                      {teachers.map((teacher) => (
+                        <TableRow key={teacher.id} className="hover:bg-muted/50 transition-colors">
+                          <TableCell className="font-medium text-xs sm:text-sm">
+                            <div className="flex items-center gap-3">
+                              {teacher.image_url ? (
+                                <img
+                                  src={teacher.image_url}
+                                  alt={teacher.name}
+                                  className="h-10 w-10 rounded-full object-cover border-2 border-border"
+                                />
+                              ) : (
+                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center border-2 border-border">
+                                  <User className="h-5 w-5 text-primary" />
+                                </div>
+                              )}
+                              <div>
+                                <div className="font-semibold">{teacher.name}</div>
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell className="hidden md:table-cell text-xs sm:text-sm">{teacher.specialty_uz}</TableCell>
-                          <TableCell className="hidden lg:table-cell text-xs sm:text-sm">{teacher.experience} yil</TableCell>
+                          <TableCell className="text-xs sm:text-sm">
+                            <div className="flex items-center gap-2">
+                              <Briefcase className="h-3 w-3 text-muted-foreground" />
+                              {teacher.specialty_uz}
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden lg:table-cell text-xs sm:text-sm">
+                            <Badge variant="outline" className="font-normal">
+                              {teacher.experience} yil
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="hidden xl:table-cell text-xs sm:text-sm">
+                            {teacher.phone ? (
+                              <div className="flex items-center gap-2">
+                                <Phone className="h-3 w-3 text-muted-foreground" />
+                                {teacher.phone}
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </TableCell>
                           <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleToggleFeatured(teacher)}
-                              className={`h-8 w-8 p-0 ${teacher.featured ? 'text-yellow-500' : ''}`}
-                            >
-                              <Star className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${teacher.featured ? 'fill-yellow-500' : ''}`} />
-                            </Button>
+                            {teacher.featured && (
+                              <Badge variant="default" className="text-xs gap-1">
+                                <Star className="h-3 w-3 fill-current" />
+                                Featured
+                              </Badge>
+                            )}
                           </TableCell>
                           <TableCell className="text-right">
-                            <div className="flex gap-1 sm:gap-2 justify-end">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={() => setLocation(`/admin/teachers/${teacher.id}`)} 
-                                className="h-8 w-8 p-0"
-                                title="Tafsilotlar"
+                            <div className="flex justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+                                onClick={() => handleEdit(teacher)}
+                                title="Tahrirlash"
                               >
-                                <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                <Pencil className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => handleEdit(teacher)} className="h-8 w-8 p-0" title="Tahrirlash">
-                                <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(teacher.id)} className="h-8 w-8 p-0" title="O'chirish">
-                                <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-destructive" />
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                                onClick={() => {
+                                  setDeleteId(teacher.id);
+                                  setDeleteDialogOpen(true);
+                                }}
+                                title="O'chirish"
+                              >
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
                           </TableCell>
@@ -398,71 +624,31 @@ function TeachersContent() {
                     </TableBody>
                   </Table>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="p-4 sm:p-6">
-              <CardTitle className="text-base sm:text-lg">Team spotlight</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6 pt-0">
-              {teachers.slice(0, 4).map((teacher, index) => (
-                <div 
-                  key={teacher.id} 
-                  className="stagger-item rounded-lg border p-3 flex items-center gap-3 hover:bg-muted/50"
-                  style={{ animationDelay: `${index * 0.02}s` }}
-                >
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={teacher.image_url || undefined} />
-                    <AvatarFallback>{teacher.name.slice(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="font-semibold">{teacher.name}</p>
-                    <p className="text-xs text-muted-foreground">{teacher.specialty_uz}</p>
-                    <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                      <span className="inline-flex items-center gap-1"><BriefcaseBusiness className="h-3 w-3" /> {teacher.experience} yil</span>
-                    </div>
-                  </div>
-                  <Badge variant={teacher.featured ? 'default' : 'outline'}>
-                    {teacher.featured ? 'Featured' : '—'}
-                  </Badge>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>O'chirishni tasdiqlash</AlertDialogTitle>
+              <AlertDialogDescription>
+                Bu o'qituvchini o'chirishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                O'chirish
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>O'qituvchini o'chirish</AlertDialogTitle>
-            <AlertDialogDescription>
-              O'qituvchini o'chirishni tasdiqlaysizmi? Bu amalni qaytarib bo'lmaydi.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              O'chirish
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </AdminLayout>
   );
 }
-
-const MetricCard = ({ title, value, subtitle, accent }: { title: string; value: number | string; subtitle: string; accent?: string }) => (
-  <Card>
-    <CardHeader className="pb-2 p-4 sm:p-6">
-      <CardTitle className="text-xs sm:text-sm text-muted-foreground">{title}</CardTitle>
-    </CardHeader>
-    <CardContent className="p-4 sm:p-6 pt-0">
-      <p className="text-xl sm:text-2xl font-bold break-words">{value}</p>
-      <p className={`text-xs sm:text-sm mt-1 sm:mt-2 ${accent || 'text-muted-foreground'}`}>{subtitle}</p>
-    </CardContent>
-  </Card>
-);
 
 export default function AdminTeachers() {
   return (
@@ -471,5 +657,4 @@ export default function AdminTeachers() {
     </ProtectedRoute>
   );
 }
-
 

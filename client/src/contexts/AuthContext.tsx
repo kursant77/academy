@@ -90,21 +90,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         return { error: { message: 'Login yoki parol noto\'g\'ri' } };
       }
-    } catch (error: any) {
-      console.error('Sign in error:', error);
-      // Xatolik bo'lsa ham default admin bilan kirish imkoniyati
-      if (login === 'admin' && password === 'admin123') {
-        const adminData = {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Sign in error:', errorMessage);
+      // Xatolik bo'lsa ham default admin bilan kirish imkoniyati (faqat development'da)
+      if (import.meta.env.DEV && login === 'admin' && password === 'admin123') {
+        const adminData: Admin = {
+          id: 'dev-admin',
           login: 'admin',
           name: 'Administrator',
           created_at: new Date().toISOString(),
         };
         localStorage.setItem('admin_session', JSON.stringify(adminData));
-        setAdmin(adminData as Admin);
+        setAdmin(adminData);
         setIsAdmin(true);
         return { error: null };
       }
-      return { error: { message: error.message || 'Xatolik yuz berdi' } };
+      return { error: { message: errorMessage } };
     }
   };
 

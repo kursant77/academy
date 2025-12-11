@@ -1,4 +1,5 @@
 import { Switch, Route, useLocation } from "wouter";
+import { Suspense, lazy } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -7,31 +8,39 @@ import { ThemeProvider } from "@/contexts/ThemeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import Home from "@/pages/home";
-import Courses from "@/pages/courses";
-import Teachers from "@/pages/teachers";
-import About from "@/pages/about";
-import Events from "@/pages/events";
-import Schedule from "@/pages/schedule";
-import Achievements from "@/pages/gallery";
-import Contact from "@/pages/contact";
-import Register from "@/pages/register";
-import NotFound from "@/pages/not-found";
-import AdminLogin from "@/pages/admin/login";
-import AdminDashboard from "@/pages/admin/dashboard";
-import AdminCourses from "@/pages/admin/courses";
-import AdminTeachers from "@/pages/admin/teachers";
-import AdminEvents from "@/pages/admin/events";
-import AdminApplications from "@/pages/admin/applications";
-import AdminAchievements from "@/pages/admin/achievements";
-import AdminCategories from "@/pages/admin/categories";
-import AdminTestimonials from "@/pages/admin/testimonials";
-import AdminSchedule from "@/pages/admin/schedule";
-import AdminStudentsPage from "@/pages/admin/students";
-import AdminStudentDetailsPage from "@/pages/admin/student-details";
-import AdminTeacherDetailsPage from "@/pages/admin/teacher-details";
-import AdminGroupsPage from "@/pages/admin/groups";
-import AdminGroupDetailsPage from "@/pages/admin/group-details";
+import { Loader2 } from "lucide-react";
+
+// Lazy load public pages
+const Home = lazy(() => import("@/pages/home"));
+const Courses = lazy(() => import("@/pages/courses"));
+const Teachers = lazy(() => import("@/pages/teachers"));
+const About = lazy(() => import("@/pages/about"));
+const Events = lazy(() => import("@/pages/events"));
+const Achievements = lazy(() => import("@/pages/gallery"));
+const Contact = lazy(() => import("@/pages/contact"));
+const Register = lazy(() => import("@/pages/register"));
+const NotFound = lazy(() => import("@/pages/not-found"));
+
+// Lazy load admin pages
+const AdminLogin = lazy(() => import("@/pages/admin/login"));
+const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
+const AdminCourses = lazy(() => import("@/pages/admin/courses"));
+const AdminTeachers = lazy(() => import("@/pages/admin/teachers"));
+const AdminEvents = lazy(() => import("@/pages/admin/events"));
+const AdminApplications = lazy(() => import("@/pages/admin/applications"));
+const AdminAchievements = lazy(() => import("@/pages/admin/achievements"));
+const AdminCategories = lazy(() => import("@/pages/admin/categories"));
+const AdminTestimonials = lazy(() => import("@/pages/admin/testimonials"));
+
+// Loading component
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="flex flex-col items-center gap-4">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <p className="text-sm text-muted-foreground">Yuklanmoqda...</p>
+    </div>
+  </div>
+);
 
 function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -49,41 +58,38 @@ function Router() {
 
   if (isAdminRoute) {
     return (
-      <Switch>
-        <Route path="/admin/login" component={AdminLogin} />
-        <Route path="/admin/groups/:id" component={AdminGroupDetailsPage} />
-        <Route path="/admin/students/:id" component={AdminStudentDetailsPage} />
-        <Route path="/admin/teachers/:id" component={AdminTeacherDetailsPage} />
-        <Route path="/admin/courses" component={AdminCourses} />
-        <Route path="/admin/teachers" component={AdminTeachers} />
-        <Route path="/admin/groups" component={AdminGroupsPage} />
-        <Route path="/admin/students" component={AdminStudentsPage} />
-        <Route path="/admin/events" component={AdminEvents} />
-        <Route path="/admin/applications" component={AdminApplications} />
-        <Route path="/admin/achievements" component={AdminAchievements} />
-        <Route path="/admin/categories" component={AdminCategories} />
-        <Route path="/admin/testimonials" component={AdminTestimonials} />
-        <Route path="/admin/schedule" component={AdminSchedule} />
-        <Route path="/admin" component={AdminDashboard} />
-        <Route component={NotFound} />
-      </Switch>
+      <Suspense fallback={<PageLoader />}>
+        <Switch>
+          <Route path="/admin/login" component={AdminLogin} />
+          <Route path="/admin/courses" component={AdminCourses} />
+          <Route path="/admin/teachers" component={AdminTeachers} />
+          <Route path="/admin/events" component={AdminEvents} />
+          <Route path="/admin/applications" component={AdminApplications} />
+          <Route path="/admin/achievements" component={AdminAchievements} />
+          <Route path="/admin/categories" component={AdminCategories} />
+          <Route path="/admin/testimonials" component={AdminTestimonials} />
+          <Route path="/admin" component={AdminDashboard} />
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
     );
   }
 
   return (
     <PublicLayout>
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/courses" component={Courses} />
-        <Route path="/teachers" component={Teachers} />
-        <Route path="/about" component={About} />
-        <Route path="/events" component={Events} />
-        <Route path="/schedule" component={Schedule} />
-        <Route path="/achievements" component={Achievements} />
-        <Route path="/contact" component={Contact} />
-        <Route path="/register" component={Register} />
-        <Route component={NotFound} />
-      </Switch>
+      <Suspense fallback={<PageLoader />}>
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route path="/courses" component={Courses} />
+          <Route path="/teachers" component={Teachers} />
+          <Route path="/about" component={About} />
+          <Route path="/events" component={Events} />
+          <Route path="/achievements" component={Achievements} />
+          <Route path="/contact" component={Contact} />
+          <Route path="/register" component={Register} />
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
     </PublicLayout>
   );
 }

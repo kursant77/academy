@@ -68,17 +68,38 @@ export default function Events() {
   return (
     <>
       <SEO
-        title="Tadbirlar va Yangiliklar"
-        description="A+ Academy tadbirlari, workshoplar, seminarlar va musobaqalar. Eng so'nggi yangiliklar va voqealar haqida bilib oling."
-        keywords="tadbirlar, workshop, seminar, musobaqa, A+ Academy yangiliklari"
+        title="Tadbirlar va Yangiliklar — A+ Academy | Workshoplar, Seminarlar Toshkent"
+        description="A+ Academy tadbirlari, workshoplar, seminarlar va musobaqalar. Eng so'nggi yangiliklar va voqealar haqida bilib oling. Toshkent. Qatnashish uchun ro'yxatdan o'ting!"
+        keywords="tadbirlar, workshop, seminar, musobaqa, A+ Academy yangiliklari, Toshkent tadbirlar, IT tadbirlar, ta'lim tadbirlar, o'quv markazi tadbirlar, yangiliklar, voqealar"
         url="/events"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "name": "A+ Academy Tadbirlari",
+          "description": "Workshoplar, seminarlar va musobaqalar",
+          "itemListElement": allEvents.map((event, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+              "@type": "Event",
+              "name": i18n.language === "uz" ? event.title_uz : i18n.language === "ru" ? event.title_ru : event.title_en,
+              "description": i18n.language === "uz" ? event.description_uz : i18n.language === "ru" ? event.description_ru : event.description_en,
+              "startDate": event.date,
+              "organizer": {
+                "@type": "Organization",
+                "name": "A+ Academy"
+              }
+            }
+          }))
+        }}
       />
       <div className="min-h-screen relative overflow-hidden">
         {/* Animated Background Elements */}
-        <div className="absolute inset-0 -z-10">
+        <div className="fixed inset-0 -z-10 pointer-events-none">
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl animate-pulse" />
           <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-accent/5 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-accent/5 rounded-full blur-3xl animate-float" />
+          <div className="absolute inset-0 bg-pattern-dots opacity-20" />
         </div>
 
         <div className="relative py-12 md:py-16 lg:py-20">
@@ -101,10 +122,9 @@ export default function Events() {
               {allEvents.map((event, index) => (
                 <div 
                   key={event.id} 
-                  className="group animate-fade-in-up hover:scale-[1.03] transition-all duration-500 hover:z-10"
+                  className="group animate-fade-in-up card-hover-lift hover:z-10"
                   style={{ 
-                    animationDelay: `${index * 0.08}s`,
-                    animation: `slideInUp 0.8s ease-out ${index * 0.08}s both, float 8s ease-in-out infinite ${index * 0.3}s`
+                    animationDelay: `${index * 0.08}s`
                   }}
                 >
                   <EventCard

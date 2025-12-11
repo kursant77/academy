@@ -40,6 +40,7 @@ export default function Register() {
     fullName: "",
     age: "",
     phone: "",
+    parentPhone: "",
     courseId: "",
   });
   const [courses, setCourses] = useState<Course[]>([]);
@@ -66,7 +67,9 @@ export default function Register() {
         } else if (data) {
           setCourses(data || []);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Registration error:', errorMessage);
         toast({
           title: t("register.error") || "Xatolik",
           description: error.message || "Ma'lumotlar yuklanmadi",
@@ -150,6 +153,7 @@ export default function Register() {
         status: "pending",
         data: {
           locale: i18n.language,
+          parent_phone: formData.parentPhone.trim() || null,
         },
       });
 
@@ -164,6 +168,7 @@ export default function Register() {
         age: formData.age,
         phone: formData.phone.trim(),
         courseName: courseName,
+        parentPhone: formData.parentPhone.trim() || undefined,
       });
       
       sendTelegramMessage(telegramMessage).catch((err) => {
@@ -198,6 +203,7 @@ export default function Register() {
           age: "",
           phone: "",
           courseId: "",
+          parentPhone: "",
         });
         setSuccess(false);
       }, 3000);
@@ -218,81 +224,96 @@ export default function Register() {
   return (
     <>
       <SEO
-        title="Ro'yxatdan o'tish"
-        description="A+ Academy kurslariga ro'yxatdan o'ting. IT, IELTS, CEFR va boshqa kurslar. Professional o'qituvchilar bilan sifatli ta'lim."
-        keywords="ro'yxatdan o'tish, kursga yozilish, A+ Academy, IT kurslar, IELTS, CEFR"
+        title="Ro'yxatdan O'tish — A+ Academy | Kursga Yozilish Toshkent"
+        description="A+ Academy kurslariga ro'yxatdan o'ting. IT, IELTS, CEFR va dasturlash kurslari. Professional o'qituvchilar bilan sifatli ta'lim. Toshkent. Tezkor ro'yxatdan o'tish!"
+        keywords="ro'yxatdan o'tish, kursga yozilish, A+ Academy, IT kurslar, IELTS, CEFR, dasturlash kurslariga yozilish, Toshkent kurslar, o'quv markaziga yozilish, online ro'yxatdan o'tish"
         url="/register"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Ro'yxatdan O'tish - A+ Academy",
+          "description": "A+ Academy kurslariga ro'yxatdan o'tish",
+          "potentialAction": {
+            "@type": "RegisterAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://aplusacademy.uz/register"
+            }
+          }
+        }}
       />
-      <div className="relative min-h-screen py-12 md:py-20 overflow-hidden">
+      <div className="relative min-h-screen py-8 sm:py-12 md:py-16 lg:py-20 overflow-hidden">
         {/* Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5 -z-10" />
+        <div className="fixed inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5 -z-10 pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)] -z-10" />
+        <div className="absolute inset-0 bg-pattern-dots opacity-20 -z-10" />
         
         {/* Animated Background Elements */}
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse -z-10" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000 -z-10" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-3xl animate-float -z-10" />
 
-        <div className="max-w-5xl mx-auto px-4 md:px-6 lg:px-8 relative z-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 relative z-10">
           {/* Header Section */}
-          <div className="mb-12 text-center space-y-4 animate-fade-in-down">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary/10 mb-4">
-              <GraduationCap className="w-10 h-10 text-primary" />
+          <div className="mb-8 sm:mb-10 md:mb-12 text-center space-y-3 sm:space-y-4 animate-fade-in-down">
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-primary/10 mb-3 sm:mb-4">
+              <GraduationCap className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent px-2">
               {t("register.title") || "Ro'yxatdan o'tish"}
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto px-2">
               {t("register.subtitle") || "A+ Academy kurslariga ro'yxatdan o'ting va professional ta'lim oling"}
             </p>
             
             {/* Benefits */}
-            <div className="flex flex-wrap justify-center gap-4 mt-8">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm">
-                <CheckCircle2 className="w-4 h-4" />
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 mt-6 sm:mt-8 px-2">
+              <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-primary/10 text-primary text-xs sm:text-sm">
+                <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                 <span>Professional o'qituvchilar</span>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent-foreground text-sm">
-                <CheckCircle2 className="w-4 h-4" />
+              <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-accent/10 text-accent-foreground text-xs sm:text-sm">
+                <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                 <span>Zamonaviy dasturlar</span>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm">
-                <CheckCircle2 className="w-4 h-4" />
+              <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-primary/10 text-primary text-xs sm:text-sm">
+                <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                 <span>Tez natijalar</span>
               </div>
             </div>
           </div>
 
-          <div className="grid md:grid-cols-[1fr_400px] gap-8 items-start">
+          <div className="grid lg:grid-cols-[1fr_400px] gap-6 sm:gap-8 items-start">
             {/* Main Form Card */}
-            <Card className="border-2 shadow-xl backdrop-blur-sm bg-card/95 animate-fade-in">
-              <CardHeader className="space-y-1 pb-4">
+            <Card className="border-2 shadow-xl backdrop-blur-sm bg-card/95 animate-fade-in card-hover-lift">
+              <CardHeader className="space-y-1 pb-3 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-primary" />
-                  <CardTitle className="text-2xl">Ma'lumotlarni kiriting</CardTitle>
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+                  <CardTitle className="text-xl sm:text-2xl">Ma'lumotlarni kiriting</CardTitle>
                 </div>
-                <CardDescription className="text-base">
+                <CardDescription className="text-sm sm:text-base">
                   Barcha maydonlarni to'ldiring va arizangizni yuboring
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
                 {success ? (
-                  <div className="text-center py-12 space-y-4 animate-fade-in">
-                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-500/10">
-                      <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+                  <div className="text-center py-8 sm:py-12 space-y-3 sm:space-y-4 animate-fade-in">
+                    <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-emerald-500/10">
+                      <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-500" />
                     </div>
-                    <h3 className="text-2xl font-bold text-emerald-600">
+                    <h3 className="text-xl sm:text-2xl font-bold text-emerald-600">
                       Muvaffaqiyatli yuborildi!
                     </h3>
-                    <p className="text-muted-foreground">
+                    <p className="text-sm sm:text-base text-muted-foreground px-2">
                       Arizangiz qabul qilindi. Tez orada siz bilan bog'lanamiz.
                     </p>
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                     {/* Full Name */}
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold flex items-center gap-2">
-                        <User className="w-4 h-4 text-primary" />
+                      <label className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 sm:gap-2">
+                        <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary flex-shrink-0" />
                         {t("register.fullName") || "To'liq ism"}
                         <span className="text-destructive">*</span>
                       </label>
@@ -303,15 +324,15 @@ export default function Register() {
                         }
                         placeholder="Masalan: Aliyev Vali"
                         required
-                        className="h-12 text-base"
+                        className="h-11 sm:h-12 text-sm sm:text-base"
                         data-testid="input-fullname"
                       />
                     </div>
 
                     {/* Age */}
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-primary" />
+                      <label className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 sm:gap-2">
+                        <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary flex-shrink-0" />
                         {t("register.age") || "Yosh"}
                         <span className="text-destructive">*</span>
                       </label>
@@ -325,14 +346,14 @@ export default function Register() {
                         required
                         min="10"
                         max="100"
-                        className="h-12 text-base"
+                        className="h-11 sm:h-12 text-sm sm:text-base"
                         data-testid="input-age"
                       />
                     </div>
 
                     {/* Phone */}
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold flex items-center gap-2">
+                      <label className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 sm:gap-2">
                         <Phone className="w-4 h-4 text-primary" />
                         {t("register.phone") || "Telefon raqami"}
                         <span className="text-destructive">*</span>
@@ -345,15 +366,35 @@ export default function Register() {
                         }
                         placeholder="+998 90 123 45 67"
                         required
-                        className="h-12 text-base"
+                        className="h-11 sm:h-12 text-sm sm:text-base"
                         data-testid="input-phone"
+                      />
+                    </div>
+
+                    {/* Parent Phone */}
+                    <div className="space-y-2">
+                      <label className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 sm:gap-2">
+                        <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary flex-shrink-0" />
+                        Ota-ona telefon raqami
+                        <span className="text-destructive">*</span>
+                      </label>
+                      <Input
+                        type="tel"
+                        value={formData.parentPhone}
+                        onChange={(e) =>
+                          setFormData({ ...formData, parentPhone: e.target.value })
+                        }
+                        placeholder="+998 90 123 45 67"
+                        required
+                        className="h-11 sm:h-12 text-sm sm:text-base"
+                        data-testid="input-parent-phone"
                       />
                     </div>
 
                     {/* Course Selection */}
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold flex items-center gap-2">
-                        <BookOpen className="w-4 h-4 text-primary" />
+                      <label className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 sm:gap-2">
+                        <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary flex-shrink-0" />
                         {t("register.selectCourse") || "Kursni tanlang"}
                         <span className="text-destructive">*</span>
                       </label>

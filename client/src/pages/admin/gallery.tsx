@@ -69,7 +69,9 @@ function GalleryContent() {
 
       if (error) throw error;
       setItems(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error in gallery page:', errorMessage);
       toast({
         title: 'Xatolik',
         description: error.message,
@@ -107,7 +109,9 @@ function GalleryContent() {
       setIsDialogOpen(false);
       resetForm();
       loadItems();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error in gallery page:', errorMessage);
       toast({
         title: 'Xatolik',
         description: error.message,
@@ -135,7 +139,9 @@ function GalleryContent() {
       loadItems();
       setDeleteDialogOpen(false);
       setDeleteId(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error in gallery page:', errorMessage);
       toast({
         title: 'Xatolik',
         description: error.message,
@@ -290,44 +296,94 @@ function GalleryContent() {
                 Hozircha rasmlar yo'q
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Sarlavha</TableHead>
-                    <TableHead>Kategoriya</TableHead>
-                    <TableHead>Rasm</TableHead>
-                    <TableHead>Amallar</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <>
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-3">
                   {items.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{item.title_uz}</TableCell>
-                      <TableCell>{item.category || '-'}</TableCell>
-                      <TableCell>
-                        <a
-                          href={item.image_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-primary underline"
-                        >
-                          Ko'rish
-                        </a>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(item.id)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                    <Card key={item.id} className="border-2 border-border/50 hover:border-primary/30 transition-all hover:shadow-md overflow-hidden">
+                      <div className="aspect-video w-full overflow-hidden">
+                        <img
+                          src={item.image_url}
+                          alt={item.title_uz}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
+                          <div>
+                            <h3 className="font-semibold text-sm mb-1">{item.title_uz}</h3>
+                            {item.category && (
+                              <Badge variant="outline" className="text-xs">{item.category}</Badge>
+                            )}
+                          </div>
+                          <div className="flex gap-2 pt-2 border-t">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 h-8 text-xs"
+                              onClick={() => handleEdit(item)}
+                            >
+                              <Pencil className="h-3 w-3 mr-1" />
+                              Tahrirlash
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 h-8 text-xs text-destructive hover:text-destructive"
+                              onClick={() => handleDeleteClick(item.id)}
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              O'chirish
+                            </Button>
+                          </div>
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </CardContent>
+                    </Card>
                   ))}
-                </TableBody>
-              </Table>
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Sarlavha</TableHead>
+                        <TableHead>Kategoriya</TableHead>
+                        <TableHead>Rasm</TableHead>
+                        <TableHead>Amallar</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {items.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell>{item.title_uz}</TableCell>
+                          <TableCell>{item.category || '-'}</TableCell>
+                          <TableCell>
+                            <a
+                              href={item.image_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-primary underline hover:text-primary/80"
+                            >
+                              Ko'rish
+                            </a>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}>
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(item.id)}>
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>

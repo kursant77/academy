@@ -13,6 +13,11 @@ import { supabase } from "@/lib/supabase";
 import type { Course, Teacher, Event, Testimonial as TestimonialRecord } from "@shared/schema";
 import { useContent } from "@/hooks/use-content";
 import { SEO } from "@/components/SEO";
+import { 
+  generateOrganizationStructuredData, 
+  generateWebSiteStructuredData, 
+  generateLocalBusinessStructuredData 
+} from "@/lib/seo-utils";
 
 interface CourseWithTeacher extends Course {
   teachers?: { name: string } | null;
@@ -28,38 +33,26 @@ export default function Home() {
   const { content: ctaContent } = useContent("home_cta", i18n.language);
 
   useEffect(() => {
-    loadData();
+    // Debounce loadData to avoid multiple calls
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
-  // Structured data for SEO
-  const structuredData = useMemo(() => ({
-    "@context": "https://schema.org",
-    "@type": "EducationalOrganization",
-    "name": "A+ Academy",
-    "description": "A+ Academy — IT, tillar va abituriyentlar uchun zamonaviy ta'lim markazi",
-    "url": typeof window !== 'undefined' ? window.location.origin : 'https://aplusacademy.uz',
-    "logo": typeof window !== 'undefined' ? `${window.location.origin}/logo.png` : 'https://aplusacademy.uz/logo.png',
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": "Toshkent",
-      "addressCountry": "UZ"
-    },
-    "offers": {
-      "@type": "Offer",
-      "priceCurrency": "UZS",
-      "category": "Education"
-    },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "reviewCount": "150"
-    }
-  }), []);
+  // Enhanced structured data for SEO - Multiple schemas
+  const structuredData = useMemo(() => {
+    return [
+      generateOrganizationStructuredData(),
+      generateWebSiteStructuredData(),
+      generateLocalBusinessStructuredData(),
+    ];
+  }, []);
 
   const loadData = async () => {
     try {
       // Load featured courses (limit 3) with teacher info
-      // Avval featured va is_published filterlarsiz urinib ko'ramiz
+      // Avval barcha kurslarni olamiz, keyin client-side filter qilamiz
       let coursesQuery = supabase
         .from('courses')
         .select(`
@@ -68,8 +61,7 @@ export default function Home() {
             name
           )
         `)
-        .order('created_at', { ascending: false })
-        .limit(3);
+        .order('created_at', { ascending: false });
       
       const { data: coursesData, error: coursesError } = await coursesQuery;
 
@@ -77,15 +69,24 @@ export default function Home() {
         console.error('Courses error:', coursesError);
         setFeaturedCourses([]);
       } else {
-        // Agar ma'lumotlar bo'lsa, featured va published filter qo'llaymiz
+        // Client-side filter: featured va is_published bo'yicha
         const filtered = (coursesData || []).filter(course => {
           // Agar featured va is_published ustunlari mavjud bo'lsa, filter qo'llaymiz
           if (course.featured !== undefined && course.is_published !== undefined) {
             return course.featured === true && course.is_published === true;
           }
+          // Agar featured mavjud bo'lsa, faqat featured kurslarni ko'rsatamiz
+          if (course.featured !== undefined) {
+            return course.featured === true;
+          }
+          // Agar is_published mavjud bo'lsa, faqat published kurslarni ko'rsatamiz
+          if (course.is_published !== undefined) {
+            return course.is_published === true;
+          }
           // Agar ustunlar mavjud bo'lmasa, barchasini ko'rsatamiz
           return true;
         });
+        // Featured kurslarni limit qilamiz
         setFeaturedCourses(filtered.slice(0, 3));
       }
 
@@ -94,7 +95,7 @@ export default function Home() {
         .from('teachers')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(10); // Ko'proq olish, keyin filter qilamiz
+        .limit(10);
       
       const { data: teachersData, error: teachersError } = await teachersQuery;
 
@@ -102,13 +103,10 @@ export default function Home() {
         console.error('Teachers error:', teachersError);
         setFeaturedTeachers([]);
       } else {
-        // Agar ma'lumotlar bo'lsa, featured filter qo'llaymiz
         const filtered = (teachersData || []).filter(teacher => {
-          // Agar featured ustuni mavjud bo'lsa, filter qo'llaymiz
           if (teacher.featured !== undefined) {
             return teacher.featured === true;
           }
-          // Agar ustun mavjud bo'lmasa, barchasini ko'rsatamiz
           return true;
         });
         setFeaturedTeachers(filtered.slice(0, 4));
@@ -208,34 +206,46 @@ export default function Home() {
   return (
     <>
       <SEO 
-        title="A+ Academy — Professional IT, IELTS & CEFR Kurslar"
-        description="A+ Academy — IT, tillar va abituriyentlar uchun zamonaviy ta'lim markazi. Professional o'qituvchilar bilan yuqori natija kafolatlanadi."
+        title="A+ Academy — Professional IT, IELTS & CEFR Kurslar | Toshkent O'quv Markazi"
+        description="A+ Academy — Toshkentdagi eng yaxshi IT, IELTS, CEFR va dasturlash kurslari. Professional o'qituvchilar, zamonaviy dasturlar, kafolatlangan natija. 2500+ talaba, 1800+ bitiruvchi. Ro'yxatdan o'ting!"
+        keywords="A+ Academy, Toshkent o'quv markazi, IT kurslar Toshkent, IELTS Toshkent, CEFR kurslar, dasturlash kurslari, frontend kurslar, backend kurslar, fullstack kurslar, ingliz tili kurslari, ta'lim markazi Toshkent, o'quv markazi Toshkent, IT o'quv markazi, IELTS o'quv markazi, professional ta'lim, zamonaviy ta'lim, React kurslar, JavaScript kurslar, Python kurslar, Node.js kurslar"
         structuredData={structuredData}
       />
-      <div className="min-h-screen">
+      <div className="min-h-screen relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="fixed inset-0 -z-10 pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent/5 rounded-full blur-3xl animate-float" />
+        </div>
+
         <Hero />
         <StatsBar />
 
-        <section className="w-full py-20 md:py-24 animate-fade-in">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12 md:mb-16 gap-4">
-            <div className="animate-slide-in-left space-y-3">
-              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+        <section className="w-full py-12 sm:py-16 md:py-20 lg:py-24 relative animate-fade-in">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 sm:mb-10 md:mb-12 lg:mb-16 gap-4">
+            <div className="animate-slide-in-left space-y-2 sm:space-y-3">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                 {t("courses.title")}
               </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl">{t("courses.subtitle")}</p>
+              <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl">{t("courses.subtitle")}</p>
             </div>
             <Link href="/courses">
-              <Button variant="outline" className="gap-2 animate-slide-in-right shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105" data-testid="button-view-all-courses">
+              <Button variant="outline" className="gap-2 animate-slide-in-right shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 text-xs sm:text-sm w-full sm:w-auto" data-testid="button-view-all-courses">
                 {t("courses.filter")}
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {featuredCourses.map((course, index) => (
-              <div key={course.id} className="animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
+              <div 
+                key={course.id} 
+                className="animate-fade-in-up card-hover-lift group" 
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
               <CourseCard
                 id={course.id}
                 name={
@@ -262,26 +272,30 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="w-full py-20 md:py-24 bg-gradient-to-b from-muted/30 to-background animate-fade-in">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12 md:mb-16 gap-4">
-            <div className="animate-slide-in-left space-y-3">
-              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+      <section className="w-full py-12 sm:py-16 md:py-20 lg:py-24 bg-gradient-to-b from-muted/30 to-background animate-fade-in">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 sm:mb-10 md:mb-12 lg:mb-16 gap-4">
+            <div className="animate-slide-in-left space-y-2 sm:space-y-3">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                 {t("teachers.title")}
               </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl">{t("teachers.subtitle")}</p>
+              <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl">{t("teachers.subtitle")}</p>
             </div>
             <Link href="/teachers">
-              <Button variant="outline" className="gap-2 animate-slide-in-right shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105" data-testid="button-view-all-teachers">
+              <Button variant="outline" className="gap-2 animate-slide-in-right shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 text-xs sm:text-sm w-full sm:w-auto" data-testid="button-view-all-teachers">
                 {t("teachers.viewProfile")}
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </Button>
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
             {featuredTeachers.map((teacher, index) => (
-              <div key={teacher.id} className="animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
+              <div 
+                key={teacher.id} 
+                className="animate-fade-in-up card-hover-lift group" 
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
               <TeacherCard
                 id={teacher.id}
                 name={teacher.name}
@@ -308,13 +322,13 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="w-full py-20 md:py-24 animate-fade-in">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-          <div className="text-center mb-16 animate-fade-in-up space-y-3">
-            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+      <section className="w-full py-12 sm:py-16 md:py-20 lg:py-24 animate-fade-in">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          <div className="text-center mb-8 sm:mb-12 md:mb-16 animate-fade-in-up space-y-2 sm:space-y-3">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               {t("testimonials.title")}
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t("testimonials.subtitle")}</p>
+            <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-2">{t("testimonials.subtitle")}</p>
           </div>
 
           <div className="animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
@@ -323,26 +337,30 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="w-full py-20 md:py-24 bg-gradient-to-b from-muted/30 to-background animate-fade-in">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12 md:mb-16 gap-4">
-            <div className="animate-slide-in-left space-y-3">
-              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+      <section className="w-full py-12 sm:py-16 md:py-20 lg:py-24 bg-gradient-to-b from-muted/30 to-background animate-fade-in">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 sm:mb-10 md:mb-12 lg:mb-16 gap-4">
+            <div className="animate-slide-in-left space-y-2 sm:space-y-3">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                 {t("events.title")}
               </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl">{t("events.subtitle")}</p>
+              <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl">{t("events.subtitle")}</p>
             </div>
             <Link href="/events">
-              <Button variant="outline" className="gap-2 animate-slide-in-right shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105" data-testid="button-view-all-events">
+              <Button variant="outline" className="gap-2 animate-slide-in-right shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 text-xs sm:text-sm w-full sm:w-auto" data-testid="button-view-all-events">
                 {t("events.readMore")}
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {latestEvents.map((event, index) => (
-              <div key={event.id} className="animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
+              <div 
+                key={event.id} 
+                className="animate-fade-in-up card-hover-lift group" 
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
               <EventCard
                 id={event.id}
                 title={
@@ -368,18 +386,23 @@ export default function Home() {
 
       <section className="w-full py-20 md:py-28 animate-fade-in relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-background -z-10" />
-        <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 text-center">
+        <div className="absolute inset-0 bg-pattern-dots opacity-30 -z-10" />
+        <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 text-center relative z-10">
           <div className="animate-fade-in-up space-y-6">
-            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold gradient-text animate-gradient">
               {ctaContent.title || t("register.title")}
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed animate-fade-in-up stagger-1">
               {ctaContent.subtitle || t("register.subtitle")}
             </p>
-            <Link href="/register">
-              <Button size="lg" className="gap-2 animate-bounce-in shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 px-8 py-6 text-base" data-testid="button-cta-register">
+            <Link href="/register" className="inline-block animate-fade-in-up stagger-2">
+              <Button 
+                size="lg" 
+                className="gap-2 animate-scale-in-bounce shadow-xl hover:shadow-2xl hover:shadow-primary/50 transition-all duration-300 hover:scale-110 px-8 py-6 text-base hover-glow" 
+                data-testid="button-cta-register"
+              >
                 {ctaContent.cta || t("hero.registerBtn")}
-                <ArrowRight className="h-5 w-5" />
+                <ArrowRight className="h-5 w-5 animate-pulse" />
               </Button>
             </Link>
           </div>

@@ -85,7 +85,9 @@ function AchievementsContent() {
 
       if (error) throw error;
       setAchievements(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error in achievements page:', errorMessage);
       toast({
         title: 'Xatolik',
         description: error.message,
@@ -105,7 +107,9 @@ function AchievementsContent() {
 
       if (error) throw error;
       setCourses(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error in achievements page:', errorMessage);
       console.error('Error loading courses:', error);
     }
   };
@@ -137,7 +141,9 @@ function AchievementsContent() {
       setIsDialogOpen(false);
       resetForm();
       loadAchievements();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error in achievements page:', errorMessage);
       toast({
         title: 'Xatolik',
         description: error.message,
@@ -165,7 +171,9 @@ function AchievementsContent() {
       loadAchievements();
       setDeleteDialogOpen(false);
       setDeleteId(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error in achievements page:', errorMessage);
       toast({
         title: 'Xatolik',
         description: error.message,
@@ -384,43 +392,104 @@ function AchievementsContent() {
                 Hozircha yutuqlar yo'q
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Sarlavha</TableHead>
-                    <TableHead>O'quvchi</TableHead>
-                    <TableHead>Kurs</TableHead>
-                    <TableHead>Amallar</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <>
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-3">
                   {achievements.map((achievement) => (
-                    <TableRow key={achievement.id}>
-                      <TableCell>{achievement.title_uz}</TableCell>
-                      <TableCell>{achievement.student_name_uz}</TableCell>
-                      <TableCell>{(achievement.course as any)?.name_uz || 'Kurs yo\'q'}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(achievement)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteClick(achievement.id)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                    <Card key={achievement.id} className="border-2 border-border/50 hover:border-primary/30 transition-all hover:shadow-md">
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
+                          {achievement.image_url && (
+                            <div className="aspect-video w-full overflow-hidden rounded-lg">
+                              <img
+                                src={achievement.image_url}
+                                alt={achievement.title_uz}
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
+                          )}
+                          <div>
+                            <h3 className="font-semibold text-sm mb-2">{achievement.title_uz}</h3>
+                            <div className="space-y-1.5 text-xs text-muted-foreground">
+                              <div className="flex items-center justify-between">
+                                <span>O'quvchi:</span>
+                                <span className="font-medium text-foreground">{achievement.student_name_uz}</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span>Kurs:</span>
+                                <span className="font-medium text-foreground">
+                                  {(achievement.course as { name_uz?: string } | null)?.name_uz || 'Kurs yo\'q'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 pt-2 border-t">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 h-8 text-xs"
+                              onClick={() => handleEdit(achievement)}
+                            >
+                              <Pencil className="h-3 w-3 mr-1" />
+                              Tahrirlash
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 h-8 text-xs text-destructive hover:text-destructive"
+                              onClick={() => handleDeleteClick(achievement.id)}
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              O'chirish
+                            </Button>
+                          </div>
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </CardContent>
+                    </Card>
                   ))}
-                </TableBody>
-              </Table>
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Sarlavha</TableHead>
+                        <TableHead>O'quvchi</TableHead>
+                        <TableHead>Kurs</TableHead>
+                        <TableHead>Amallar</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {achievements.map((achievement) => (
+                        <TableRow key={achievement.id}>
+                          <TableCell>{achievement.title_uz}</TableCell>
+                          <TableCell>{achievement.student_name_uz}</TableCell>
+                          <TableCell>{(achievement.course as { name_uz?: string } | null)?.name_uz || 'Kurs yo\'q'}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(achievement)}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteClick(achievement.id)}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>

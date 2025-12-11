@@ -57,17 +57,37 @@ export function formatRegistrationMessage(data: {
   age: string;
   phone: string;
   courseName: string;
+  parentPhone?: string;
 }): string {
-  return `
-🆕 <b>Yangi ro'yxatdan o'tish</b>
+  const date = new Date();
+  const formattedDate = date.toLocaleDateString('uz-UZ', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  let message = `
+🎓 <b>🆕 YANGI RO'YXATDAN O'TISH</b>
+━━━━━━━━━━━━━━━━━━━━━━━━
 
 👤 <b>Ism:</b> ${escapeHtml(data.fullName)}
-📅 <b>Yosh:</b> ${escapeHtml(data.age)}
-📱 <b>Telefon:</b> ${escapeHtml(data.phone)}
-📚 <b>Kurs:</b> ${escapeHtml(data.courseName)}
+📅 <b>Yosh:</b> ${escapeHtml(data.age)} yosh
+📱 <b>Telefon raqami:</b> <code>${escapeHtml(data.phone)}</code>
+`;
 
-⏰ <i>Vaqt: ${new Date().toLocaleString('uz-UZ')}</i>
-  `.trim();
+  if (data.parentPhone && data.parentPhone.trim()) {
+    message += `👨‍👩‍👧 <b>Ota-ona telefon:</b> <code>${escapeHtml(data.parentPhone.trim())}</code>\n`;
+  }
+
+  message += `📚 <b>Tanlangan kurs:</b> ${escapeHtml(data.courseName)}
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+⏰ <i>${formattedDate}</i>
+  `;
+
+  return message.trim();
 }
 
 /**

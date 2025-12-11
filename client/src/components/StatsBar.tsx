@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import type { SiteStat } from "@shared/schema";
 
+// Memoize icon map to prevent recreation
 const iconMap: Record<string, LucideIcon> = {
   Users,
   Award,
@@ -23,8 +24,12 @@ function useCountUp(end: number, duration: number = 2000, start: number = 0): nu
   const countRef = useRef(start);
   const startTimeRef = useRef<number | null>(null);
   const requestRef = useRef<number>();
+  const hasAnimatedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent multiple animations
+    if (hasAnimatedRef.current) return;
+
     const animate = (currentTime: number) => {
       if (startTimeRef.current === null) {
         startTimeRef.current = currentTime;
@@ -46,6 +51,7 @@ function useCountUp(end: number, duration: number = 2000, start: number = 0): nu
         requestRef.current = requestAnimationFrame(animate);
       } else {
         setCount(end);
+        hasAnimatedRef.current = true;
       }
     };
 
@@ -53,7 +59,7 @@ function useCountUp(end: number, duration: number = 2000, start: number = 0): nu
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
+          if (entry.isIntersecting && !hasAnimatedRef.current) {
             startTimeRef.current = null;
             countRef.current = start;
             setCount(start);
@@ -62,7 +68,7 @@ function useCountUp(end: number, duration: number = 2000, start: number = 0): nu
           }
         });
       },
-      { threshold: 0.5 }
+      { threshold: 0.1, rootMargin: '50px' } // Optimize threshold
     );
 
     const element = document.querySelector('[data-stats-container]');
@@ -91,18 +97,20 @@ function AnimatedStat({ stat, index }: { stat: Stat; index: number }) {
 
   return (
     <div
-      className="flex flex-col items-center text-center gap-3 animate-fade-in-up"
+      className="flex flex-col items-center text-center gap-4 animate-fade-in-up group cursor-default"
       style={{ animationDelay: `${index * 0.1}s` }}
       data-testid={`stat-${index}`}
     >
-      <div className="p-3 rounded-lg bg-primary/10 transition-transform hover:scale-110">
-        {stat.icon}
+      <div className="p-4 rounded-xl bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-primary/20 border border-primary/10 group-hover:border-primary/30">
+        <div className="transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+          {stat.icon}
+        </div>
       </div>
-      <div className="space-y-1">
-        <div className="text-3xl md:text-4xl font-bold transition-all" data-testid={`stat-value-${index}`}>
+      <div className="space-y-2">
+        <div className="text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent bg-[length:200%_auto] transition-all duration-300 group-hover:animate-gradient" data-testid={`stat-value-${index}`}>
           {displayValue}
         </div>
-        <div className="text-sm md:text-base text-muted-foreground">
+        <div className="text-sm md:text-base text-muted-foreground group-hover:text-foreground/80 transition-colors duration-300 font-medium">
           {stat.label}
         </div>
       </div>
@@ -174,12 +182,15 @@ export function StatsBar() {
         numericValue: numeric,
       };
     });
-  }, [siteStats, t, i18n.language]);
+  }, [siteStats, i18n.language]);
 
   return (
-    <section className="w-full py-12 bg-muted/30" data-stats-container>
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+    <section className="w-full py-12 md:py-16 bg-gradient-to-b from-muted/30 via-background to-background relative overflow-hidden" data-stats-container>
+      {/* Background pattern */}
+      <div className="absolute inset-0 bg-pattern-dots opacity-10" />
+      
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 relative z-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           {stats.map((stat, index) => (
             <AnimatedStat key={index} stat={stat} index={index} />
           ))}

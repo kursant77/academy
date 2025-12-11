@@ -9,19 +9,40 @@ Disallow: /api/
 # Sitemap
 Sitemap: https://aplusacademy.uz/sitemap.xml
 
-# Crawl-delay
-Crawl-delay: 1
+# Crawl-delay - removed for faster indexing
+# Crawl-delay: 1
 
-# Specific bots
+# Specific bots - Enhanced
 User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+Crawl-delay: 0
+
+User-agent: Googlebot-Image
 Allow: /
 Disallow: /admin/
 
 User-agent: Bingbot
 Allow: /
 Disallow: /admin/
+Crawl-delay: 0
 
 User-agent: Yandex
 Allow: /
 Disallow: /admin/
+Crawl-delay: 0
+
+User-agent: Slurp
+Allow: /
+Disallow: /admin/
+
+# Allow all search engines
+User-agent: *
+Allow: /courses
+Allow: /teachers
+Allow: /events
+Allow: /about
+Allow: /contact
+Allow: /register
+Allow: /achievements
 

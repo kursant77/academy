@@ -22,14 +22,31 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: false, // Production da sourcemap o'chiriladi
     minify: 'esbuild', // Esbuild minifier (default, terser kerak emas)
+    target: 'esnext', // Modern browsers uchun
+    cssMinify: 'esbuild', // CSS minification
     rollupOptions: {
       output: {
-        manualChunks: {
+        manualChunks: (id) => {
           // Vendor chunklar
-          'react-vendor': ['react', 'react-dom', 'wouter'],
-          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
-          'utils-vendor': ['date-fns', 'zod', 'clsx', 'tailwind-merge'],
-          'supabase-vendor': ['@supabase/supabase-js'],
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('wouter')) {
+              return 'react-vendor';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'ui-vendor';
+            }
+            if (id.includes('date-fns') || id.includes('zod') || id.includes('clsx') || id.includes('tailwind-merge')) {
+              return 'utils-vendor';
+            }
+            if (id.includes('@supabase')) {
+              return 'supabase-vendor';
+            }
+            if (id.includes('@tanstack')) {
+              return 'query-vendor';
+            }
+            // Boshqa vendor'lar
+            return 'vendor';
+          }
         },
         // Chunk naming
         chunkFileNames: 'assets/js/[name]-[hash].js',
@@ -51,6 +68,16 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     // CSS code splitting
     cssCodeSplit: true,
+    // Compression
+    reportCompressedSize: true,
+    // Tree shaking
+    terserOptions: {
+      compress: {
+        drop_console: import.meta.env.PROD, // Console.log'larni production'da o'chirish
+        drop_debugger: true,
+        pure_funcs: import.meta.env.PROD ? ['console.log', 'console.info'] : [],
+      },
+    },
   },
   server: {
     port: 5173,
@@ -74,5 +101,11 @@ export default defineConfig({
       'date-fns',
       'zod',
     ],
+    exclude: ['@tanstack/react-query'],
+  },
+  // Performance optimizations
+  esbuild: {
+    legalComments: 'none',
+    treeShaking: true,
   },
 });

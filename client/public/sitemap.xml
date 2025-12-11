@@ -44,20 +44,12 @@
     <priority>0.7</priority>
   </url>
   
-  <!-- Schedule -->
+  <!-- Achievements/Gallery -->
   <url>
-    <loc>https://aplusacademy.uz/schedule</loc>
+    <loc>https://aplusacademy.uz/achievements</loc>
     <lastmod>2025-01-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-  </url>
-  
-  <!-- Gallery -->
-  <url>
-    <loc>https://aplusacademy.uz/gallery</loc>
-    <lastmod>2025-01-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
   </url>
   
   <!-- Contact -->

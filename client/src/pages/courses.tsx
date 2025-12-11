@@ -23,7 +23,11 @@ export default function Courses() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadData();
+    // Debounce loadData to avoid multiple calls
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const loadData = async () => {
@@ -174,22 +178,47 @@ export default function Courses() {
     return filtered;
   }, [allCourses, selectedCategory, categories, i18n.language]);
 
-  const structuredData = useMemo(() => ({
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "name": "A+ Academy - Barcha Kurslar",
-    "description": "Professional IT, IELTS, CEFR va boshqa kurslar",
-    "itemListElement": filteredCourses.map((course, index) => ({
-      "@type": "Course",
-      "position": index + 1,
-      "name": i18n.language === "uz" ? course.name_uz : i18n.language === "ru" ? course.name_ru : course.name_en,
-      "description": i18n.language === "uz" ? course.description_uz : i18n.language === "ru" ? course.description_ru : course.description_en,
-      "provider": {
-        "@type": "EducationalOrganization",
-        "name": "A+ Academy"
+  const structuredData = useMemo(() => {
+    return [
+      generateWebSiteStructuredData(),
+      {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "A+ Academy - Barcha Kurslar | IT, IELTS, CEFR Kurslar Toshkent",
+        "description": "Professional IT, IELTS, CEFR va boshqa kurslar. Toshkentdagi eng yaxshi o'quv markazi.",
+        "url": typeof window !== 'undefined' ? window.location.href : 'https://aplusacademy.uz/courses',
+        "numberOfItems": filteredCourses.length,
+        "itemListElement": filteredCourses.map((course, index) => {
+          const courseName = i18n.language === "uz" ? course.name_uz : i18n.language === "ru" ? course.name_ru : course.name_en;
+          const courseDesc = i18n.language === "uz" ? course.description_uz : i18n.language === "ru" ? course.description_ru : course.description_en;
+          
+          return {
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+              "@type": "Course",
+              "name": courseName,
+              "description": courseDesc,
+              "url": typeof window !== 'undefined' ? `${window.location.origin}/courses` : 'https://aplusacademy.uz/courses',
+              "provider": {
+                "@type": "EducationalOrganization",
+                "name": "A+ Academy",
+                "url": "https://aplusacademy.uz"
+              },
+              "offers": {
+                "@type": "Offer",
+                "price": course.price.replace(/[^\d]/g, ''),
+                "priceCurrency": "UZS"
+              },
+              ...(course.image_url && {
+                "image": course.image_url.startsWith('http') ? course.image_url : `https://aplusacademy.uz${course.image_url}`
+              })
+            }
+          };
+        })
       }
-    }))
-  }), [filteredCourses, i18n.language]);
+    ];
+  }, [filteredCourses, i18n.language]);
 
   if (loading) {
     return (
@@ -208,40 +237,41 @@ export default function Courses() {
   return (
     <>
       <SEO 
-        title="Kurslar — A+ Academy"
-        description="Professional IT, IELTS, CEFR va boshqa kurslar. A+ Academy da o'qing va martaba quring."
-        keywords="IELTS kurslar, CEFR, IT kurslar, dasturlash, ingliz tili kurslar"
+        title="Kurslar — A+ Academy | IT, IELTS, CEFR, Dasturlash Kurslari Toshkent"
+        description="A+ Academy kurslari: IT, IELTS, CEFR, dasturlash (React, JavaScript, Python, Node.js), ingliz tili. Professional o'qituvchilar, zamonaviy dasturlar. Toshkent. Ro'yxatdan o'ting!"
+        keywords="kurslar, IT kurslar, IELTS kurslar, CEFR kurslar, dasturlash kurslari, frontend kurslar, backend kurslar, fullstack kurslar, React kurslar, JavaScript kurslar, Python kurslar, Node.js kurslar, ingliz tili kurslari, Toshkent kurslar, o'quv markazi kurslar, A+ Academy kurslar, professional kurslar, zamonaviy kurslar"
         structuredData={structuredData}
       />
       <div className="min-h-screen relative overflow-hidden">
         {/* Animated Background Elements */}
-        <div className="absolute inset-0 -z-10">
+        <div className="fixed inset-0 -z-10 pointer-events-none">
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl animate-pulse" />
           <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-accent/5 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-accent/5 rounded-full blur-3xl animate-float" />
+          <div className="absolute inset-0 bg-pattern-dots opacity-20" />
         </div>
 
-        <div className="relative py-12 md:py-16 lg:py-20">
-          <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <div className="relative py-8 sm:py-12 md:py-16 lg:py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
             {/* Hero Section */}
-            <div className="mb-12 md:mb-16 text-center animate-fade-in-down">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 mb-6 backdrop-blur-sm border border-primary/20 animate-bounce-in">
-                <BookOpen className="w-10 h-10 text-primary" />
+            <div className="mb-8 sm:mb-10 md:mb-12 lg:mb-16 text-center animate-fade-in-down">
+              <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 mb-4 sm:mb-6 backdrop-blur-sm border border-primary/20 animate-bounce-in">
+                <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
               </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient px-2">
                 {t("courses.title")}
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto px-2">
                 {t("courses.subtitle")}
               </p>
             </div>
 
             {/* Filter Section */}
-            <Card className="mb-8 md:mb-12 bg-card/50 backdrop-blur-sm border-2 border-border/50 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
-              <div className="p-4 md:p-6">
-                <div className="flex flex-wrap items-center gap-2 md:gap-4">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Filter className="h-4 w-4" />
+            <Card className="mb-6 sm:mb-8 md:mb-12 bg-card/50 backdrop-blur-sm border-2 border-border/50 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+              <div className="p-3 sm:p-4 md:p-6">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+                    <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                     <span className="font-medium">{t("courses.filter")}:</span>
                   </div>
                   {categoryFilters.map((category) => (
@@ -263,25 +293,24 @@ export default function Courses() {
             {/* Courses Grid with Carousel Animation */}
             {filteredCourses.length === 0 ? (
               <Card className="border-dashed border-2 bg-card/50 backdrop-blur-sm">
-                <div className="flex flex-col items-center justify-center py-16 px-6">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mb-4">
-                    <BookOpen className="w-10 h-10 text-primary/50" />
+                <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4 sm:px-6">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mb-3 sm:mb-4">
+                    <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 text-primary/50" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Kurslar topilmadi</h3>
-                  <p className="text-muted-foreground text-center max-w-md">
+                  <h3 className="text-lg sm:text-xl font-semibold mb-2">Kurslar topilmadi</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground text-center max-w-md">
                     {t("courses.noCourses") || "Hozircha kurslar ro'yxati bo'sh. Tez orada qo'shiladi."}
                   </p>
                 </div>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
                 {filteredCourses.map((course, index) => (
                   <div 
                     key={course.id} 
-                    className="group animate-fade-in-up hover:scale-[1.03] transition-all duration-500 hover:z-10"
+                    className="group animate-fade-in-up card-hover-lift hover:z-10"
                     style={{ 
-                      animationDelay: `${index * 0.08}s`,
-                      animation: `slideInUp 0.8s ease-out ${index * 0.08}s both, float 8s ease-in-out infinite ${index * 0.3}s`
+                      animationDelay: `${index * 0.08}s`
                     }}
                   >
                     <CourseCard

@@ -37,7 +37,6 @@ import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { adminApi } from '@/lib/adminApi';
-import type { DashboardSnapshot } from '@/types/admin';
 import { type LucideIcon, Star, TrendingUp, Wallet, Users, Calendar, BookOpen, FileText, Trophy, ArrowRight, FilePenLine, Clock, PiggyBank } from 'lucide-react';
 
 type RecentApplication = {
@@ -163,8 +162,6 @@ function DashboardContent() {
       showTeacherPayouts: true,
     };
   });
-  const [dashboardSnapshot, setDashboardSnapshot] = useState<DashboardSnapshot | null>(null);
-  const [snapshotLoading, setSnapshotLoading] = useState(true);
 
   useEffect(() => {
     loadStats();
@@ -172,21 +169,6 @@ function DashboardContent() {
     loadFeaturedSets();
   }, []);
 
-  useEffect(() => {
-    const loadSnapshot = async () => {
-      try {
-        setSnapshotLoading(true);
-        // Dashboard'da belgilangan foizni uzatish
-        const data = await adminApi.getDashboardSnapshot(dashboardConfig.payoutRate);
-        setDashboardSnapshot(data);
-      } catch (error) {
-        console.error('Dashboard snapshot error', error);
-      } finally {
-        setSnapshotLoading(false);
-      }
-    };
-    loadSnapshot();
-  }, [dashboardConfig.payoutRate]);
 
   useEffect(() => {
     loadFinancialSnapshot(dashboardConfig.timeRange);
@@ -242,7 +224,7 @@ function DashboardContent() {
             full_name: item.full_name,
             phone: item.phone,
             created_at: item.created_at,
-            course_name: (item as any).courses?.name_uz,
+            course_name: (item.courses as { name_uz?: string } | null)?.name_uz,
           }))
         );
       }
@@ -259,14 +241,13 @@ function DashboardContent() {
     setIsFinancialLoading(true);
     try {
       const since = getRangeStart(range);
-      const [coursesRes, teachersRes, applicationsRes, groupsRes] = await Promise.all([
+      const [coursesRes, teachersRes, applicationsRes] = await Promise.all([
         supabase.from('courses').select('id, name_uz, category, price, teacher_id').eq('is_published', true),
         supabase.from('teachers').select('id, name, specialty_uz'),
         supabase
           .from('applications')
           .select('id, course_id, created_at')
           .gte('created_at', since.toISOString()),
-        supabase.from('groups').select('teacher_id, monthly_revenue'),
       ]);
 
       if (coursesRes.error) throw coursesRes.error;
@@ -279,15 +260,6 @@ function DashboardContent() {
       const teacherMap = new Map(
         (teachersRes.data || []).map((teacher) => [teacher.id, { name: teacher.name, specialty: teacher.specialty_uz }])
       );
-      
-      // O'qituvchilarning groups daromadlarini hisoblash
-      const teacherGroupsRevenueMap = new Map<string, number>();
-      (groupsRes.data || []).forEach((group: any) => {
-        if (group.teacher_id) {
-          const currentRevenue = teacherGroupsRevenueMap.get(group.teacher_id) || 0;
-          teacherGroupsRevenueMap.set(group.teacher_id, currentRevenue + parseFloat(group.monthly_revenue || '0'));
-        }
-      });
       
       const enrollmentMap = new Map<string, number>();
       const filteredApplications = (applicationsRes.data || []).filter(
@@ -316,35 +288,6 @@ function DashboardContent() {
         };
       });
 
-      // O'qituvchilar revenue'larini groups daromadlaridan yig'ish (courses'dan emas)
-      // Har bir o'qituvchi uchun groups daromadlarini qo'shamiz
-      const teacherRevenueMap = new Map<string, number>();
-      (teachersRes.data || []).forEach((teacher) => {
-        const groupsRevenue = teacherGroupsRevenueMap.get(teacher.id) || 0;
-        teacherRevenueMap.set(teacher.id, groupsRevenue);
-      });
-
-      // Course financials'ga groups daromadlarini qo'shamiz
-      teacherRevenueMap.forEach((revenue, teacherId) => {
-        // Agar bu o'qituvchi courseFinancials'da bo'lmasa, qo'shamiz
-        const existingCourse = courseFinancials.find(c => c.teacherId === teacherId);
-        if (existingCourse) {
-          existingCourse.revenue = Math.max(existingCourse.revenue, revenue);
-        } else if (teacherId) {
-          // Agar course'da bo'lmasa, lekin groups'da bo'lsa, qo'shamiz
-          const teacherDetails = teacherMap.get(teacherId);
-          courseFinancials.push({
-            id: `group-revenue-${teacherId}`,
-            name: `${teacherDetails?.name || 'Noma\'lum'} - Groups`,
-            category: 'Groups',
-            teacherId,
-            teacherName: teacherDetails?.name,
-            teacherSpecialty: teacherDetails?.specialty,
-            revenue,
-            enrollment: 0,
-          });
-        }
-      });
 
       const totalRevenue = courseFinancials.reduce((sum, course) => sum + course.revenue, 0);
       const totalEnrollments = courseFinancials.reduce((sum, course) => sum + course.enrollment, 0);
@@ -578,8 +521,6 @@ function DashboardContent() {
           </div>
         </div>
 
-        <FinanceSnapshot snapshot={dashboardSnapshot} loading={snapshotLoading} currency={dashboardConfig.currency} payoutRate={dashboardConfig.payoutRate} />
-        <GroupAnalytics snapshot={dashboardSnapshot} loading={snapshotLoading} />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
           <div className="stagger-item">
@@ -761,7 +702,7 @@ function DashboardContent() {
                   onValueChange={(value) => handleDashboardConfigChange('payoutRate', value[0] / 100)}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Har bir o'qituvchi oyligi groups daromadlari yig'indisidan {Math.round(dashboardConfig.payoutRate * 100)}% hisoblanadi. 
+                  Har bir o'qituvchi oyligi kurs daromadlari yig'indisidan {Math.round(dashboardConfig.payoutRate * 100)}% hisoblanadi. 
                   Bu sozlamalar barcha sahifalarda dinamik ishlatiladi.
                 </p>
               </div>
@@ -782,7 +723,7 @@ function DashboardContent() {
               <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 text-sm">
                 <p className="font-medium text-primary mb-2">✅ Dinamik hisoblash aktiv</p>
                 <p className="text-muted-foreground text-xs">
-                  Oyliklar avtomatik hisoblanadi: Groups daromadlari × {Math.round(dashboardConfig.payoutRate * 100)}% = O'qituvchi oyligi
+                  Oyliklar avtomatik hisoblanadi: Kurs daromadlari × {Math.round(dashboardConfig.payoutRate * 100)}% = O'qituvchi oyligi
                 </p>
                 <p className="text-muted-foreground text-xs mt-2">
                   Bu sozlamalar localStorage'da saqlanadi va barcha sahifalarda ishlatiladi.
@@ -1154,9 +1095,7 @@ function buildFinancialOverview(base: FinancialBase | null, payoutRate: number):
 
   const avgTicket = base.totalEnrollments ? base.totalRevenue / base.totalEnrollments : 0;
 
-  // O'qituvchilar revenue'larini groups daromadlaridan hisoblash (courses'dan emas)
-  // Bu funksiya async bo'lgani uchun, bu yerda faqat UI'da ko'rsatish uchun ma'lumotlarni qayta hisoblaymiz
-  // Real ma'lumotlar loadFinancialSnapshot'da groups'lar orqali yuklanadi
+  // O'qituvchilar revenue'larini kurs daromadlaridan hisoblash
   
   const teacherAggregate = new Map<
     string,
@@ -1164,9 +1103,8 @@ function buildFinancialOverview(base: FinancialBase | null, payoutRate: number):
   >();
 
   base.courseFinancials.forEach((course) => {
-    // Agar course id `group-revenue-` bilan boshlansa, bu groups daromadlari
-    if (course.id.startsWith('group-revenue-')) {
-      // Bu groups daromadlaridan kelib chiqqan
+    // Kurs daromadlarini hisoblash
+    if (course.id) {
       const teacherId = course.teacherId;
       if (teacherId) {
         const entry = teacherAggregate.get(teacherId) || {
@@ -1177,7 +1115,7 @@ function buildFinancialOverview(base: FinancialBase | null, payoutRate: number):
         };
         entry.name = course.teacherName || entry.name;
         entry.specialty = course.teacherSpecialty || entry.specialty;
-        entry.totalRevenue += course.revenue; // Groups daromadlari
+        entry.totalRevenue += course.revenue; // Kurs daromadlari
         entry.courses += 1;
         teacherAggregate.set(teacherId, entry);
       }
@@ -1191,7 +1129,7 @@ function buildFinancialOverview(base: FinancialBase | null, payoutRate: number):
       };
       entry.name = course.teacherName || entry.name;
       entry.specialty = course.teacherSpecialty || entry.specialty;
-      // Groups daromadlari bo'lsa, uni ustun qilamiz
+      // Kurs daromadlarini qo'shamiz
       // Aks holda course revenue'ni qo'shamiz
       if (!entry.totalRevenue || course.revenue > entry.totalRevenue) {
         entry.totalRevenue = Math.max(entry.totalRevenue, course.revenue);
@@ -1207,7 +1145,7 @@ function buildFinancialOverview(base: FinancialBase | null, payoutRate: number):
       name: data.name,
       specialty: data.specialty,
       totalRevenue: data.totalRevenue,
-      payout: data.totalRevenue * payoutRate, // Groups daromadlari × payoutRate
+      payout: data.totalRevenue * payoutRate, // Kurs daromadlari × payoutRate
       courses: data.courses,
       status: determineTeacherStatus(data.totalRevenue, base.totalRevenue, teacherAggregate.size),
     }))
@@ -1274,394 +1212,4 @@ function InsightCard({ title, value, subLabel, icon: Icon, trend }: InsightCardP
   );
 }
 
-type FinanceSnapshotProps = {
-  snapshot: DashboardSnapshot | null;
-  loading: boolean;
-  currency: DashboardConfig['currency'];
-  payoutRate: number;
-};
 
-function FinanceSnapshot({ snapshot, loading, currency, payoutRate }: FinanceSnapshotProps) {
-
-  const formatCurrencyLocal = (value: number) => {
-    const rate = currencyRates[currency] || 1;
-    const formatter = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency,
-      maximumFractionDigits: currency === 'UZS' ? 0 : 2,
-    });
-    return formatter.format(value * rate);
-  };
-
-  if (loading || !snapshot) {
-    return (
-      <Card className="border-dashed">
-        <CardHeader>
-          <CardTitle>Moliya paneli</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          Moliya statistikasi yuklanmoqda...
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const revenueChartData = snapshot.revenueSeries
-    .filter((item) => item.month && /^\d{4}-\d{2}$/.test(item.month))
-    .map((item) => {
-      try {
-        const date = new Date(`${item.month}-01`);
-        if (isNaN(date.getTime())) {
-          return null;
-        }
-        return {
-          month: date.toLocaleDateString('default', { month: 'short', year: '2-digit' }),
-          value: item.revenue,
-        };
-      } catch {
-        return null;
-      }
-    })
-    .filter((item) => item !== null) as { month: string; value: number }[];
-
-  const expenseChartData = snapshot.expenseSeries
-    .filter((item) => item.month && /^\d{4}-\d{2}$/.test(item.month))
-    .map((item) => {
-      try {
-        const date = new Date(`${item.month}-01`);
-        if (isNaN(date.getTime())) {
-          return null;
-        }
-        return {
-          month: date.toLocaleDateString('default', { month: 'short', year: '2-digit' }),
-          value: item.expense,
-        };
-      } catch {
-        return null;
-      }
-    })
-    .filter((item) => item !== null) as { month: string; value: number }[];
-
-  const pieData = [
-    { name: 'Net Profit', value: Math.max(snapshot.netProfit, 0) },
-    { name: 'Expenses', value: snapshot.monthlyExpenses },
-  ];
-
-  const studentStatusData = snapshot.studentStatusSeries.map((item) => ({
-    status: item.status === 'paid' ? 'Paid' : 'Unpaid',
-    value: item.value,
-  }));
-
-  return (
-    <div className="space-y-4 sm:space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
-        <Card className="stagger-item" style={{ animationDelay: '0.02s' }}>
-          <CardHeader className="pb-2 p-4 sm:p-6">
-            <CardTitle className="text-xs sm:text-sm text-muted-foreground">Monthly revenue</CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0">
-            <p className="text-xl sm:text-2xl font-bold break-words">{formatCurrencyLocal(snapshot.monthlyRevenue)}</p>
-            <p className="text-xs text-muted-foreground mt-1">Teachers: {snapshot.teacherCount}</p>
-          </CardContent>
-        </Card>
-        <Card className="stagger-item" style={{ animationDelay: '0.04s' }}>
-          <CardHeader className="pb-2 p-4 sm:p-6">
-            <CardTitle className="text-xs sm:text-sm text-muted-foreground">O'qituvchilar oyligi</CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0">
-            <p className="text-xl sm:text-2xl font-bold break-words text-primary">{formatCurrencyLocal(snapshot.teacherSalaryExpense || 0)}</p>
-            <p className="text-xs text-muted-foreground mt-1">Groups daromadlari: {Math.round(payoutRate * 100)}%</p>
-          </CardContent>
-        </Card>
-        <Card className="stagger-item" style={{ animationDelay: '0.06s' }}>
-          <CardHeader className="pb-2 p-4 sm:p-6">
-            <CardTitle className="text-xs sm:text-sm text-muted-foreground">Monthly expenses</CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0">
-            <p className="text-xl sm:text-2xl font-bold break-words">{formatCurrencyLocal(snapshot.monthlyExpenses)}</p>
-            <p className="text-xs text-muted-foreground mt-1">Teacher salaries + other expenses</p>
-          </CardContent>
-        </Card>
-        <Card className="stagger-item" style={{ animationDelay: '0.08s' }}>
-          <CardHeader className="pb-2 p-4 sm:p-6">
-            <CardTitle className="text-xs sm:text-sm text-muted-foreground">Net profit</CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0">
-            <p className="text-xl sm:text-2xl font-bold break-words">{formatCurrencyLocal(snapshot.netProfit)}</p>
-            <p className="text-xs text-muted-foreground mt-1">{snapshot.netProfit >= 0 ? 'Positive month' : 'Loss month'}</p>
-          </CardContent>
-        </Card>
-        <Card className="stagger-item" style={{ animationDelay: '0.1s' }}>
-          <CardHeader className="pb-2 p-4 sm:p-6">
-            <CardTitle className="text-xs sm:text-sm text-muted-foreground">Profit margin</CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0">
-            <p className="text-xl sm:text-2xl font-bold">{snapshot.profitMargin.toFixed(1)}%</p>
-            <p className="text-xs text-muted-foreground mt-1">Paid students: {snapshot.paidStudents}</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
-        <Card className="xl:col-span-2">
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg">Monthly revenue line</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[240px] sm:h-[300px] p-4 sm:p-6 pt-0">
-            {revenueChartData.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                Ma'lumot topilmadi
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={revenueChartData}>
-                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={3} dot />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg">Profit vs expenses</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[240px] sm:h-[300px] flex items-center justify-center p-4 sm:p-6 pt-0">
-            {pieData.every(item => item.value === 0) ? (
-              <div className="text-sm text-muted-foreground">Ma'lumot topilmadi</div>
-            ) : (
-              <PieChart width={240} height={240} className="sm:w-[280px] sm:h-[280px]">
-                <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={4}>
-                  {pieData.map((entry, index) => (
-                    <Cell key={entry.name} fill={index === 0 ? '#16a34a' : '#f97316'} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
-        <Card>
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg">Monthly expense bar</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[220px] sm:h-[260px] p-4 sm:p-6 pt-0">
-            {expenseChartData.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                Ma'lumot topilmadi
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={expenseChartData}>
-                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#6366f1" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg">Student payment status</CardTitle>
-            <CardDescription className="text-xs sm:text-sm">Paid vs unpaid o'quvchilar</CardDescription>
-          </CardHeader>
-          <CardContent className="h-[220px] sm:h-[260px] p-4 sm:p-6 pt-0">
-            {studentStatusData.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                Ma'lumot topilmadi
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={studentStatusData}>
-                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                  <XAxis dataKey="status" tick={{ fontSize: 12 }} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#f59e0b" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-}
-
-function GroupAnalytics({ snapshot, loading }: { snapshot: DashboardSnapshot | null; loading: boolean }) {
-  if (loading || !snapshot) {
-    return (
-      <Card className="border-dashed">
-        <CardHeader>
-          <CardTitle>Guruh statistikasi</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">Guruh statistikasi yuklanmoqda...</CardContent>
-      </Card>
-    );
-  }
-
-  const topStudents = snapshot.topGroups?.byStudents || [];
-  const topRevenue = snapshot.topGroups?.byRevenue || [];
-  const topAttendance = snapshot.topGroups?.byAttendance || [];
-  const studentsPerGroup = snapshot.studentsPerGroup || [];
-  const teachersPerGroup = snapshot.teachersPerGroup || [];
-  const capacityUsage = snapshot.capacityUsage || [];
-
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Guruhlar soni</CardTitle>
-            <CardDescription>Faol va yopiq guruhlar</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{snapshot.groupCount}</p>
-            <p className="text-sm text-muted-foreground">Jami A+ Academy bo'ylab</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>O'qituvchi boshiga guruhlar</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[220px]">
-            {teachersPerGroup.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                Ma'lumot topilmadi
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={teachersPerGroup}>
-                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                  <XAxis dataKey="teacher" hide />
-                  <YAxis allowDecimals={false} />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#0ea5e9" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Talabalar soni</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[260px]">
-            {studentsPerGroup.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                Ma'lumot topilmadi
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={studentsPerGroup}>
-                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                  <XAxis dataKey="name" />
-                  <YAxis allowDecimals={false} />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#10b981" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Sig'imdan foydalanish</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[260px]">
-            {capacityUsage.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                Ma'lumot topilmadi
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={capacityUsage}>
-                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                  <XAxis dataKey="name" />
-                  <YAxis unit="%" />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#f97316" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Top 5 guruhlar</CardTitle>
-          <CardDescription>Talaba, revenue va attendance bo'yicha</CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {topStudents.length === 0 && topRevenue.length === 0 && topAttendance.length === 0 ? (
-            <div className="col-span-3 py-8 text-center text-sm text-muted-foreground">
-              Guruhlar bo'yicha ma'lumot topilmadi
-            </div>
-          ) : (
-            <>
-              <TopGroupList title="Talabalar" items={topStudents} suffix="talaba" />
-              <TopGroupList title="Revenue" items={topRevenue} suffix="so'm" formatter={(value) => value.toLocaleString()} />
-              <TopGroupList title="Attendance" items={topAttendance} suffix="%" />
-            </>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-function TopGroupList({
-  title,
-  items,
-  suffix,
-  formatter,
-}: {
-  title: string;
-  items: { id: string; name: string; value: number }[];
-  suffix?: string;
-  formatter?: (value: number) => string;
-}) {
-  if (items.length === 0) {
-    return (
-      <div>
-        <p className="text-sm font-semibold">{title}</p>
-        <div className="mt-3 text-center py-4 text-sm text-muted-foreground">
-          Ma'lumot topilmadi
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div>
-      <p className="text-sm font-semibold">{title}</p>
-      <div className="mt-3 space-y-2">
-        {items.map((item, index) => (
-          <div key={item.id} className="flex items-center justify-between rounded-lg border px-3 py-2">
-            <div>
-              <p className="font-semibold">
-                #{index + 1} {item.name}
-              </p>
-            </div>
-            <span className="text-sm text-muted-foreground">
-              {formatter ? formatter(item.value) : item.value} {suffix}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}

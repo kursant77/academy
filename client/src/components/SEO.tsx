@@ -37,6 +37,13 @@ export function SEO({
   const fullImageUrl = image.startsWith('http') ? image : `${siteUrl}${image}`;
   const fullUrl = url.startsWith('http') ? url : `${siteUrl}${url}`;
   const canonicalUrl = canonical || fullUrl;
+  
+  // Enhanced keywords with common search terms
+  const enhancedKeywords = keywords + 
+    ', A+ Academy, Toshkent, o\'quv markazi, ta\'lim markazi, IT o\'quv markazi, ' +
+    'IELTS o\'quv markazi, ingliz tili kurslari, dasturlash kurslari, ' +
+    'frontend kurslar, backend kurslar, fullstack kurslar, ' +
+    'CEFR kurslar, IELTS Toshkent, IT kurslar Toshkent';
 
   useEffect(() => {
     // Document title
@@ -58,7 +65,7 @@ export function SEO({
       metaKeywords.setAttribute('name', 'keywords');
       document.head.appendChild(metaKeywords);
     }
-    metaKeywords.setAttribute('content', keywords);
+    metaKeywords.setAttribute('content', enhancedKeywords);
 
     // Canonical URL
     let canonical = document.querySelector('link[rel="canonical"]');
@@ -97,15 +104,20 @@ export function SEO({
       metaLang.setAttribute('lang', 'uz');
     }
 
-    // Open Graph tags
+    // Open Graph tags - Enhanced
     const ogTags = [
       { property: 'og:title', content: fullTitle },
       { property: 'og:description', content: description },
       { property: 'og:image', content: fullImageUrl },
+      { property: 'og:image:width', content: '1200' },
+      { property: 'og:image:height', content: '630' },
+      { property: 'og:image:alt', content: fullTitle },
       { property: 'og:url', content: fullUrl },
       { property: 'og:type', content: type },
       { property: 'og:site_name', content: 'A+ Academy' },
       { property: 'og:locale', content: 'uz_UZ' },
+      { property: 'og:locale:alternate', content: 'ru_RU' },
+      { property: 'og:locale:alternate', content: 'en_US' },
     ];
 
     if (publishedTime) {
@@ -128,12 +140,15 @@ export function SEO({
       meta.setAttribute('content', content);
     });
 
-    // Twitter Card tags
+    // Twitter Card tags - Enhanced
     const twitterTags = [
       { name: 'twitter:card', content: 'summary_large_image' },
       { name: 'twitter:title', content: fullTitle },
       { name: 'twitter:description', content: description },
       { name: 'twitter:image', content: fullImageUrl },
+      { name: 'twitter:image:alt', content: fullTitle },
+      { name: 'twitter:site', content: '@aplusacademy' },
+      { name: 'twitter:creator', content: '@aplusacademy' },
     ];
 
     twitterTags.forEach(({ name, content }) => {
@@ -146,21 +161,56 @@ export function SEO({
       meta.setAttribute('content', content);
     });
 
-    // Structured Data (JSON-LD)
+    // Structured Data (JSON-LD) - Multiple schemas support
     if (structuredData) {
       // Oldingi structured data ni o'chirish
-      const existingScript = document.querySelector('script[type="application/ld+json"]');
-      if (existingScript) {
-        existingScript.remove();
-      }
+      const existingScripts = document.querySelectorAll('script[type="application/ld+json"]');
+      existingScripts.forEach(script => script.remove());
 
-      // Yangi structured data qo'shish
-      const script = document.createElement('script');
-      script.type = 'application/ld+json';
-      script.text = JSON.stringify(structuredData);
-      document.head.appendChild(script);
+      // Array bo'lsa, har birini alohida qo'shamiz
+      const schemas = Array.isArray(structuredData) ? structuredData : [structuredData];
+      
+      schemas.forEach((schema) => {
+        const script = document.createElement('script');
+        script.type = 'application/ld+json';
+        script.text = JSON.stringify(schema);
+        document.head.appendChild(script);
+      });
     }
-  }, [fullTitle, description, keywords, fullImageUrl, fullUrl, type, author, publishedTime, modifiedTime, structuredData]);
+
+    // Additional SEO meta tags
+    // Geo location
+    let geoRegion = document.querySelector('meta[name="geo.region"]');
+    if (!geoRegion) {
+      geoRegion = document.createElement('meta');
+      geoRegion.setAttribute('name', 'geo.region');
+      document.head.appendChild(geoRegion);
+    }
+    geoRegion.setAttribute('content', 'UZ-TK');
+
+    // Language alternates
+    const languages = ['uz', 'ru', 'en'];
+    languages.forEach((lang) => {
+      let alternate = document.querySelector(`link[rel="alternate"][hreflang="${lang}"]`);
+      if (!alternate) {
+        alternate = document.createElement('link');
+        alternate.setAttribute('rel', 'alternate');
+        alternate.setAttribute('hreflang', lang);
+        document.head.appendChild(alternate);
+      }
+      alternate.setAttribute('href', fullUrl);
+    });
+
+    // Default language
+    let defaultLang = document.querySelector('link[rel="alternate"][hreflang="x-default"]');
+    if (!defaultLang) {
+      defaultLang = document.createElement('link');
+      defaultLang.setAttribute('rel', 'alternate');
+      defaultLang.setAttribute('hreflang', 'x-default');
+      document.head.appendChild(defaultLang);
+    }
+    defaultLang.setAttribute('href', fullUrl);
+  }, [fullTitle, description, enhancedKeywords, fullImageUrl, fullUrl, type, author, publishedTime, modifiedTime, structuredData, canonicalUrl]);
 
   return null;
 }
