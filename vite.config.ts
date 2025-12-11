@@ -104,14 +104,7 @@ export default defineConfig(({ mode }) => {
       reportCompressedSize: true,
       // Build optimizations
       assetsInlineLimit: 4096, // 4KB dan kichik fayllarni inline qilish
-      // Tree shaking
-      terserOptions: {
-        compress: {
-          drop_console: isProduction, // Console.log'larni production'da o'chirish
-          drop_debugger: true,
-          pure_funcs: isProduction ? ['console.log', 'console.info'] : [],
-        },
-      },
+      // Tree shaking is handled by esbuild automatically
     },
     server: {
       port: 5173,
@@ -149,6 +142,8 @@ export default defineConfig(({ mode }) => {
       minifyIdentifiers: isProduction,
       minifySyntax: isProduction,
       minifyWhitespace: isProduction,
+      // Drop console and debugger in production
+      drop: isProduction ? ['console', 'debugger'] : [],
     },
   };
 });
