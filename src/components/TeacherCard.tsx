@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +18,7 @@ interface TeacherCardProps {
   isFeatured?: boolean;
 }
 
-export function TeacherCard({
+export const TeacherCard = memo(function TeacherCard({
   name,
   specialty,
   experience,
@@ -158,4 +159,4 @@ export function TeacherCard({
       </CardContent>
     </Card>
   );
-}
+});

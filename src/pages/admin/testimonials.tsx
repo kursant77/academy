@@ -36,7 +36,6 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import type { Testimonial, InsertTestimonial } from '@shared/schema';
 import { Plus, Pencil, Trash2, Star } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 
 function TestimonialsContent() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -73,7 +72,7 @@ function TestimonialsContent() {
       console.error('Error in testimonials page:', errorMessage);
       toast({
         title: 'Xatolik',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -113,7 +112,7 @@ function TestimonialsContent() {
       console.error('Error in testimonials page:', errorMessage);
       toast({
         title: 'Xatolik',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -143,7 +142,7 @@ function TestimonialsContent() {
       console.error('Error in testimonials page:', errorMessage);
       toast({
         title: 'Xatolik',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
     }

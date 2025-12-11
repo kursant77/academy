@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -37,7 +38,7 @@ import { useOptions, OPTION_TYPES } from '@/hooks/use-options';
 import { supabase } from '@/lib/supabase';
 import type { Event, InsertEvent } from '@shared/schema';
 import { ImageUpload } from '@/components/ImageUpload';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Star } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -68,6 +69,8 @@ function EventsContent() {
     date: new Date().toISOString(),
     image_url: null,
     category: '',
+    featured: false,
+    is_published: true,
   });
   const { toast } = useToast();
 
@@ -179,6 +182,8 @@ function EventsContent() {
       date: event.date,
       image_url: event.image_url,
       category: event.category,
+      featured: event.featured || false,
+      is_published: event.is_published !== undefined ? event.is_published : true,
     });
     setIsDialogOpen(true);
   };
@@ -197,6 +202,8 @@ function EventsContent() {
       date: new Date().toISOString(),
       image_url: null,
       category: '',
+      featured: false,
+      is_published: true,
     });
   };
 
@@ -230,6 +237,33 @@ function EventsContent() {
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Sarlavha (UZ)</Label>
+                    <Input
+                      value={formData.title_uz}
+                      onChange={(e) => setFormData({ ...formData, title_uz: e.target.value })}
+                      required
+                      placeholder="Tadbir sarlavhasi (O'zbekcha)"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Sarlavha (RU)</Label>
+                    <Input
+                      value={formData.title_ru}
+                      onChange={(e) => setFormData({ ...formData, title_ru: e.target.value })}
+                      required
+                      placeholder="Tadbir sarlavhasi (Ruscha)"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Sarlavha (EN)</Label>
+                    <Input
+                      value={formData.title_en}
+                      onChange={(e) => setFormData({ ...formData, title_en: e.target.value })}
+                      required
+                      placeholder="Tadbir sarlavhasi (Inglizcha)"
+                    />
+                  </div>
                   <div className="space-y-2">
                     <Label>Kategoriya</Label>
                     <Select
@@ -299,6 +333,26 @@ function EventsContent() {
                     rows={3}
                   />
                 </div>
+                <div className="space-y-2 flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="featured"
+                    checked={formData.featured || false}
+                    onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                    className="h-4 w-4"
+                  />
+                  <Label htmlFor="featured" className="cursor-pointer">Featured (Asosiy sahifada ko'rsatish)</Label>
+                </div>
+                <div className="space-y-2 flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="is_published"
+                    checked={formData.is_published !== undefined ? formData.is_published : true}
+                    onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })}
+                    className="h-4 w-4"
+                  />
+                  <Label htmlFor="is_published" className="cursor-pointer">Published (Nashr qilish)</Label>
+                </div>
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Bekor qilish
@@ -331,9 +385,17 @@ function EventsContent() {
                       <CardContent className="p-4">
                         <div className="space-y-3">
                           <div>
-                            <h3 className="font-semibold text-sm mb-1">{event.title_uz}</h3>
+                            <h3 className="font-semibold text-sm mb-1">
+                              {event.title_uz || event.title_ru || event.title_en || event.title || 'Sarlavha yo\'q'}
+                            </h3>
                             <div className="flex flex-wrap items-center gap-2 text-xs">
                               <Badge variant="outline" className="text-xs">{event.category}</Badge>
+                              {event.featured && (
+                                <Badge variant="default" className="text-xs gap-1">
+                                  <Star className="h-3 w-3 fill-current" />
+                                  Featured
+                                </Badge>
+                              )}
                               <span className="text-xs text-muted-foreground">
                                 {new Date(event.date).toLocaleDateString()}
                               </span>
@@ -373,15 +435,26 @@ function EventsContent() {
                         <TableHead>Sarlavha</TableHead>
                         <TableHead>Kategoriya</TableHead>
                         <TableHead>Sana</TableHead>
+                        <TableHead>Featured</TableHead>
                         <TableHead>Amallar</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {events.map((event, index) => (
                         <TableRow key={event.id} className="table-row-hover stagger-item" style={{ animationDelay: `${index * 0.02}s` }}>
-                          <TableCell className="font-medium">{event.title_uz}</TableCell>
+                          <TableCell className="font-medium">
+                            {event.title_uz || event.title_ru || event.title_en || event.title || 'Sarlavha yo\'q'}
+                          </TableCell>
                           <TableCell>{event.category}</TableCell>
                           <TableCell>{new Date(event.date).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            {event.featured && (
+                              <Badge variant="default" className="text-xs gap-1">
+                                <Star className="h-3 w-3 fill-current" />
+                                Featured
+                              </Badge>
+                            )}
+                          </TableCell>
                           <TableCell>
                             <div className="flex gap-2">
                               <Button

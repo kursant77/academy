@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ interface CourseCardProps {
   isFeatured?: boolean;
 }
 
-export function CourseCard({
+export const CourseCard = memo(function CourseCard({
   id,
   name,
   description,
@@ -144,4 +145,4 @@ export function CourseCard({
       </CardFooter>
     </Card>
   );
-}
+});

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Star } from "lucide-react";
@@ -14,7 +15,7 @@ interface EventCardProps {
   isFeatured?: boolean;
 }
 
-export function EventCard({
+export const EventCard = memo(function EventCard({
   title,
   description,
   date,
@@ -55,8 +56,13 @@ export function EventCard({
               target.parentElement!.innerHTML = `<div class="h-52 bg-gradient-to-br from-accent/20 via-primary/10 to-accent/5 flex items-center justify-center relative"><div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-t-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div><div class="text-6xl text-primary/30 font-bold group-hover:text-primary/40 transition-all duration-500 group-hover:scale-110 relative z-10">${title.charAt(0)}</div><div class="absolute top-4 right-4 z-20"><div class="bg-background/90 backdrop-blur px-2 py-1 rounded text-xs flex items-center gap-1 border shadow-lg transition-all duration-300 group-hover:scale-105"><svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>${format(date, "dd MMM yyyy")}</div></div></div>`;
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20" />
-          <div className="absolute top-4 right-4 z-20">
+          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent z-20" />
+          <div className="absolute bottom-0 left-0 right-0 p-4 z-30">
+            <h3 className="text-xl font-bold text-white drop-shadow-lg line-clamp-2 group-hover:text-primary-foreground transition-all duration-300">
+              {title}
+            </h3>
+          </div>
+          <div className="absolute top-4 right-4 z-30">
             <Badge className="bg-background/90 backdrop-blur-md border shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl" data-testid="badge-date">
               <Calendar className="h-3.5 w-3.5 mr-1.5" />
               {format(date, "dd MMM yyyy")}
@@ -64,11 +70,14 @@ export function EventCard({
           </div>
         </div>
       ) : (
-        <div className="h-52 bg-gradient-to-br from-accent/20 via-primary/10 to-accent/5 flex items-center justify-center relative group-hover:from-accent/30 group-hover:via-primary/20 transition-all duration-500">
+        <div className="h-52 bg-gradient-to-br from-accent/20 via-primary/10 to-accent/5 flex flex-col items-center justify-center relative group-hover:from-accent/30 group-hover:via-primary/20 transition-all duration-500 p-4">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-t-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="text-6xl text-primary/30 font-bold group-hover:text-primary/40 transition-all duration-500 group-hover:scale-110 relative z-10">
+          <div className="text-6xl text-primary/30 font-bold group-hover:text-primary/40 transition-all duration-500 group-hover:scale-110 relative z-10 mb-2">
             {title.charAt(0)}
           </div>
+          <h3 className="text-xl font-bold text-foreground line-clamp-2 text-center group-hover:text-primary transition-all duration-300 relative z-10">
+            {title}
+          </h3>
           <div className="absolute top-4 right-4 z-20">
             <Badge className="bg-background/90 backdrop-blur-md border shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl" data-testid="badge-date">
               <Calendar className="h-3.5 w-3.5 mr-1.5" />
@@ -83,9 +92,11 @@ export function EventCard({
           <Badge variant="secondary" className="transition-all duration-300 group-hover:scale-110 group-hover:shadow-md" data-testid="badge-category">
             {category}
           </Badge>
-          <h3 className="text-xl font-bold line-clamp-2 group-hover:text-primary transition-all duration-300 group-hover:translate-x-1" data-testid="text-event-title">
-            {title}
-          </h3>
+          {!imageUrl && (
+            <h3 className="text-xl font-bold line-clamp-2 group-hover:text-primary transition-all duration-300 group-hover:translate-x-1" data-testid="text-event-title">
+              {title}
+            </h3>
+          )}
         </div>
       </CardHeader>
 
@@ -96,4 +107,4 @@ export function EventCard({
       </CardContent>
     </Card>
   );
-}
+});

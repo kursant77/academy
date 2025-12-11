@@ -112,7 +112,7 @@ export default function Home() {
         setFeaturedTeachers(filtered.slice(0, 4));
       }
 
-      // Load latest events (limit 3)
+      // Load latest events (limit 3) - faqat featured va published
       let eventsQuery = supabase
         .from('events')
         .select('*')
@@ -125,13 +125,17 @@ export default function Home() {
         console.error('Events error:', eventsError);
         setLatestEvents([]);
       } else {
-        // Agar ma'lumotlar bo'lsa, is_published filter qo'llaymiz
+        // Agar ma'lumotlar bo'lsa, is_published va featured filter qo'llaymiz
         const filtered = (eventsData || []).filter(event => {
           // Agar is_published ustuni mavjud bo'lsa, filter qo'llaymiz
-          if (event.is_published !== undefined) {
-            return event.is_published === true;
+          if (event.is_published !== undefined && event.is_published !== true) {
+            return false;
           }
-          // Agar ustun mavjud bo'lmasa, barchasini ko'rsatamiz
+          // Agar featured ustuni mavjud bo'lsa, faqat featured'larni ko'rsatamiz
+          if (event.featured !== undefined && event.featured !== true) {
+            return false;
+          }
+          // Agar ustunlar mavjud bo'lmasa, barchasini ko'rsatamiz
           return true;
         });
         setLatestEvents(filtered.slice(0, 3));

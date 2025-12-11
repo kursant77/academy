@@ -36,10 +36,32 @@ export default function Achievements() {
   return (
     <>
       <SEO
-        title="Yutuqlar va Galereya"
-        description="A+ Academy o'quvchilarining yutuqlari va galereya. Bitiruvchilarimizning muvaffaqiyatlari va markaz hayoti."
-        keywords="yutuqlar, galereya, A+ Academy, bitiruvchilar, muvaffaqiyatlar"
+        title="Yutuqlar va Galereya — A+ Academy | Talabalar Muvaffaqiyatlari Toshkent"
+        description="A+ Academy o'quvchilarining yutuqlari va galereya. Bitiruvchilarimizning muvaffaqiyatlari, sertifikatlar va markaz hayoti. 1800+ bitiruvchi, 2500+ talaba. Toshkent."
+        keywords="yutuqlar, galereya, A+ Academy, bitiruvchilar, muvaffaqiyatlar, talabalar yutuqlari, sertifikatlar, o'quv markazi galereya, Toshkent, bitiruvchilar muvaffaqiyatlari"
         url="/achievements"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "A+ Academy Yutuqlar va Galereya",
+          "description": "A+ Academy o'quvchilarining yutuqlari va galereya",
+          "mainEntity": {
+            "@type": "ItemList",
+            "itemListElement": achievements.map((achievement, index) => ({
+              "@type": "ListItem",
+              "position": index + 1,
+              "item": {
+                "@type": "CreativeWork",
+                "name": i18n.language === "uz" ? achievement.title_uz : i18n.language === "ru" ? achievement.title_ru : achievement.title_en,
+                "description": i18n.language === "uz" ? achievement.description_uz : i18n.language === "ru" ? achievement.description_ru : achievement.description_en,
+                "creator": {
+                  "@type": "Person",
+                  "name": i18n.language === "uz" ? achievement.student_name_uz : i18n.language === "ru" ? achievement.student_name_ru : achievement.student_name_en
+                }
+              }
+            }))
+          }
+        }}
       />
       <div className="min-h-screen relative overflow-hidden">
         {/* Animated Background Elements */}
@@ -125,6 +147,8 @@ export default function Achievements() {
                           ? achievement.title_en
                           : achievement.title_uz}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        loading="lazy"
+                        decoding="async"
                         onError={(e) => {
                           // Agar rasm yuklanmasa, fallback ko'rsatish
                           const target = e.target as HTMLImageElement;

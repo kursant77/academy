@@ -10,8 +10,9 @@ export async function uploadImage(file: File, folder: string): Promise<string> {
     const { data, error } = await supabase.storage
       .from('images')
       .upload(fileName, file, {
-        cacheControl: '3600',
+        cacheControl: '31536000', // 1 yil - uzun muddatli cache
         upsert: false,
+        contentType: file.type || 'image/jpeg',
       });
 
     if (error) throw error;

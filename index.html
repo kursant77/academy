@@ -31,7 +31,6 @@
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     
     <!-- Preconnect for Performance -->
@@ -44,9 +43,18 @@
     <link rel="preconnect" href="https://supabase.co" crossorigin>
     <link rel="dns-prefetch" href="https://supabase.co">
     
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/src/main.tsx" as="script" crossorigin>
+    <link rel="modulepreload" href="/src/main.tsx">
+    
     <!-- Fonts with display=swap for performance - async load -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
+    
+    <!-- Resource hints for better performance -->
+    <link rel="prefetch" href="/courses">
+    <link rel="prefetch" href="/teachers">
+    <link rel="prefetch" href="/events">
     
     <!-- Canonical URL -->
     <link rel="canonical" href="https://aplusacademy.uz/" />

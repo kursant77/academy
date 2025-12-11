@@ -70,7 +70,7 @@ export default function Events() {
       <SEO
         title="Tadbirlar va Yangiliklar — A+ Academy | Workshoplar, Seminarlar Toshkent"
         description="A+ Academy tadbirlari, workshoplar, seminarlar va musobaqalar. Eng so'nggi yangiliklar va voqealar haqida bilib oling. Toshkent. Qatnashish uchun ro'yxatdan o'ting!"
-        keywords="tadbirlar, workshop, seminar, musobaqa, A+ Academy yangiliklari, Toshkent tadbirlar, IT tadbirlar, ta'lim tadbirlar, o'quv markazi tadbirlar, yangiliklar, voqealar"
+        keywords="tadbirlar, workshop, seminar, musobaqa, A+ Academy yangiliklari, Toshkent tadbirlar, IT tadbirlar, ta'lim tadbirlar, o'quv markazi tadbirlar, yangiliklar, voqealar, IT workshop, dasturlash tadbirlari, ta'lim tadbirlari"
         url="/events"
         structuredData={{
           "@context": "https://schema.org",

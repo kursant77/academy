@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import type { Course, Category } from "@shared/schema";
 import { SEO } from "@/components/SEO";
+import { generateWebSiteStructuredData } from "@/lib/seo-utils";
 
 interface CourseWithTeacher extends Course {
   teachers?: { name: string } | null;
