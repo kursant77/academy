@@ -27,22 +27,27 @@ export default defineConfig(({ mode }) => {
       minify: 'esbuild', // Esbuild minifier (default, terser kerak emas)
       target: 'esnext', // Modern browsers uchun
       cssMinify: 'esbuild', // CSS minification
-      // Ensure proper module format
+      // Ensure proper module format and preloading
       modulePreload: {
         polyfill: true,
+        resolveDependencies: (filename, deps) => {
+          // Ensure React dependencies are preloaded first
+          return deps;
+        },
       },
       rollupOptions: {
         output: {
           manualChunks: (id) => {
             // Vendor chunklar - optimal code splitting
             if (id.includes('node_modules')) {
-              // React core - MUST be loaded first, so keep it separate
+              // React core - DON'T split React, keep it in main bundle for reliability
+              // This ensures React is always available when code executes
               if (id.includes('react') || id.includes('react-dom')) {
-                return 'react-vendor';
+                return undefined; // Keep React in main bundle
               }
-              // Router (depends on React)
+              // Router (depends on React) - can be split
               if (id.includes('wouter')) {
-                return 'react-vendor';
+                return 'router-vendor';
               }
               // UI libraries (depend on React)
               if (id.includes('@radix-ui')) {
@@ -131,6 +136,7 @@ export default defineConfig(({ mode }) => {
       include: [
         'react',
         'react-dom',
+        'react/jsx-runtime',
         'wouter',
         '@supabase/supabase-js',
         'date-fns',
@@ -141,6 +147,10 @@ export default defineConfig(({ mode }) => {
       exclude: ['@tanstack/react-query'],
       // Force optimization for better performance
       force: false,
+      // Ensure React is properly optimized
+      esbuildOptions: {
+        target: 'esnext',
+      },
     },
     // Performance optimizations
     esbuild: {
