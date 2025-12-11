@@ -27,16 +27,24 @@ export default defineConfig(({ mode }) => {
       minify: 'esbuild', // Esbuild minifier (default, terser kerak emas)
       target: 'esnext', // Modern browsers uchun
       cssMinify: 'esbuild', // CSS minification
+      // Ensure proper module format
+      modulePreload: {
+        polyfill: true,
+      },
       rollupOptions: {
         output: {
           manualChunks: (id) => {
             // Vendor chunklar - optimal code splitting
             if (id.includes('node_modules')) {
-              // React core
-              if (id.includes('react') || id.includes('react-dom') || id.includes('wouter')) {
+              // React core - MUST be loaded first, so keep it separate
+              if (id.includes('react') || id.includes('react-dom')) {
                 return 'react-vendor';
               }
-              // UI libraries
+              // Router (depends on React)
+              if (id.includes('wouter')) {
+                return 'react-vendor';
+              }
+              // UI libraries (depend on React)
               if (id.includes('@radix-ui')) {
                 return 'ui-vendor';
               }
@@ -56,11 +64,11 @@ export default defineConfig(({ mode }) => {
               if (id.includes('@supabase')) {
                 return 'supabase-vendor';
               }
-              // React Query
+              // React Query (depends on React)
               if (id.includes('@tanstack')) {
                 return 'query-vendor';
               }
-              // i18n
+              // i18n (depends on React)
               if (id.includes('i18next') || id.includes('react-i18next')) {
                 return 'i18n-vendor';
               }
