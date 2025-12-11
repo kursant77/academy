@@ -1,17 +1,19 @@
+/// <reference types="node" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// __dirname yaratish ESM uchun
+// __dirname ESM uchun
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig(({ mode }) => {
-  const isProduction = mode === 'production';
-  
+  const isProduction = mode === "production";
+
   return {
     plugins: [react()],
+
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "src"),
@@ -19,144 +21,132 @@ export default defineConfig(({ mode }) => {
         "@assets": path.resolve(__dirname, "attached_assets"),
       },
     },
+
     root: path.resolve(__dirname),
+
     build: {
       outDir: path.resolve(__dirname, "dist"),
       emptyOutDir: true,
-      sourcemap: false, // Production da sourcemap o'chiriladi
-      minify: 'esbuild', // Esbuild minifier (default, terser kerak emas)
-      target: 'esnext', // Modern browsers uchun
-      cssMinify: 'esbuild', // CSS minification
-      // Module preloading
-      modulePreload: {
-        polyfill: true,
-      },
+      sourcemap: false,
+      minify: "esbuild",
+      target: "esnext",
+      cssMinify: "esbuild",
+
       rollupOptions: {
         output: {
-          manualChunks: (id) => {
-            // Vendor chunklar - React va React-dom asosiy bundle'da qoladi
-            if (id.includes('node_modules')) {
-              // React va React-dom - ASOSIY BUNDLE'DA QOLADI (split qilinmaydi)
-              if (id.includes('react') || id.includes('react-dom') || id.includes('react/jsx-runtime')) {
-                return; // undefined qaytaradi, main bundle'da qoladi
-              }
-              // Router
-              if (id.includes('wouter')) {
-                return 'router-vendor';
-              }
-              // UI libraries
-              if (id.includes('@radix-ui')) {
-                return 'ui-vendor';
-              }
-              // Animation library
-              if (id.includes('framer-motion')) {
-                return 'animation-vendor';
-              }
-              // Charts library
-              if (id.includes('recharts')) {
-                return 'charts-vendor';
-              }
-              // Utils
-              if (id.includes('date-fns') || id.includes('zod') || id.includes('clsx') || id.includes('tailwind-merge')) {
-                return 'utils-vendor';
-              }
-              // Supabase
-              if (id.includes('@supabase')) {
-                return 'supabase-vendor';
-              }
-              // React Query
-              if (id.includes('@tanstack')) {
-                return 'query-vendor';
-              }
-              // i18n
-              if (id.includes('i18next') || id.includes('react-i18next')) {
-                return 'i18n-vendor';
-              }
-              // Boshqa vendor'lar
-              return 'vendor';
+          manualChunks(id) {
+            if (!id.includes("node_modules")) return;
+
+            // ⚠ React — doim bitta chunk, hech qachon bo‘linmaydi!
+            if (
+              id.includes("react") ||
+              id.includes("react-dom") ||
+              id.includes("react/jsx-runtime")
+            ) {
+              return "react-core";
             }
+
+            if (id.includes("wouter")) return "router-vendor";
+            if (id.includes("@radix-ui")) return "ui-vendor";
+            if (id.includes("framer-motion")) return "animation-vendor";
+            if (id.includes("recharts")) return "charts-vendor";
+
+            if (
+              id.includes("date-fns") ||
+              id.includes("zod") ||
+              id.includes("clsx") ||
+              id.includes("tailwind-merge")
+            ) {
+              return "utils-vendor";
+            }
+
+            if (id.includes("@supabase")) return "supabase-vendor";
+            if (id.includes("@tanstack")) return "query-vendor";
+
+            if (id.includes("i18next") || id.includes("react-i18next")) {
+              return "i18n-vendor";
+            }
+
+            return "vendor";
           },
-          // Chunk naming
-          chunkFileNames: 'assets/js/[name]-[hash].js',
-          entryFileNames: 'assets/js/[name]-[hash].js',
-          assetFileNames: (assetInfo) => {
-            const name = 'name' in assetInfo && assetInfo.name ? assetInfo.name : '';
-            if (!name) {
-              return `assets/[name]-[hash][extname]`;
+
+          chunkFileNames: "assets/js/[name]-[hash].js",
+          entryFileNames: "assets/js/[name]-[hash].js",
+
+          assetFileNames(assetInfo) {
+            const name = assetInfo.name || "";
+            const parts = name.split(".");
+            const lastIndex = parts.length - 1;
+            const extValue = lastIndex >= 0 && parts[lastIndex] ? parts[lastIndex] : "";
+            
+            // Type guard funksiyası
+            const testExtension = (pattern: RegExp, value: string): boolean => {
+              return pattern.test(value);
+            };
+
+            if (extValue) {
+              const imagePattern = /png|jpe?g|svg|gif|tiff|bmp|ico/i;
+              const fontPattern = /woff2?|eot|ttf|otf/i;
+
+              if (testExtension(imagePattern, extValue)) {
+                return "assets/images/[name]-[hash][extname]";
+              }
+
+              if (testExtension(fontPattern, extValue)) {
+                return "assets/fonts/[name]-[hash][extname]";
+              }
             }
-            const info = name.split('.');
-            const ext = info[info.length - 1];
-            if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
-              return `assets/images/[name]-[hash][extname]`;
-            }
-            if (/woff2?|eot|ttf|otf/i.test(ext)) {
-              return `assets/fonts/[name]-[hash][extname]`;
-            }
-            return `assets/[ext]/[name]-[hash][extname]`;
+
+            return "assets/[ext]/[name]-[hash][extname]";
           },
-          // Compact output for smaller bundles (production only)
+
           ...(isProduction && {
             compact: true,
             generatedCode: {
-              preset: 'es2015',
+              preset: "es2015",
               constBindings: true,
             },
           }),
         },
       },
-      // Chunk size warning limit (KB)
+
       chunkSizeWarningLimit: 500,
-      // CSS code splitting
       cssCodeSplit: true,
-      // Compression
       reportCompressedSize: true,
-      // Build optimizations
-      assetsInlineLimit: 4096, // 4KB dan kichik fayllarni inline qilish
-      // Tree shaking is handled by esbuild automatically
+
+      assetsInlineLimit: 4096,
     },
+
     server: {
       port: 5173,
-      fs: {
-        strict: true,
-        deny: ["**/.*"],
-      },
+      fs: { strict: true, deny: ["**/.*"] },
     },
-    // Preview server (production preview)
+
     preview: {
       port: 4173,
       strictPort: true,
     },
-    // Optimize dependencies
+
     optimizeDeps: {
       include: [
-        'react',
-        'react-dom',
-        'react/jsx-runtime',
-        'wouter',
-        '@supabase/supabase-js',
-        'date-fns',
-        'zod',
-        'clsx',
-        'tailwind-merge',
+        "wouter",
+        "@supabase/supabase-js",
+        "date-fns",
+        "zod",
+        "clsx",
+        "tailwind-merge",
       ],
-      exclude: ['@tanstack/react-query'],
-      // Force optimization for better performance
-      force: false,
-      // Ensure React is properly optimized
-      esbuildOptions: {
-        target: 'esnext',
-      },
+      exclude: ["@tanstack/react-query"],
+      esbuildOptions: { target: "esnext" },
     },
-    // Performance optimizations
+
     esbuild: {
-      legalComments: 'none',
+      legalComments: "none",
       treeShaking: true,
-      // Minify identifiers
       minifyIdentifiers: isProduction,
       minifySyntax: isProduction,
       minifyWhitespace: isProduction,
-      // Drop console and debugger in production
-      drop: isProduction ? ['console', 'debugger'] : [],
+      drop: isProduction ? ["console", "debugger"] : [],
     },
   };
 });
