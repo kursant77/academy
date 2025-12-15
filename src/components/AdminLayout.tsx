@@ -2,6 +2,7 @@ import { useLocation } from 'wouter';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { Logo } from '@/components/Logo';
 import {
   Sidebar,
   SidebarContent,
@@ -125,9 +126,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           <SidebarContent className="overflow-y-auto">
             <div className="px-2 sm:px-3 md:px-4 py-3 sm:py-4 md:py-5 animate-fade-in-down">
               <div className="flex items-center gap-2 sm:gap-3">
-                <div className="h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-semibold transition-all duration-300 hover:bg-primary/20 flex-shrink-0 text-[10px] sm:text-xs md:text-sm">
-                  A+
-                </div>
+                <Logo variant="admin" showText={false} linkTo={undefined} />
                 <div className="min-w-0 flex-1 hidden sm:block">
                   <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground truncate">A+ Academy</p>
                   <p className="font-semibold leading-tight text-foreground text-[10px] sm:text-xs md:text-sm truncate">

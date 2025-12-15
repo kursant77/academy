@@ -30,7 +30,7 @@ export function Hero() {
           </div>
 
           <div className="space-y-4 sm:space-y-6 animate-fade-in-up w-full">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight gradient-text animate-gradient leading-tight sm:leading-tight md:leading-tight lg:leading-tight break-words overflow-visible px-2 sm:px-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight gradient-text animate-gradient leading-tight sm:leading-tight md:leading-tight lg:leading-tight break-words overflow-visible px-2 sm:px-4" style={{ height: '79px' }}>
               {content.title || t("hero.title")}
             </h1>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed px-2 sm:px-4 break-words overflow-visible">

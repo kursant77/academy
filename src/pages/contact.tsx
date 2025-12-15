@@ -114,7 +114,7 @@ export default function Contact() {
               <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 mb-4 sm:mb-6 backdrop-blur-sm border border-primary/20 animate-bounce-in shadow-lg">
                 <Mail className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
               </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient" style={{ height: '58px' }}>
                 {t("contact.title")}
               </h1>
               <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -274,7 +274,7 @@ export default function Contact() {
                 <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 via-secondary/2 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="absolute top-0 left-0 w-32 h-32 bg-secondary/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                 <CardHeader className="relative pb-3">
-                  <CardTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
+                  <CardTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient" style={{ marginTop: '10px', marginBottom: '10px' }}>
                     {t("contact.message")}
                   </CardTitle>
                 </CardHeader>
@@ -305,7 +305,7 @@ export default function Contact() {
                       />
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2" style={{ marginTop: '0px', marginBottom: '0px' }}>
                       <label className="text-sm font-semibold">{t("contact.message")}</label>
                       <Textarea
                         value={formData.message}
@@ -323,6 +323,7 @@ export default function Contact() {
                       className="w-full h-11 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed" 
                       data-testid="button-contact-submit" 
                       disabled={submitting}
+                      style={{ marginTop: '35px' }}
                     >
                       {submitting ? (
                         <span className="flex items-center gap-2">

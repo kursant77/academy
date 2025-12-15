@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useContent } from "@/hooks/use-content";
 import { supabase } from "@/lib/supabase";
 import { sendTelegramMessage, formatRegistrationMessage } from "@/lib/telegram";
 import type { Course } from "@shared/schema";
@@ -36,6 +37,8 @@ import {
 export default function Register() {
   const { t, i18n } = useTranslation();
   const { toast, dismiss } = useToast();
+  const { content: contactContent } = useContent("contact", i18n.language);
+  const { content: socialContent } = useContent("social", i18n.language);
   const [formData, setFormData] = useState({
     fullName: "",
     age: "",
@@ -536,14 +539,31 @@ export default function Register() {
                     Savollaringiz bormi? Bizning jamoamizga murojaat qiling
                   </p>
                   <div className="flex flex-col gap-2">
-                    <Button variant="outline" className="justify-start">
-                      <Phone className="w-4 h-4 mr-2" />
-                      +998 XX XXX XX XX
-                    </Button>
-                    <Button variant="outline" className="justify-start">
-                      <Phone className="w-4 h-4 mr-2" />
-                      Telegram kanal
-                    </Button>
+                    {contactContent.phone && (
+                      <Button 
+                        variant="outline" 
+                        className="justify-start"
+                        onClick={() => window.open(`tel:${contactContent.phone?.replace(/\s/g, '')}`, '_self')}
+                      >
+                        <Phone className="w-4 h-4 mr-2" />
+                        {contactContent.phone}
+                      </Button>
+                    )}
+                    {socialContent.telegram && (
+                      <Button 
+                        variant="outline" 
+                        className="justify-start"
+                        onClick={() => window.open(socialContent.telegram as string, '_blank')}
+                      >
+                        <Phone className="w-4 h-4 mr-2" />
+                        Telegram kanal
+                      </Button>
+                    )}
+                    {!contactContent.phone && !socialContent.telegram && (
+                      <p className="text-xs text-muted-foreground italic">
+                        Ma'lumotlar admin panelda sozlanadi
+                      </p>
+                    )}
                   </div>
                 </CardContent>
               </Card>

@@ -5,6 +5,7 @@ import { Menu, X, BookOpen, Home, GraduationCap, Users, Info, Calendar, Trophy, 
 import { useState, useEffect } from "react";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
+import { Logo } from "./Logo";
 
 export function Header() {
   const { t } = useTranslation();
@@ -42,14 +43,7 @@ export function Header() {
       <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80 shadow-sm shadow-primary/5">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 relative">
           <div className="flex h-14 sm:h-16 md:h-20 items-center justify-between gap-2 sm:gap-4 relative">
-          <Link href="/" className="flex items-center gap-1.5 sm:gap-2 hover-elevate rounded-lg px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 md:py-2 transition-all duration-300 hover:scale-105 group">
-            <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2.5">
-              <div className="h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10 rounded-lg bg-gradient-to-br from-primary via-primary/90 to-primary/80 flex items-center justify-center text-primary-foreground font-bold text-xs sm:text-sm md:text-lg tracking-tight shadow-lg group-hover:shadow-xl group-hover:shadow-primary/30 transition-all duration-300 group-hover:scale-110">
-                A+
-              </div>
-              <span className="font-bold text-base sm:text-lg md:text-xl bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent bg-[length:200%_auto] group-hover:animate-gradient transition-all duration-300">Academy</span>
-            </div>
-          </Link>
+          <Logo variant="header" showText={true} linkTo="/" />
 
           <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
             {navLinks.map((link) => (

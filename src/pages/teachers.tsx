@@ -91,7 +91,7 @@ export default function Teachers() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
             {/* Header */}
             <div className="text-center mb-8 sm:mb-10 md:mb-12 lg:mb-16 space-y-3 sm:space-y-4 animate-fade-in-down">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent px-2">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent px-2" style={{ height: '68px' }}>
                 {t("teachers.title")}
               </h1>
               <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto px-2">

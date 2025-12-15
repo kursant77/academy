@@ -423,14 +423,14 @@ DECLARE
   course_name TEXT;
 BEGIN
   -- Kurs nomini olish
-  SELECT COALESCE(name_uz, name_ru, name_en, 'Noma\'lum kurs')
+  SELECT COALESCE(name_uz, name_ru, name_en, 'Noma''lum kurs')
   INTO course_name
   FROM courses
   WHERE id = NEW.course_id;
 
   -- Telegram xabarini formatlash
   telegram_message := format(
-    E'🆕 <b>Yangi ro\'yxatdan o\'tish</b>\n\n' ||
+    E'🆕 <b>Yangi ro''yxatdan o''tish</b>\n\n' ||
     E'👤 <b>Ism:</b> %s\n' ||
     E'📅 <b>Yosh:</b> %s\n' ||
     E'📱 <b>Telefon:</b> %s\n' ||
