@@ -226,51 +226,54 @@ function EventsContent() {
                 Yangi tadbir
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
+            <DialogContent className="max-w-[95vw] sm:max-w-2xl lg:max-w-3xl max-h-[95vh] overflow-y-auto p-4 sm:p-5 md:p-6">
+              <DialogHeader className="space-y-1 sm:space-y-2 pb-2 sm:pb-3">
+                <DialogTitle className="text-base sm:text-lg md:text-xl">
                   {editingEvent ? 'Tadbirni tahrirlash' : 'Yangi tadbir qo\'shish'}
                 </DialogTitle>
-                <DialogDescription>
+                <DialogDescription className="text-xs sm:text-sm">
                   Tadbir ma'lumotlarini to'ldiring
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 md:space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
-                    <Label>Sarlavha (UZ)</Label>
+                    <Label className="text-sm sm:text-base font-medium">Sarlavha (UZ) *</Label>
                     <Input
                       value={formData.title_uz}
                       onChange={(e) => setFormData({ ...formData, title_uz: e.target.value })}
                       required
                       placeholder="Tadbir sarlavhasi (O'zbekcha)"
+                      className="h-11 sm:h-10 text-base sm:text-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Sarlavha (RU)</Label>
+                    <Label className="text-sm sm:text-base font-medium">Sarlavha (RU) *</Label>
                     <Input
                       value={formData.title_ru}
                       onChange={(e) => setFormData({ ...formData, title_ru: e.target.value })}
                       required
                       placeholder="Tadbir sarlavhasi (Ruscha)"
+                      className="h-11 sm:h-10 text-base sm:text-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Sarlavha (EN)</Label>
+                    <Label className="text-sm sm:text-base font-medium">Sarlavha (EN) *</Label>
                     <Input
                       value={formData.title_en}
                       onChange={(e) => setFormData({ ...formData, title_en: e.target.value })}
                       required
                       placeholder="Tadbir sarlavhasi (Inglizcha)"
+                      className="h-11 sm:h-10 text-base sm:text-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Kategoriya</Label>
+                    <Label className="text-sm sm:text-base font-medium">Kategoriya</Label>
                     <Select
                       value={formData.category || undefined}
                       onValueChange={(value) => setFormData({ ...formData, category: value })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="h-11 sm:h-10 text-base sm:text-sm">
                         <SelectValue placeholder="Kategoriya tanlang" />
                       </SelectTrigger>
                       <SelectContent>
@@ -289,12 +292,13 @@ function EventsContent() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Sana va vaqt</Label>
+                    <Label className="text-sm sm:text-base font-medium">Sana va vaqt *</Label>
                     <Input
                       type="datetime-local"
                       value={formData.date ? new Date(formData.date).toISOString().slice(0, 16) : ''}
                       onChange={(e) => setFormData({ ...formData, date: new Date(e.target.value).toISOString() })}
                       required
+                      className="h-11 sm:h-10 text-base sm:text-sm"
                     />
                   </div>
                   <div className="space-y-2">
@@ -307,30 +311,36 @@ function EventsContent() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Tavsif (UZ)</Label>
+                  <Label className="text-sm sm:text-base font-medium">Tavsif (UZ) *</Label>
                   <Textarea
                     value={formData.description_uz}
                     onChange={(e) => setFormData({ ...formData, description_uz: e.target.value })}
                     required
-                    rows={3}
+                    rows={4}
+                    className="text-base sm:text-sm min-h-[100px] resize-y"
+                    placeholder="Tadbir haqida batafsil ma'lumot (O'zbekcha)"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Tavsif (RU)</Label>
+                  <Label className="text-sm sm:text-base font-medium">Tavsif (RU) *</Label>
                   <Textarea
                     value={formData.description_ru}
                     onChange={(e) => setFormData({ ...formData, description_ru: e.target.value })}
                     required
-                    rows={3}
+                    rows={4}
+                    className="text-base sm:text-sm min-h-[100px] resize-y"
+                    placeholder="Tadbir haqida batafsil ma'lumot (Ruscha)"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Tavsif (EN)</Label>
+                  <Label className="text-sm sm:text-base font-medium">Tavsif (EN) *</Label>
                   <Textarea
                     value={formData.description_en}
                     onChange={(e) => setFormData({ ...formData, description_en: e.target.value })}
                     required
-                    rows={3}
+                    rows={4}
+                    className="text-base sm:text-sm min-h-[100px] resize-y"
+                    placeholder="Tadbir haqida batafsil ma'lumot (Inglizcha)"
                   />
                 </div>
                 <div className="space-y-2 flex items-center gap-2">
@@ -339,9 +349,9 @@ function EventsContent() {
                     id="featured"
                     checked={formData.featured || false}
                     onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                    className="h-4 w-4"
+                    className="h-4 w-4 sm:h-5 sm:w-5"
                   />
-                  <Label htmlFor="featured" className="cursor-pointer">Featured (Asosiy sahifada ko'rsatish)</Label>
+                  <Label htmlFor="featured" className="cursor-pointer text-sm sm:text-base">Featured (Asosiy sahifada ko'rsatish)</Label>
                 </div>
                 <div className="space-y-2 flex items-center gap-2">
                   <input
@@ -349,15 +359,23 @@ function EventsContent() {
                     id="is_published"
                     checked={formData.is_published !== undefined ? formData.is_published : true}
                     onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })}
-                    className="h-4 w-4"
+                    className="h-4 w-4 sm:h-5 sm:w-5"
                   />
-                  <Label htmlFor="is_published" className="cursor-pointer">Published (Nashr qilish)</Label>
+                  <Label htmlFor="is_published" className="cursor-pointer text-sm sm:text-base">Published (Nashr qilish)</Label>
                 </div>
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-2">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsDialogOpen(false)}
+                    className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm"
+                  >
                     Bekor qilish
                   </Button>
-                  <Button type="submit">
+                  <Button 
+                    type="submit"
+                    className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm"
+                  >
                     {editingEvent ? 'Yangilash' : 'Qo\'shish'}
                   </Button>
                 </div>

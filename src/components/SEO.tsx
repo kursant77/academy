@@ -38,12 +38,15 @@ export function SEO({
   const fullUrl = url.startsWith('http') ? url : `${siteUrl}${url}`;
   const canonicalUrl = canonical || fullUrl;
   
-  // Enhanced keywords with common search terms
+  // Enhanced keywords with common search terms - SEO optimized
   const enhancedKeywords = keywords + 
     ', A+ Academy, Toshkent, o\'quv markazi, ta\'lim markazi, IT o\'quv markazi, ' +
     'IELTS o\'quv markazi, ingliz tili kurslari, dasturlash kurslari, ' +
     'frontend kurslar, backend kurslar, fullstack kurslar, ' +
-    'CEFR kurslar, IELTS Toshkent, IT kurslar Toshkent';
+    'CEFR kurslar, IELTS Toshkent, IT kurslar Toshkent, ' +
+    'React kurslar, JavaScript kurslar, Python kurslar, Node.js kurslar, ' +
+    'professional ta\'lim, zamonaviy ta\'lim, sertifikat, bitiruvchilar, ' +
+    'o\'qituvchilar, tajribali mutaxassislar, kafolatlangan natija';
 
   useEffect(() => {
     // Document title
@@ -98,11 +101,57 @@ export function SEO({
     }
     metaAuthor.setAttribute('content', author);
 
-    // Language meta
+    // Language meta - Enhanced
     let metaLang = document.querySelector('html');
     if (metaLang) {
       metaLang.setAttribute('lang', 'uz');
+      metaLang.setAttribute('xml:lang', 'uz');
     }
+    
+    // Content language
+    let contentLang = document.querySelector('meta[http-equiv="content-language"]');
+    if (!contentLang) {
+      contentLang = document.createElement('meta');
+      contentLang.setAttribute('http-equiv', 'content-language');
+      document.head.appendChild(contentLang);
+    }
+    contentLang.setAttribute('content', 'uz, ru, en');
+    
+    // Theme color for mobile browsers
+    let themeColor = document.querySelector('meta[name="theme-color"]');
+    if (!themeColor) {
+      themeColor = document.createElement('meta');
+      themeColor.setAttribute('name', 'theme-color');
+      document.head.appendChild(themeColor);
+    }
+    themeColor.setAttribute('content', '#3b82f6');
+    
+    // Mobile web app capable
+    let mobileWebApp = document.querySelector('meta[name="mobile-web-app-capable"]');
+    if (!mobileWebApp) {
+      mobileWebApp = document.createElement('meta');
+      mobileWebApp.setAttribute('name', 'mobile-web-app-capable');
+      document.head.appendChild(mobileWebApp);
+    }
+    mobileWebApp.setAttribute('content', 'yes');
+    
+    // Apple mobile web app
+    let appleMobileWebApp = document.querySelector('meta[name="apple-mobile-web-app-capable"]');
+    if (!appleMobileWebApp) {
+      appleMobileWebApp = document.createElement('meta');
+      appleMobileWebApp.setAttribute('name', 'apple-mobile-web-app-capable');
+      document.head.appendChild(appleMobileWebApp);
+    }
+    appleMobileWebApp.setAttribute('content', 'yes');
+    
+    // Apple mobile web app title
+    let appleMobileWebAppTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+    if (!appleMobileWebAppTitle) {
+      appleMobileWebAppTitle = document.createElement('meta');
+      appleMobileWebAppTitle.setAttribute('name', 'apple-mobile-web-app-title');
+      document.head.appendChild(appleMobileWebAppTitle);
+    }
+    appleMobileWebAppTitle.setAttribute('content', SITE_NAME);
 
     // Open Graph tags - Enhanced
     const ogTags = [
@@ -118,6 +167,8 @@ export function SEO({
       { property: 'og:locale', content: 'uz_UZ' },
       { property: 'og:locale:alternate', content: 'ru_RU' },
       { property: 'og:locale:alternate', content: 'en_US' },
+      { property: 'og:image:secure_url', content: fullImageUrl },
+      { property: 'og:image:type', content: 'image/jpeg' },
     ];
 
     if (publishedTime) {

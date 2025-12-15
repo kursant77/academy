@@ -7,9 +7,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Globe } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export function LanguageSwitcher() {
-  const { i18n } = useTranslation();
+  const { i18n, ready } = useTranslation();
+  const [currentLang, setCurrentLang] = useState(i18n.language || 'uz');
 
   const languages = [
     { code: "uz", label: "O'zbekcha", flag: "🇺🇿" },
@@ -17,12 +19,57 @@ export function LanguageSwitcher() {
     { code: "en", label: "English", flag: "🇬🇧" },
   ];
 
-  const currentLanguage = languages.find((lang) => lang.code === i18n.language) || languages[0];
+  // Listen to language changes
+  useEffect(() => {
+    const handleLanguageChanged = (lng: string) => {
+      setCurrentLang(lng);
+    };
 
-  const changeLanguage = (code: string) => {
-    i18n.changeLanguage(code);
-    localStorage.setItem("language", code);
+    i18n.on('languageChanged', handleLanguageChanged);
+    
+    // Set initial language from localStorage if available
+    const savedLang = localStorage.getItem('language');
+    if (savedLang && savedLang !== i18n.language) {
+      i18n.changeLanguage(savedLang).catch(console.error);
+    }
+
+    return () => {
+      i18n.off('languageChanged', handleLanguageChanged);
+    };
+  }, [i18n]);
+
+  // Update current language when i18n.language changes
+  useEffect(() => {
+    if (i18n.language && i18n.language !== currentLang) {
+      setCurrentLang(i18n.language);
+    }
+  }, [i18n.language, currentLang]);
+
+  const currentLanguage = languages.find((lang) => lang.code === currentLang) || languages[0];
+
+  const changeLanguage = async (code: string) => {
+    try {
+      await i18n.changeLanguage(code);
+      localStorage.setItem("language", code);
+      setCurrentLang(code);
+      // Force a small delay to ensure state updates
+      setTimeout(() => {
+        window.dispatchEvent(new Event('languagechange'));
+      }, 100);
+    } catch (error) {
+      console.error('Error changing language:', error);
+    }
   };
+
+  if (!ready) {
+    return (
+      <Button variant="ghost" size="sm" className="gap-2" disabled>
+        <Globe className="h-4 w-4" />
+        <span className="hidden sm:inline">...</span>
+        <span className="sm:hidden">...</span>
+      </Button>
+    );
+  }
 
   return (
     <DropdownMenu>
@@ -38,11 +85,12 @@ export function LanguageSwitcher() {
           <DropdownMenuItem
             key={lang.code}
             onClick={() => changeLanguage(lang.code)}
-            className="gap-2"
+            className={`gap-2 ${currentLang === lang.code ? 'bg-primary/10' : ''}`}
             data-testid={`option-language-${lang.code}`}
           >
             <span>{lang.flag}</span>
             <span>{lang.label}</span>
+            {currentLang === lang.code && <span className="ml-auto text-primary">✓</span>}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

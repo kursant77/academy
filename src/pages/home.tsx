@@ -226,16 +226,16 @@ export default function Home() {
         <Hero />
         <StatsBar />
 
-        <section className="w-full py-12 sm:py-16 md:py-20 lg:py-24 relative animate-fade-in">
+        <section className="w-full py-8 sm:py-12 md:py-16 lg:py-20 relative animate-fade-in" aria-label="Kurslar bo'limi">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 sm:mb-10 md:mb-12 lg:mb-16 gap-4">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 sm:mb-8 md:mb-10 lg:mb-12 gap-4">
             <div className="animate-slide-in-left space-y-2 sm:space-y-3">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent px-2">
                 {t("courses.title")}
               </h2>
-              <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl">{t("courses.subtitle")}</p>
+              <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl px-2">{t("courses.subtitle")}</p>
             </div>
-            <Link href="/courses">
+            <Link href="/courses" className="w-full sm:w-auto px-2">
               <Button variant="outline" className="gap-2 animate-slide-in-right shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 text-xs sm:text-sm w-full sm:w-auto" data-testid="button-view-all-courses">
                 {t("courses.filter")}
                 <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -326,10 +326,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="w-full py-12 sm:py-16 md:py-20 lg:py-24 animate-fade-in">
+      <section className="w-full py-8 sm:py-12 md:py-16 lg:py-20 animate-fade-in" aria-label="Fikrlar bo'limi">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-          <div className="text-center mb-8 sm:mb-12 md:mb-16 animate-fade-in-up space-y-2 sm:space-y-3">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+          <div className="text-center mb-6 sm:mb-8 md:mb-10 lg:mb-12 animate-fade-in-up space-y-2 sm:space-y-3">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent px-2">
               {t("testimonials.title")}
             </h2>
             <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-2">{t("testimonials.subtitle")}</p>
@@ -341,16 +341,16 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="w-full py-12 sm:py-16 md:py-20 lg:py-24 bg-gradient-to-b from-muted/30 to-background animate-fade-in">
+      <section className="w-full py-8 sm:py-12 md:py-16 lg:py-20 bg-gradient-to-b from-muted/30 to-background animate-fade-in" aria-label="Tadbirlar bo'limi">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 sm:mb-10 md:mb-12 lg:mb-16 gap-4">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 sm:mb-8 md:mb-10 lg:mb-12 gap-4">
             <div className="animate-slide-in-left space-y-2 sm:space-y-3">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent px-2">
                 {t("events.title")}
               </h2>
-              <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl">{t("events.subtitle")}</p>
+              <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl px-2">{t("events.subtitle")}</p>
             </div>
-            <Link href="/events">
+            <Link href="/events" className="w-full sm:w-auto px-2">
               <Button variant="outline" className="gap-2 animate-slide-in-right shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 text-xs sm:text-sm w-full sm:w-auto" data-testid="button-view-all-events">
                 {t("events.readMore")}
                 <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />

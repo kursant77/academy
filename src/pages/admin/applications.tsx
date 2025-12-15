@@ -197,7 +197,7 @@ function ApplicationsContent() {
   }, [applications, currentPage, itemsPerPage]);
 
   const exportToCSV = () => {
-    const headers = ['Ism', 'Yosh', 'Telefon', 'Ota-ona telefon', 'Kurs', 'Narxi', 'Qiziqishlar', 'Sana'];
+    const headers = ['Ism', 'Yosh', 'Telefon', 'Ota-ona telefon', 'Kurs', 'Narxi', 'Sana'];
     const rows = applications.map((app) => [
       app.full_name,
       app.age.toString(),
@@ -210,7 +210,6 @@ function ApplicationsContent() {
       })(),
       (app.course?.name_uz as string) || 'Noma\'lum',
       (app.course?.price as string) || '',
-      app.interests,
       new Date(app.created_at).toLocaleDateString(),
     ]);
 
@@ -333,12 +332,6 @@ function ApplicationsContent() {
                                   <span className="font-medium text-foreground">{app.course.price} so'm</span>
                                 </div>
                               )}
-                              {app.interests && (
-                                <div className="pt-1 border-t">
-                                  <span className="text-muted-foreground">Qiziqishlar: </span>
-                                  <span className="text-foreground">{app.interests}</span>
-                                </div>
-                              )}
                               <div className="flex items-center justify-between pt-1 border-t">
                                 <span>Sana:</span>
                                 <span className="font-medium text-foreground">{new Date(app.created_at).toLocaleDateString()}</span>
@@ -361,7 +354,6 @@ function ApplicationsContent() {
                         <TableHead className="text-xs sm:text-sm">Telefon</TableHead>
                         <TableHead className="text-xs sm:text-sm hidden lg:table-cell">Ota-ona telefon</TableHead>
                         <TableHead className="text-xs sm:text-sm hidden lg:table-cell">Kurs</TableHead>
-                        <TableHead className="text-xs sm:text-sm hidden xl:table-cell">Qiziqishlar</TableHead>
                         <TableHead className="text-xs sm:text-sm">Sana</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -388,7 +380,6 @@ function ApplicationsContent() {
                               <div className="text-xs text-muted-foreground">{app.course?.price ? `${app.course.price} so'm` : ''}</div>
                             </div>
                           </TableCell>
-                          <TableCell className="hidden xl:table-cell max-w-xs truncate text-xs sm:text-sm">{app.interests}</TableCell>
                           <TableCell className="text-xs sm:text-sm">{new Date(app.created_at).toLocaleDateString()}</TableCell>
                         </TableRow>
                       ))}

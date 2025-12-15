@@ -233,19 +233,19 @@ function TeachersContent() {
                 Yangi o'qituvchi
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[95vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="text-xl sm:text-2xl">
+            <DialogContent className="max-w-[95vw] sm:max-w-2xl lg:max-w-3xl max-h-[95vh] overflow-y-auto p-4 sm:p-5 md:p-6">
+              <DialogHeader className="space-y-1 sm:space-y-2 pb-2 sm:pb-3">
+                <DialogTitle className="text-base sm:text-lg md:text-xl">
                   {editingTeacher ? 'O\'qituvchini tahrirlash' : 'Yangi o\'qituvchi qo\'shish'}
                 </DialogTitle>
-                <DialogDescription>
+                <DialogDescription className="text-xs sm:text-sm">
                   O'qituvchi ma'lumotlarini to'liq kiriting
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 md:space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
+                    <Label className="flex items-center gap-2 text-sm sm:text-base font-medium">
                       <User className="h-4 w-4 text-muted-foreground" />
                       Ism *
                     </Label>
@@ -254,11 +254,11 @@ function TeachersContent() {
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="To'liq ism"
                       required
-                      className="h-10"
+                      className="h-11 sm:h-10 text-base sm:text-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
+                    <Label className="flex items-center gap-2 text-sm sm:text-base font-medium">
                       <Briefcase className="h-4 w-4 text-muted-foreground" />
                       Tajriba (yil) *
                     </Label>
@@ -269,72 +269,72 @@ function TeachersContent() {
                       placeholder="Masalan: 5"
                       required
                       min="0"
-                      className="h-10"
+                      className="h-11 sm:h-10 text-base sm:text-sm"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   <div className="space-y-2">
-                    <Label>Mutaxassislik (UZ) *</Label>
+                    <Label className="text-sm sm:text-base font-medium">Mutaxassislik (UZ) *</Label>
                     <Input
                       value={formData.specialty_uz}
                       onChange={(e) => setFormData({ ...formData, specialty_uz: e.target.value })}
                       placeholder="Masalan: Frontend Developer"
                       required
-                      className="h-10"
+                      className="h-11 sm:h-10 text-base sm:text-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Mutaxassislik (RU)</Label>
+                    <Label className="text-sm sm:text-base font-medium">Mutaxassislik (RU)</Label>
                     <Input
                       value={formData.specialty_ru}
                       onChange={(e) => setFormData({ ...formData, specialty_ru: e.target.value })}
                       placeholder="Например: Frontend Developer"
-                      className="h-10"
+                      className="h-11 sm:h-10 text-base sm:text-sm"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>Mutaxassislik (EN)</Label>
+                  <div className="space-y-2 sm:col-span-2 lg:col-span-1">
+                    <Label className="text-sm sm:text-base font-medium">Mutaxassislik (EN)</Label>
                     <Input
                       value={formData.specialty_en}
                       onChange={(e) => setFormData({ ...formData, specialty_en: e.target.value })}
                       placeholder="e.g. Frontend Developer"
-                      className="h-10"
+                      className="h-11 sm:h-10 text-base sm:text-sm"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <div className="space-y-2">
-                    <Label>Bio (UZ) *</Label>
+                    <Label className="text-sm sm:text-base font-medium">Bio (UZ) *</Label>
                     <Textarea
                       value={formData.bio_uz}
                       onChange={(e) => setFormData({ ...formData, bio_uz: e.target.value })}
                       placeholder="O'qituvchi haqida qisqacha ma'lumot..."
                       required
-                      rows={3}
-                      className="resize-none"
+                      rows={4}
+                      className="resize-y text-base sm:text-sm min-h-[100px]"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Bio (RU)</Label>
+                    <Label className="text-sm sm:text-base font-medium">Bio (RU)</Label>
                     <Textarea
                       value={formData.bio_ru}
                       onChange={(e) => setFormData({ ...formData, bio_ru: e.target.value })}
                       placeholder="Краткая информация о преподавателе..."
-                      rows={3}
-                      className="resize-none"
+                      rows={4}
+                      className="resize-y text-base sm:text-sm min-h-[100px]"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Bio (EN)</Label>
+                    <Label className="text-sm sm:text-base font-medium">Bio (EN)</Label>
                     <Textarea
                       value={formData.bio_en}
                       onChange={(e) => setFormData({ ...formData, bio_en: e.target.value })}
                       placeholder="Brief information about the teacher..."
-                      rows={3}
-                      className="resize-none"
+                      rows={4}
+                      className="resize-y text-base sm:text-sm min-h-[100px]"
                     />
                   </div>
                 </div>
@@ -346,9 +346,9 @@ function TeachersContent() {
                     folder="teachers"
                     label="O'qituvchi rasmi"
                   />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
+                      <Label className="flex items-center gap-2 text-sm sm:text-base font-medium">
                         <Phone className="h-4 w-4 text-muted-foreground" />
                         Telefon
                       </Label>
@@ -356,15 +356,16 @@ function TeachersContent() {
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         placeholder="+998 XX XXX XX XX"
-                        className="h-10"
+                        className="h-11 sm:h-10 text-base sm:text-sm"
+                        type="tel"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
+                    <Label className="flex items-center gap-2 text-sm sm:text-base font-medium">
                       <Linkedin className="h-4 w-4 text-muted-foreground" />
                       LinkedIn
                     </Label>
@@ -372,11 +373,12 @@ function TeachersContent() {
                       value={formData.linked_in}
                       onChange={(e) => setFormData({ ...formData, linked_in: e.target.value })}
                       placeholder="https://linkedin.com/..."
-                      className="h-10"
+                      className="h-11 sm:h-10 text-base sm:text-sm"
+                      type="url"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
+                    <Label className="flex items-center gap-2 text-sm sm:text-base font-medium">
                       <Send className="h-4 w-4 text-muted-foreground" />
                       Telegram
                     </Label>
@@ -384,11 +386,12 @@ function TeachersContent() {
                       value={formData.telegram}
                       onChange={(e) => setFormData({ ...formData, telegram: e.target.value })}
                       placeholder="https://t.me/..."
-                      className="h-10"
+                      className="h-11 sm:h-10 text-base sm:text-sm"
+                      type="url"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
+                  <div className="space-y-2 sm:col-span-2 lg:col-span-1">
+                    <Label className="flex items-center gap-2 text-sm sm:text-base font-medium">
                       <Instagram className="h-4 w-4 text-muted-foreground" />
                       Instagram
                     </Label>
@@ -396,7 +399,8 @@ function TeachersContent() {
                       value={formData.instagram}
                       onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
                       placeholder="https://instagram.com/..."
-                      className="h-10"
+                      className="h-11 sm:h-10 text-base sm:text-sm"
+                      type="url"
                     />
                   </div>
                 </div>
@@ -420,11 +424,21 @@ function TeachersContent() {
                   />
                 </div>
 
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-2">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsDialogOpen(false)}
+                    className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm"
+                  >
                     Bekor
                   </Button>
-                  <Button type="submit">{editingTeacher ? 'Saqlash' : 'Qo\'shish'}</Button>
+                  <Button 
+                    type="submit"
+                    className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm"
+                  >
+                    {editingTeacher ? 'Saqlash' : 'Qo\'shish'}
+                  </Button>
                 </div>
               </form>
             </DialogContent>

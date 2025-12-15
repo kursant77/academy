@@ -285,7 +285,7 @@ export default function Register() {
 
           <div className="grid lg:grid-cols-[1fr_400px] gap-6 sm:gap-8 items-start">
             {/* Main Form Card */}
-            <Card className="border-2 shadow-xl backdrop-blur-sm bg-card/95 animate-fade-in card-hover-lift">
+            <Card className="border-2 shadow-xl backdrop-blur-sm bg-card/95 animate-fade-in card-hover-lift order-2 lg:order-1">
               <CardHeader className="space-y-1 pb-3 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
@@ -471,7 +471,7 @@ export default function Register() {
             </Card>
 
             {/* Side Info Card */}
-            <div className="space-y-6 animate-fade-in-up">
+            <div className="space-y-6 animate-fade-in-up order-1 lg:order-2">
               <Card className="border-2 shadow-lg bg-gradient-to-br from-primary/5 to-accent/5">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">

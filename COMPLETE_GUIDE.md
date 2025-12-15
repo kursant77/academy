@@ -17,6 +17,9 @@ Bu qo'llanma loyihani to'liq sozlash, ishga tushirish va boshqarish uchun barcha
 9. [Xavfsizlik](#xavfsizlik)
 10. [Design Guidelines](#design-guidelines)
 11. [Muammolarni Hal Qilish](#muammolarni-hal-qilish)
+12. [SEO Optimizatsiyasi](#seo-optimizatsiyasi)
+13. [Bundle Size Optimizatsiyasi](#bundle-size-optimizatsiyasi)
+14. [Deployment Checklist](#deployment-checklist)
 
 ---
 
@@ -25,15 +28,13 @@ Bu qo'llanma loyihani to'liq sozlash, ishga tushirish va boshqarish uchun barcha
 ### Loyiha Tuzilishi
 
 ```
-JobConnectFlow/
-├── client/              # Frontend React loyihasi
-│   ├── src/
-│   │   ├── pages/      # Sahifalar
-│   │   ├── components/ # Komponentlar
-│   │   ├── lib/        # Utility funksiyalar
-│   │   └── ...
-│   ├── shared/         # Shared types
+ACADEMY/
+├── src/              # Frontend React loyihasi
+│   ├── pages/      # Sahifalar
+│   ├── components/ # Komponentlar
+│   ├── lib/        # Utility funksiyalar
 │   └── ...
+├── public/          # Static fayllar
 └── README.md
 ```
 
@@ -49,7 +50,6 @@ JobConnectFlow/
 ### Install va Ishga Tushirish
 
 ```bash
-cd client
 npm install
 npm run dev
 ```
@@ -69,7 +69,7 @@ Loyiha `http://localhost:5173` da ishga tushadi.
 
 ### 2.2. Environment Variables
 
-`client/.env` fayl yarating va quyidagilarni qo'shing:
+`.env` fayl yarating va quyidagilarni qo'shing:
 
 ```env
 # Supabase Configuration
@@ -77,8 +77,8 @@ VITE_SUPABASE_URL=your_project_url
 VITE_SUPABASE_ANON_KEY=your_anon_key
 
 # Telegram Bot Configuration (Ixtiyoriy)
-VITE_TELEGRAM_BOT_TOKEN=8578440348:AAHM-FGbW6al3w8wyqSNTWTsCpolhxoJ1ls
-VITE_TELEGRAM_CHAT_ID=5865994146
+VITE_TELEGRAM_BOT_TOKEN=your_bot_token
+VITE_TELEGRAM_CHAT_ID=your_chat_id
 ```
 
 ### 2.3. Database Setup
@@ -270,119 +270,58 @@ VALUES (
 
 ## 6. TELEGRAM BOT INTEGRATSIYASI
 
-### 6.1. Supabase Edge Function Yaratish
+### 6.1. Database Trigger Yechimi (Tavsiya Etiladi)
 
-#### Qadam 1: Edge Function Yaratish
+Bu yechim **database trigger** ishlatadi va **CORS muammosi umuman bo'lmaydi**, chunki trigger server-side'da ishlaydi.
+
+#### Qadam 1: SQL Skriptni Ishga Tushirish
 
 1. **Supabase Dashboard** ga kiring
-2. Chap menuda **"Edge Functions"** ni toping va bosing
-3. **"Create a new function"** tugmasini bosing
-4. Function nomi: `send-telegram` (katta-kichik harf muhim!)
-5. **"Create function"** ni bosing
+2. **SQL Editor** ga o'ting
+3. **`COMPLETE_DATABASE_SETUP.sql`** faylida Telegram trigger kodi bor
+4. Barcha SQL kodini nusxalab SQL Editor'ga yopishtiring
+5. **Run** tugmasini bosing
 
-#### Qadam 2: Function Kodini Qo'shish
+#### Qadam 2: Nima Qiladi?
 
-Function editor'ga quyidagi kodni yopishtiring:
+SQL skript quyidagilarni yaratadi:
 
-```typescript
-const TELEGRAM_BOT_TOKEN = '8578440348:AAHM-FGbW6al3w8wyqSNTWTsCpolhxoJ1ls';
-const TELEGRAM_CHAT_ID = '5865994146';
+1. ✅ **pg_net extension** - HTTP so'rovlar yuborish uchun
+2. ✅ **send_telegram_message function** - Telegram API ga xabar yuboradi
+3. ✅ **notify_new_application function** - Registratsiya uchun trigger
+4. ✅ **notify_new_contact_message function** - Aloqa formasi uchun trigger
+5. ✅ **contact_messages jadvali** - Agar mavjud bo'lmasa yaratadi
+6. ✅ **Trigger'lar** - Avtomatik Telegram xabar yuboradi
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+#### Qadam 3: Frontend Kod
 
-Deno.serve(async (req) => {
-  // CORS preflight request'ni handle qilish
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: CORS_HEADERS });
-  }
-
-  try {
-    const { message } = await req.json();
-
-    if (!message) {
-      return new Response(
-        JSON.stringify({ error: 'Message is required' }),
-        { 
-          status: 400, 
-          headers: { 
-            'Content-Type': 'application/json',
-            ...CORS_HEADERS
-          } 
-        }
-      );
-    }
-
-    // Telegram Bot API ga so'rov yuborish
-    const telegramResponse = await fetch(
-      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
-          text: message,
-          parse_mode: 'HTML',
-        }),
-      }
-    );
-
-    if (!telegramResponse.ok) {
-      const errorData = await telegramResponse.text();
-      return new Response(
-        JSON.stringify({ error: 'Failed to send message', details: errorData }),
-        { 
-          status: 500,
-          headers: { 
-            'Content-Type': 'application/json',
-            ...CORS_HEADERS
-          } 
-        }
-      );
-    }
-
-    const result = await telegramResponse.json();
-
-    return new Response(
-      JSON.stringify({ success: true, result }),
-      { 
-        status: 200,
-        headers: { 
-          'Content-Type': 'application/json',
-          ...CORS_HEADERS
-        } 
-      }
-    );
-  } catch (error) {
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
-        status: 500,
-        headers: { 
-          'Content-Type': 'application/json',
-          ...CORS_HEADERS
-        } 
-      }
-    );
-  }
-});
-```
-
-#### Qadam 3: Deploy Qilish
-
-1. **"Deploy"** tugmasini bosing
-2. 5-10 soniya kuting
-3. ✅ **Tayyor!**
+Frontend kod **o'zgartirildi**:
+- ✅ `register.tsx` - Faqat database'ga saqlaydi, trigger avtomatik xabar yuboradi
+- ✅ `contact.tsx` - Faqat database'ga saqlaydi, trigger avtomatik xabar yuboradi
+- ✅ Edge Function chaqiruvlari olib tashlandi
 
 ### 6.2. Test Qilish
 
+#### 1. Test Funksiyasini Ishlatish
+
+SQL Editor'da:
+
+```sql
+SELECT test_telegram_message('Salom, bu test xabar!');
+```
+
+Agar `true` qaytsa, function to'g'ri ishlayapti!
+
+#### 2. Websaytda Test
+
 1. Websaytga o'ting: `http://localhost:5173`
-2. `/register` yoki `/contact` sahifasiga o'ting
-3. Formani to'ldiring va yuboring
-4. Telegram bot'ga xabar kelganini tekshiring!
+2. `/register` formasini to'ldiring va yuboring
+3. Telegram bot'ga xabar kelganini tekshiring!
+
+Yoki:
+
+1. `/contact` formasini to'ldiring va yuboring
+2. Telegram bot'ga xabar kelganini tekshiring!
 
 ### 6.3. Xabar Formatlari
 
@@ -411,6 +350,14 @@ Xabar matni shu yerda
 ⏰ Vaqt: 01.01.2024, 12:00:00
 ```
 
+### 6.4. Afzalliklari
+
+- ✅ **CORS muammosi yo'q** - Server-side'da ishlaydi
+- ✅ **Edge Function kerak emas** - Faqat database trigger
+- ✅ **Avtomatik ishlaydi** - Yangi yozuv qo'shilganda xabar ketadi
+- ✅ **Xavfsiz** - Server-side'da ishlaydi, token xavfsiz
+- ✅ **Oson** - Bitta SQL skript bajariladi
+
 ---
 
 ## 7. DEVELOPMENT VA TEST
@@ -418,7 +365,6 @@ Xabar matni shu yerda
 ### 7.1. Loyihani Ishga Tushirish
 
 ```bash
-cd client
 npm install
 npm run dev
 ```
@@ -461,18 +407,193 @@ Production ga deploy qilganda environment variables qo'shing:
    ```
    VITE_SUPABASE_URL=your_project_url
    VITE_SUPABASE_ANON_KEY=your_anon_key
+   VITE_SITE_URL=https://aplusacademy.uz
    ```
 
 ### 8.2. Build
 
 ```bash
-cd client
 npm run build
 ```
 
-Build fayllar `client/dist` papkasida yaratiladi.
+Build fayllar `dist` papkasida yaratiladi.
 
-### 8.3. RLS Policies Tekshirish
+### 8.3. Vercel Deployment
+
+#### Environment Variables
+
+Vercel dashboard'da quyidagi environment variables'ni sozlash kerak:
+
+1. **Project Settings > Environment Variables** ga kiring
+2. Quyidagi variables'ni qo'shing:
+
+```
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGci... (Supabase dashboard'dan oling)
+VITE_SITE_URL=https://aplusacademy.uz
+```
+
+3. Har bir variable uchun **Production, Preview, Development** ni tanlang
+4. Save qiling va project'ni qayta deploy qiling
+
+#### Supabase Credentials Qayerdan Olinadi:
+
+1. Supabase dashboard: https://app.supabase.com
+2. Project'ni tanlang
+3. **Settings > API**
+4. `Project URL` → `VITE_SUPABASE_URL`
+5. `anon public` key → `VITE_SUPABASE_ANON_KEY`
+
+#### Deploy Qilish:
+
+```bash
+# Vercel CLI orqali
+npm i -g vercel
+vercel --prod
+
+# Yoki GitHub orqali
+# 1. GitHub'ga push qiling
+# 2. Vercel dashboard'da project'ni import qiling
+# 3. Environment variables'ni sozlang
+# 4. Deploy qiling
+```
+
+### 8.4. Netlify Deployment
+
+#### Variant A: Netlify CLI orqali
+
+```bash
+# Netlify CLI o'rnatish
+npm i -g netlify-cli
+
+# Login qilish
+netlify login
+
+# Deploy qilish
+netlify deploy --prod
+```
+
+#### Variant B: Drag & Drop
+
+1. `npm run build` ni ishga tushiring
+2. https://app.netlify.com ga kiring
+3. "Add new site" > "Deploy manually"
+4. `dist/` papkasini drag & drop qiling
+5. Environment Variables qo'shing (Site settings > Environment variables)
+
+### 8.5. Custom Server (Nginx/Apache)
+
+#### Build qilish:
+```bash
+npm run build
+```
+
+#### Server'ga yuklash:
+```bash
+# SCP orqali
+scp -r dist/* user@your-server.com:/var/www/aplusacademy/
+
+# Yoki FTP/SFTP orqali
+# dist/ papkasidagi barcha fayllarni server'ga yuklang
+```
+
+#### Nginx Configuration
+
+```nginx
+server {
+    listen 80;
+    server_name aplusacademy.uz www.aplusacademy.uz;
+    
+    # Redirect to HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name aplusacademy.uz www.aplusacademy.uz;
+    
+    # SSL certificates
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+    
+    root /var/www/aplusacademy/dist;
+    index index.html;
+    
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
+    
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    
+    # Cache static assets
+    location ~* \.(jpg|jpeg|png|gif|ico|css|js|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+    
+    # SPA routing
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+    
+    # Block admin routes from indexing
+    location /admin {
+        add_header X-Robots-Tag "noindex, nofollow";
+        try_files $uri $uri/ /index.html;
+    }
+    
+    # robots.txt va sitemap.xml
+    location ~ ^/(robots\.txt|sitemap\.xml)$ {
+        access_log off;
+    }
+}
+```
+
+#### Apache Configuration (.htaccess)
+
+```apache
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
+
+# Gzip compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Cache static assets
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpg "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+</IfModule>
+
+# Security headers
+<IfModule mod_headers.c>
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-XSS-Protection "1; mode=block"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+```
+
+### 8.6. RLS Policies Tekshirish
 
 Production'da RLS policies'ni qayta sozlang:
 - Public faqat o'qishi mumkin bo'lgan ma'lumotlarni ko'ra oladimi?
@@ -615,18 +736,24 @@ Barcha jadvallar uchun RLS yoqilgan:
 
 ### 11.4. Telegram Bot Muammolari
 
-#### Function topilmayapti
-1. Function nomi to'g'ri ekanligini tekshiring: `send-telegram`
-2. Deploy qilinganini tekshiring (Edge Functions → Functions → send-telegram)
+#### Trigger ishlamayapti
+1. pg_net extension yoqilganini tekshiring:
+   ```sql
+   CREATE EXTENSION IF NOT EXISTS pg_net;
+   ```
+2. Trigger'lar mavjudligini tekshiring:
+   ```sql
+   SELECT * FROM pg_trigger WHERE tgname LIKE '%telegram%';
+   ```
+3. Function'lar mavjudligini tekshiring:
+   ```sql
+   SELECT * FROM pg_proc WHERE proname LIKE '%telegram%';
+   ```
 
 #### Xabar kelmayapti
 1. Browser Console'ni oching (F12)
-2. Network tab'ida `send-telegram` function'ga so'rov ketayotganini ko'ring
-3. Edge Functions → Functions → send-telegram → Logs'da xatoliklarni ko'ring
-
-#### CORS xatolik
-1. Edge Function kodida CORS headers borligini tekshiring
-2. Function'ni qayta deploy qiling
+2. Network tab'ida database so'rovlarini ko'ring
+3. Supabase Dashboard → Logs → Postgres Logs'da xatoliklarni ko'ring
 
 ### 11.5. Browser Cache Muammolari
 
@@ -638,48 +765,285 @@ Barcha jadvallar uchun RLS yoqilgan:
 
 ---
 
-## 12. ADMIN PANEL RESPONSIVLIGI
+## 12. SEO OPTIMIZATSIYASI
 
-### 12.1. Mobil Optimallashtirish
+### 12.1. Qilingan Optimizatsiyalar
 
-Barcha admin sahifalar mobil uchun optimallashtirilgan:
+#### SEO Komponenti Yaratildi
+- **`src/components/SEO.tsx`** - Dinamik SEO komponenti
+- Meta teglar, Open Graph, Twitter Card
+- Strukturangan ma'lumotlar (JSON-LD)
+- Canonical URL
 
-- ✅ **AdminLayout** - Responsive sidebar va header
-- ✅ **Dashboard** - Responsive kartalar va grafiklar
-- ✅ **Courses** - Responsive jadval va formlar
-- ✅ **Students** - Responsive jadval va filterlar
-- ✅ **Teachers** - Responsive kartalar
-- ✅ **Groups** - Responsive jadval
-- ✅ **Applications** - Responsive jadval
+#### index.html Yangilandi
+- Open Graph meta teglar
+- Twitter Card meta teglar
+- Strukturangan ma'lumotlar (Schema.org)
+- Favicon va Apple Touch Icon
 
-### 12.2. Responsive Breakpoints
+#### Sahifalarga SEO Qo'shildi
+- ✅ Home (`/`) - To'liq SEO + strukturangan ma'lumotlar
+- ✅ Courses (`/courses`) - Kurslar ro'yxati SEO
+- ✅ Teachers (`/teachers`) - O'qituvchilar SEO
+- ✅ Events (`/events`) - Tadbirlar SEO
+- ✅ About (`/about`) - Biz haqimizda SEO
+- ✅ Contact (`/contact`) - Aloqa SEO
+- ✅ Register (`/register`) - Ro'yxatdan o'tish SEO
+- ✅ Achievements (`/achievements`) - Yutuqlar SEO
 
-- `sm:` - 640px dan boshlab
-- `md:` - 768px dan boshlab
-- `lg:` - 1024px dan boshlab
-- `xl:` - 1280px dan boshlab
+### 12.2. Asosiy SEO Elementlari
 
-### 12.3. Mobil Optimallashtirilgan Elementlar
+#### Meta Teglar
+```html
+- title
+- description
+- keywords
+- author
+- robots
+```
 
-- **Jadvallar** - Gorizontal scroll yoki kartalar ko'rinishida
-- **Formalar** - 1 kolonka (mobil) → 2 kolonka (desktop)
-- **Kartalar** - Responsive grid layout
-- **Dialog'lar** - To'liq ekran (mobil) → Markazda (desktop)
-- **Text o'lchamlari** - Responsive shriftlar
+#### Open Graph
+```html
+- og:title
+- og:description
+- og:image
+- og:url
+- og:type
+- og:site_name
+```
+
+#### Twitter Card
+```html
+- twitter:card
+- twitter:title
+- twitter:description
+- twitter:image
+```
+
+#### Strukturangan Ma'lumotlar (JSON-LD)
+- EducationalOrganization schema
+- Course schema
+- ItemList schema
+- BreadcrumbList schema
+- FAQPage schema
+
+### 12.3. Qanday Qo'shish
+
+Har bir sahifaga SEO qo'shish uchun:
+
+```tsx
+import { SEO } from "@/components/SEO";
+
+export default function MyPage() {
+  return (
+    <>
+      <SEO 
+        title="Sahifa Nomi — A+ Academy"
+        description="Sahifa tavsifi..."
+        keywords="kalit sozlar..."
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          // ...
+        }}
+      />
+      {/* Sahifa kontenti */}
+    </>
+  );
+}
+```
+
+### 12.4. SEO Best Practices
+
+1. **Title** - 50-60 belgi, har bir sahifa uchun unikal
+2. **Description** - 150-160 belgi, qiziqarli va tavsiflovchi
+3. **Keywords** - 10-15 muhim kalit soz
+4. **Image** - 1200x630px (Open Graph uchun)
+5. **Structured Data** - Har bir sahifa turi uchun mos schema
+
+### 12.5. Google Search Console
+
+1. Google Search Console ga kiring
+2. Loyihani qo'shing
+3. Sitemap yuklang: `https://aplusacademy.uz/sitemap.xml`
+4. Indexlash tezligini kuzating
+
+### 12.6. Test Qilish
+
+1. **Google Rich Results Test:**
+   - https://search.google.com/test/rich-results
+   - URL ni kiriting va strukturangan ma'lumotlarni tekshiring
+
+2. **Facebook Sharing Debugger:**
+   - https://developers.facebook.com/tools/debug/
+   - Open Graph teglarni tekshiring
+
+3. **Twitter Card Validator:**
+   - https://cards-dev.twitter.com/validator
+   - Twitter Card teglarni tekshiring
 
 ---
 
-## 13. FOYDALI LINKLAR
+## 13. BUNDLE SIZE OPTIMIZATSIYASI
 
-- **Supabase Dashboard:** https://supabase.com/dashboard
-- **Supabase Docs:** https://supabase.com/docs
-- **Telegram Bot API:** https://core.telegram.org/bots/api
-- **Tailwind CSS:** https://tailwindcss.com
-- **shadcn/ui:** https://ui.shadcn.com
+### 13.1. Qilingan Optimizatsiyalar
+
+#### Code Splitting ✅
+- **React va React-DOM** - Main bundle'da (critical, split qilinmaydi)
+- **Radix UI** - Alohida chunk'larga ajratilgan (har bir komponent alohida)
+- **Recharts** - Faqat admin dashboard'da, lazy load orqali
+- **Framer Motion** - Alohida chunk
+- **Icons** - Lucide va React Icons alohida chunk'lar
+- **Utils** - Kichik utility library'lar bitta chunk'da
+
+#### Minification ✅
+- **Terser** - Agressiv minification (2 passes)
+- **Console.log'lar o'chirilgan** - Production'da
+- **Comments o'chirilgan** - Barcha comment'lar
+- **Unsafe optimizations** - Agressiv compression
+
+#### Tree Shaking ✅
+- **ES Modules** - Avtomatik tree shaking
+- **Unused code** - Avtomatik o'chiriladi
+- **CSS code splitting** - Faqat ishlatilgan CSS
+
+#### Lazy Loading ✅
+- **Barcha sahifalar** - Lazy load qilingan
+- **Admin sahifalar** - Alohida lazy load
+- **Recharts** - Faqat admin dashboard'da, lazy load
+
+#### Asset Optimization ✅
+- **4KB dan kichik fayllar** - Inline qilinadi
+- **Image optimization** - Lazy loading
+- **Font optimization** - Display swap
+
+### 13.2. Expected Bundle Sizes
+
+#### Main Bundle (Initial Load)
+- **Size**: ~150-200KB (gzipped)
+- **Ichimida**: React, React-DOM, Router, Core utilities
+
+#### Vendor Chunks
+- **UI (Radix)**: ~100-150KB (gzipped)
+- **Supabase**: ~50-80KB (gzipped)
+- **Icons**: ~30-50KB (gzipped)
+- **Utils**: ~20-30KB (gzipped)
+- **Router**: ~10-20KB (gzipped)
+
+#### Admin Chunks (Lazy Loaded)
+- **Dashboard + Recharts**: ~200-300KB (gzipped)
+- **Admin Components**: ~50-100KB (gzipped)
+
+#### Total Initial Load
+- **Without Admin**: ~400-600KB (gzipped)
+- **With Admin**: ~700-1000KB (gzipped)
+
+### 13.3. Performance Metrics
+
+#### Target Metrics:
+- **First Contentful Paint (FCP)**: < 1.5s
+- **Largest Contentful Paint (LCP)**: < 2.5s
+- **Time to Interactive (TTI)**: < 3s
+- **Total Blocking Time (TBT)**: < 300ms
+- **Cumulative Layout Shift (CLS)**: < 0.1
+
+### 13.4. Bundle Size'ni Tekshirish
+
+```bash
+# Build qilish
+npm run build
+
+# Bundle size'ni ko'rish
+ls -lh dist/assets/
+```
 
 ---
 
-## 14. FAQ (TEZ-TEZ SO'RALADIGAN SAVOLLAR)
+## 14. DEPLOYMENT CHECKLIST
+
+### Pre-Deployment Checklist
+
+#### 1. Environment Variables ✅
+- [ ] `.env` fayl yaratilgan va to'ldirilgan
+- [ ] `VITE_SUPABASE_URL` to'g'ri
+- [ ] `VITE_SUPABASE_ANON_KEY` to'g'ri
+- [ ] `VITE_SITE_URL` production URL'ga o'rnatilgan
+- [ ] `.env` fayl `.gitignore` da (hech qachon commit qilinmasin!)
+
+#### 2. Build Test ✅
+```bash
+npm install
+npm run build
+npm run preview
+```
+- [ ] Build muvaffaqiyatli yakunlandi
+- [ ] Preview'da barcha sahifalar ishlayapti
+- [ ] Console'da xatoliklar yo'q
+- [ ] Supabase ulanishi ishlayapti
+
+#### 3. Code Quality ✅
+- [ ] TypeScript xatoliklari yo'q (`npm run type-check`)
+- [ ] ESLint xatoliklari yo'q (`npm run lint`)
+- [ ] Barcha import'lar to'g'ri
+- [ ] Unused code o'chirilgan
+
+#### 4. SEO Optimization ✅
+- [ ] `public/sitemap.xml` yangilangan
+- [ ] `public/robots.txt` to'g'ri
+- [ ] Barcha sahifalarda SEO komponenti ishlatilgan
+- [ ] Meta taglar to'g'ri
+- [ ] Open Graph image mavjud (`/og-image.jpg`)
+
+#### 5. Database Setup ✅
+- [ ] Supabase'da barcha jadvallar yaratilgan
+- [ ] RLS policies sozlangan
+- [ ] Test ma'lumotlar o'chirilgan (production uchun)
+- [ ] Admin foydalanuvchi yaratilgan
+
+#### 6. Assets ✅
+- [ ] Barcha image'lar optimallashtirilgan
+- [ ] Favicon va logo mavjud
+- [ ] OG image mavjud (1200x630px)
+- [ ] Apple touch icon mavjud
+
+#### 7. Security ✅
+- [ ] Admin route'lar `noindex` (robots.txt)
+- [ ] Environment variables xavfsiz
+- [ ] API key'lar public bo'lmagan
+- [ ] CORS sozlamalari to'g'ri
+
+### Post-Deployment Checklist
+
+#### 1. Functionality Test ✅
+- [ ] Home page yuklanmoqda
+- [ ] Barcha sahifalar ishlayapti
+- [ ] Navigation ishlayapti
+- [ ] Forms ishlayapti
+- [ ] Admin panel ishlayapti
+- [ ] Supabase ulanishi ishlayapti
+
+#### 2. SEO Verification ✅
+- [ ] Google Search Console'ga qo'shildi
+- [ ] Sitemap yuklandi
+- [ ] robots.txt tekshirildi
+- [ ] Meta taglar to'g'ri (Facebook Debugger)
+- [ ] Twitter Card to'g'ri (Twitter Card Validator)
+
+#### 3. Performance Test ✅
+- [ ] Google PageSpeed Insights (90+ score)
+- [ ] GTmetrix (A+ rating)
+- [ ] WebPageTest
+- [ ] Lighthouse audit
+
+#### 4. Security Test ✅
+- [ ] SSL sertifikat ishlayapti
+- [ ] Security headers to'g'ri (SecurityHeaders.com)
+- [ ] XSS protection ishlayapti
+- [ ] CSRF protection ishlayapti
+
+---
+
+## 15. FAQ (TEZ-TEZ SO'RALADIGAN SAVOLLAR)
 
 ### Q: Database jadvallar yaratilmayapti?
 
@@ -702,10 +1066,10 @@ Barcha admin sahifalar mobil uchun optimallashtirilgan:
 ### Q: Telegram bot'ga xabar kelmayapti?
 
 **A:**
-1. Edge Function yaratilganini tekshiring (`send-telegram`)
-2. Function deploy qilinganini tekshiring
+1. Database trigger'lar yaratilganini tekshiring
+2. pg_net extension yoqilganini tekshiring
 3. Browser Console'da xatoliklarni tekshiring
-4. Edge Functions → Logs'da xatoliklarni ko'ring
+4. Supabase Dashboard → Logs → Postgres Logs'da xatoliklarni ko'ring
 
 ### Q: Production'ga qanday deploy qilaman?
 
@@ -717,18 +1081,18 @@ Barcha admin sahifalar mobil uchun optimallashtirilgan:
 
 ---
 
-## 15. SUPPORT
+## 16. SUPPORT
 
 Agar muammo bo'lsa:
 
 1. Browser Console'ni tekshiring (F12)
 2. Supabase Dashboard → Logs'da xatoliklarni ko'ring
 3. SQL Editor → Logs'da xatoliklarni ko'ring
-4. Edge Functions → Logs'da xatoliklarni ko'ring
+4. Network tab'da API so'rovlarni tekshiring
 
 ---
 
-**Oxirgi yangilanish:** 2024
+**Oxirgi yangilanish:** 2025-01-28
 
 **Versiya:** 1.0.0
 
@@ -744,8 +1108,8 @@ Agar muammo bo'lsa:
 - [ ] Admin foydalanuvchi yaratildi
 
 ### Telegram Integratsiya
-- [ ] Edge Function yaratildi
-- [ ] Function deploy qilindi
+- [ ] Database trigger'lar yaratildi
+- [ ] pg_net extension yoqildi
 - [ ] Registratsiya formasi test qilindi
 - [ ] Aloqa formasi test qilindi
 

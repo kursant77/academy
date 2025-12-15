@@ -190,78 +190,98 @@ function TestimonialsContent() {
                 Yangi fikr
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
+            <DialogContent className="max-w-[95vw] sm:max-w-2xl lg:max-w-3xl max-h-[95vh] overflow-y-auto p-4 sm:p-5 md:p-6">
+              <DialogHeader className="space-y-1 sm:space-y-2 pb-2 sm:pb-3">
+                <DialogTitle className="text-base sm:text-lg md:text-xl">
                   {editingItem ? 'Fikrni tahrirlash' : 'Yangi fikr qo\'shish'}
                 </DialogTitle>
-                <DialogDescription>
+                <DialogDescription className="text-xs sm:text-sm">
                   Talaba yoki ota-onalarning real fikrlarini kiriting
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 md:space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
-                    <Label>Ism</Label>
+                    <Label className="text-sm sm:text-base font-medium">Ism *</Label>
                     <Input
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       required
+                      className="h-11 sm:h-10 text-base sm:text-sm"
+                      placeholder="To'liq ism"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Kurs</Label>
+                    <Label className="text-sm sm:text-base font-medium">Kurs *</Label>
                     <Input
                       value={formData.course}
                       onChange={(e) => setFormData({ ...formData, course: e.target.value })}
                       required
+                      className="h-11 sm:h-10 text-base sm:text-sm"
+                      placeholder="Kurs nomi"
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   <div className="space-y-2">
-                    <Label>Matn (UZ)</Label>
+                    <Label className="text-sm sm:text-base font-medium">Matn (UZ) *</Label>
                     <Textarea
                       value={formData.text_uz}
                       onChange={(e) => setFormData({ ...formData, text_uz: e.target.value })}
                       required
-                      rows={3}
+                      rows={4}
+                      className="text-base sm:text-sm min-h-[100px] resize-y"
+                      placeholder="Fikr matni (O'zbekcha)"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Matn (RU)</Label>
+                    <Label className="text-sm sm:text-base font-medium">Matn (RU) *</Label>
                     <Textarea
                       value={formData.text_ru}
                       onChange={(e) => setFormData({ ...formData, text_ru: e.target.value })}
                       required
-                      rows={3}
+                      rows={4}
+                      className="text-base sm:text-sm min-h-[100px] resize-y"
+                      placeholder="Fikr matni (Ruscha)"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>Matn (EN)</Label>
+                  <div className="space-y-2 sm:col-span-2 lg:col-span-1">
+                    <Label className="text-sm sm:text-base font-medium">Matn (EN) *</Label>
                     <Textarea
                       value={formData.text_en}
                       onChange={(e) => setFormData({ ...formData, text_en: e.target.value })}
                       required
-                      rows={3}
+                      rows={4}
+                      className="text-base sm:text-sm min-h-[100px] resize-y"
+                      placeholder="Fikr matni (Inglizcha)"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Reyting (1-5)</Label>
+                  <Label className="text-sm sm:text-base font-medium">Reyting (1-5) *</Label>
                   <Input
                     type="number"
                     min={1}
                     max={5}
                     value={formData.rating}
                     onChange={(e) => setFormData({ ...formData, rating: Number(e.target.value) })}
+                    className="h-11 sm:h-10 text-base sm:text-sm"
+                    placeholder="1 dan 5 gacha"
                   />
                 </div>
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-2">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsDialogOpen(false)}
+                    className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm"
+                  >
                     Bekor qilish
                   </Button>
-                  <Button type="submit">
+                  <Button 
+                    type="submit"
+                    className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm"
+                  >
                     {editingItem ? 'Yangilash' : 'Qo\'shish'}
                   </Button>
                 </div>

@@ -87,28 +87,28 @@ export default function Teachers() {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl -z-10 animate-pulse" style={{ animationDelay: '1s' }} />
         <div className="absolute inset-0 bg-pattern-dots opacity-20 -z-10" />
 
-        <div className="relative py-12 md:py-16 lg:py-20">
-          <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <div className="relative py-8 sm:py-12 md:py-16 lg:py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
             {/* Header */}
-            <div className="text-center mb-12 md:mb-16 space-y-4 animate-fade-in-down">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent">
+            <div className="text-center mb-8 sm:mb-10 md:mb-12 lg:mb-16 space-y-3 sm:space-y-4 animate-fade-in-down">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent px-2">
                 {t("teachers.title")}
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto px-2">
                 {t("teachers.subtitle")}
               </p>
             </div>
 
             {/* Teachers Grid */}
             {teachers.length === 0 ? (
-              <div className="text-center py-20">
-                <h3 className="text-xl font-semibold mb-2">O'qituvchilar hozircha yo'q</h3>
-                <p className="text-muted-foreground">
+              <div className="text-center py-12 sm:py-16 md:py-20">
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">O'qituvchilar hozircha yo'q</h3>
+                <p className="text-sm sm:text-base text-muted-foreground">
                   O'qituvchilar ro'yxati tez orada qo'shiladi. Kuting!
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
                 {teachers.map((teacher, index) => (
                   <div
                     key={teacher.id}

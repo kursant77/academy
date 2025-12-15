@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/lib/supabase";
 import type { Achievement } from "@shared/schema";
-import { Trophy, X, ZoomIn } from "lucide-react";
+import { Trophy, X, ZoomIn, ZoomOut, RotateCw } from "lucide-react";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 
@@ -13,6 +13,24 @@ export default function Achievements() {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string; studentName: string } | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const imageRef = useRef<HTMLImageElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const zoomRef = useRef(zoom);
+  const positionRef = useRef(position);
+  const isDraggingRef = useRef(isDragging);
+  const dragStartRef = useRef(dragStart);
+
+  // Keep refs in sync with state
+  useEffect(() => {
+    zoomRef.current = zoom;
+    positionRef.current = position;
+    isDraggingRef.current = isDragging;
+    dragStartRef.current = dragStart;
+  }, [zoom, position, isDragging, dragStart]);
 
   useEffect(() => {
     let active = true;
@@ -32,6 +50,72 @@ export default function Achievements() {
       active = false;
     };
   }, []);
+
+  // Attach non-passive event listeners for wheel and touch events
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const currentZoom = zoomRef.current;
+      const currentPosition = positionRef.current;
+      const delta = e.deltaY > 0 ? -0.15 : 0.15;
+      const newZoom = Math.max(0.5, Math.min(5, currentZoom + delta));
+      setZoom(newZoom);
+      
+      // Zoom center'da bo'lishi uchun
+      if (container && imageRef.current) {
+        const containerRect = container.getBoundingClientRect();
+        const mouseX = e.clientX - containerRect.left;
+        const mouseY = e.clientY - containerRect.top;
+        
+        const scaleChange = newZoom / currentZoom;
+        setPosition({
+          x: mouseX - (mouseX - currentPosition.x) * scaleChange,
+          y: mouseY - (mouseY - currentPosition.y) * scaleChange,
+        });
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isDraggingRef.current && zoomRef.current > 1 && e.touches.length === 1) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const currentDragStart = dragStartRef.current;
+        setPosition({
+          x: touch.clientX - currentDragStart.x,
+          y: touch.clientY - currentDragStart.y,
+        });
+      }
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (zoomRef.current > 1 && e.touches.length === 1) {
+        setIsDragging(true);
+        const touch = e.touches[0];
+        const currentPosition = positionRef.current;
+        setDragStart({ x: touch.clientX - currentPosition.x, y: touch.clientY - currentPosition.y });
+      }
+    };
+
+    const handleTouchEnd = () => {
+      setIsDragging(false);
+    };
+
+    // Attach non-passive event listeners
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
+    container.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, []); // Empty dependency array - effect only runs once on mount
 
   return (
     <>
@@ -206,40 +290,139 @@ export default function Achievements() {
         </div>
       </div>
 
-      {/* Image Modal */}
-      <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] w-auto h-auto p-0 bg-background/95 backdrop-blur-xl border-2 border-border/50">
+      {/* Image Modal with Zoom */}
+      <Dialog 
+        open={!!selectedImage} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedImage(null);
+            setZoom(1);
+            setPosition({ x: 0, y: 0 });
+          }
+        }}
+      >
+        <DialogContent className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 !w-screen !h-screen !max-w-none !max-h-none !m-0 !p-0 bg-background/95 backdrop-blur-xl !border-0 !rounded-none overflow-hidden !shadow-none">
+          <DialogHeader className="sr-only">
+            <DialogTitle>{selectedImage?.title || 'Rasm'}</DialogTitle>
+            <DialogDescription>{selectedImage?.studentName || 'O\'quvchi yutug\'i'}</DialogDescription>
+          </DialogHeader>
           {selectedImage && (
-            <div className="relative">
-              {/* Close button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-4 right-4 z-50 h-10 w-10 rounded-full bg-background/90 backdrop-blur-sm hover:bg-destructive/10 hover:text-destructive shadow-lg"
-                onClick={() => setSelectedImage(null)}
-                aria-label="Close"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-
-              {/* Image */}
-              <div className="flex flex-col items-center justify-center p-4 sm:p-6">
-                <img
-                  src={selectedImage.url}
-                  alt={selectedImage.title}
-                  className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
-                  onClick={(e) => e.stopPropagation()}
-                />
-                
-                {/* Image info */}
-                <div className="mt-4 text-center max-w-2xl">
-                  <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">
-                    {selectedImage.title}
-                  </h3>
-                  <p className="text-sm sm:text-base text-muted-foreground">
-                    {selectedImage.studentName}
-                  </p>
+            <div className="relative w-full h-full flex flex-col">
+              {/* Controls Bar */}
+              <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between p-2 sm:p-3 bg-background/90 backdrop-blur-md border-b border-border/50 shadow-lg">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 sm:h-10 sm:w-10"
+                    onClick={() => setZoom(Math.max(0.5, zoom - 0.25))}
+                    disabled={zoom <= 0.5}
+                    aria-label="Kichiklashtirish"
+                  >
+                    <ZoomOut className="h-5 w-5" />
+                  </Button>
+                  <span className="text-sm sm:text-base font-medium min-w-[70px] text-center">
+                    {Math.round(zoom * 100)}%
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 sm:h-10 sm:w-10"
+                    onClick={() => setZoom(Math.min(5, zoom + 0.25))}
+                    disabled={zoom >= 5}
+                    aria-label="Kattalashtirish"
+                  >
+                    <ZoomIn className="h-5 w-5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 sm:h-10 sm:w-10"
+                    onClick={() => {
+                      setZoom(1);
+                      setPosition({ x: 0, y: 0 });
+                    }}
+                    aria-label="Qayta tiklash"
+                  >
+                    <RotateCw className="h-5 w-5" />
+                  </Button>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 sm:h-10 sm:w-10 hover:bg-destructive/10 hover:text-destructive"
+                  onClick={() => {
+                    setSelectedImage(null);
+                    setZoom(1);
+                    setPosition({ x: 0, y: 0 });
+                  }}
+                  aria-label="Yopish"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+
+              {/* Image Container with Zoom - Full Height */}
+              <div
+                ref={containerRef}
+                className="flex-1 overflow-hidden relative w-full"
+                style={{ height: 'calc(100vh - 120px)', cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default', touchAction: 'none' }}
+                onMouseDown={(e) => {
+                  if (zoom > 1) {
+                    setIsDragging(true);
+                    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+                    e.preventDefault();
+                  }
+                }}
+                onMouseMove={(e) => {
+                  if (isDragging && zoom > 1) {
+                    setPosition({
+                      x: e.clientX - dragStart.x,
+                      y: e.clientY - dragStart.y,
+                    });
+                    e.preventDefault();
+                  }
+                }}
+                onMouseUp={() => setIsDragging(false)}
+                onMouseLeave={() => setIsDragging(false)}
+              >
+                <div
+                  className="w-full h-full flex items-center justify-center relative"
+                  style={{
+                    transform: `translate(${position.x}px, ${position.y}px)`,
+                    transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+                  }}
+                >
+                  <img
+                    ref={imageRef}
+                    src={selectedImage.url}
+                    alt={selectedImage.title}
+                    className="select-none pointer-events-none"
+                    style={{
+                      transform: `scale(${zoom})`,
+                      maxHeight: '100%',
+                      height: '100%',
+                      width: 'auto',
+                      objectFit: 'contain',
+                      transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+                    }}
+                    draggable={false}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Image Info */}
+              <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-background/90 backdrop-blur-md border-t border-border/50 z-40">
+                <h3 className="text-base sm:text-lg font-bold text-foreground mb-1 text-center">
+                  {selectedImage.title}
+                </h3>
+                <p className="text-xs sm:text-sm text-muted-foreground text-center">
+                  {selectedImage.studentName}
+                </p>
               </div>
             </div>
           )}

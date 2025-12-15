@@ -31,6 +31,7 @@ const AdminApplications = lazy(() => import("@/pages/admin/applications"));
 const AdminAchievements = lazy(() => import("@/pages/admin/achievements"));
 const AdminCategories = lazy(() => import("@/pages/admin/categories"));
 const AdminTestimonials = lazy(() => import("@/pages/admin/testimonials"));
+const AdminSettings = lazy(() => import("@/pages/admin/settings"));
 
 // Loading component
 const PageLoader = () => (
@@ -68,6 +69,7 @@ function Router() {
           <Route path="/admin/achievements" component={AdminAchievements} />
           <Route path="/admin/categories" component={AdminCategories} />
           <Route path="/admin/testimonials" component={AdminTestimonials} />
+          <Route path="/admin/settings" component={AdminSettings} />
           <Route path="/admin" component={AdminDashboard} />
           <Route component={NotFound} />
         </Switch>

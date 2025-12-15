@@ -11,6 +11,9 @@ interface ContentResponse {
   facebook?: string;
   instagram?: string;
   telegram?: string;
+  youtube?: string;
+  linkedin?: string;
+  twitter?: string;
 }
 
 export function useContent(page: string, language: string) {
@@ -19,32 +22,59 @@ export function useContent(page: string, language: string) {
   useEffect(() => {
     async function load() {
       try {
-        // Supabase'dan content_blocks jadvalidan ma'lumotlarni olish
-        const { data, error } = await supabase
+        // Social section uchun locale'ni e'tiborsiz qoldirish
+        let query = supabase
           .from('content_blocks')
-          .select('content_key, value')
-          .eq('section', page)
-          .eq('locale', language);
+          .select('content_key, value, locale')
+          .eq('section', page);
 
-        if (error) {
-          console.error("Content load error:", error);
-          // Fallback: localStorage'dan olish
-          const saved = localStorage.getItem(`content_${page}_${language}`);
-          if (saved) {
-            setContent(JSON.parse(saved));
+        // Social section bo'lsa, locale'ni e'tiborsiz qoldirish
+        if (page === 'social') {
+          // Social section uchun barcha locale'larni olish
+          const { data, error } = await query;
+          
+          if (error) {
+            console.error("Content load error:", error);
+            return;
           }
-          return;
-        }
 
-        // Ma'lumotlarni object'ga aylantirish
-        const contentObj: ContentResponse = {};
-        if (data) {
-          data.forEach((item) => {
-            contentObj[item.content_key as keyof ContentResponse] = item.value;
-          });
-        }
+          // Ma'lumotlarni object'ga aylantirish (birinchi topilganini olish)
+          const contentObj: ContentResponse = {};
+          if (data) {
+            const seenKeys = new Set<string>();
+            data.forEach((item) => {
+              if (!seenKeys.has(item.content_key)) {
+                contentObj[item.content_key as keyof ContentResponse] = item.value;
+                seenKeys.add(item.content_key);
+              }
+            });
+          }
 
-        setContent(contentObj);
+          setContent(contentObj);
+        } else {
+          // Boshqa section'lar uchun locale'ga qarab qidirish
+          const { data, error } = await query.eq('locale', language);
+
+          if (error) {
+            console.error("Content load error:", error);
+            // Fallback: localStorage'dan olish
+            const saved = localStorage.getItem(`content_${page}_${language}`);
+            if (saved) {
+              setContent(JSON.parse(saved));
+            }
+            return;
+          }
+
+          // Ma'lumotlarni object'ga aylantirish
+          const contentObj: ContentResponse = {};
+          if (data) {
+            data.forEach((item) => {
+              contentObj[item.content_key as keyof ContentResponse] = item.value;
+            });
+          }
+
+          setContent(contentObj);
+        }
       } catch (error) {
         console.error("Content load error:", error);
         // Fallback: localStorage'dan olish

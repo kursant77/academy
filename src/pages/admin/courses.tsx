@@ -302,50 +302,56 @@ function CoursesContent() {
                 Yangi kurs
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[95vh] overflow-y-auto p-3 sm:p-4 md:p-6">
-              <DialogHeader className="space-y-1 sm:space-y-2">
-                <DialogTitle className="text-sm sm:text-base md:text-lg">
+            <DialogContent className="max-w-[95vw] sm:max-w-2xl lg:max-w-3xl max-h-[95vh] overflow-y-auto p-4 sm:p-5 md:p-6">
+              <DialogHeader className="space-y-1 sm:space-y-2 pb-2 sm:pb-3">
+                <DialogTitle className="text-base sm:text-lg md:text-xl">
                   {editingCourse ? 'Kursni tahrirlash' : 'Yangi kurs qo\'shish'}
                 </DialogTitle>
-                <DialogDescription className="text-[11px] sm:text-xs md:text-sm">
+                <DialogDescription className="text-xs sm:text-sm">
                   Kurs ma'lumotlarini to'ldiring
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3 md:space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 md:space-y-6">
+                <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Nomi (UZ)</Label>
+                    <Label className="text-sm sm:text-base font-medium">Nomi (UZ) *</Label>
                     <Input
                       value={formData.name_uz}
                       onChange={(e) => setFormData({ ...formData, name_uz: e.target.value })}
                       required
+                      className="h-11 sm:h-10 text-base sm:text-sm"
+                      placeholder="Kurs nomi (O'zbekcha)"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Nomi (RU)</Label>
+                    <Label className="text-sm sm:text-base font-medium">Nomi (RU) *</Label>
                     <Input
                       value={formData.name_ru}
                       onChange={(e) => setFormData({ ...formData, name_ru: e.target.value })}
                       required
+                      className="h-11 sm:h-10 text-base sm:text-sm"
+                      placeholder="Kurs nomi (Ruscha)"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Nomi (EN)</Label>
+                    <Label className="text-sm sm:text-base font-medium">Nomi (EN) *</Label>
                     <Input
                       value={formData.name_en}
                       onChange={(e) => setFormData({ ...formData, name_en: e.target.value })}
                       required
+                      className="h-11 sm:h-10 text-base sm:text-sm"
+                      placeholder="Kurs nomi (Inglizcha)"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Kategoriya</Label>
+                    <Label className="text-sm sm:text-base font-medium">Kategoriya</Label>
                     <Select
                       value={formData.category || undefined}
                       onValueChange={(value) => {
                         setFormData({ ...formData, category: value === 'none' ? '' : value });
                       }}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="h-11 sm:h-10 text-base sm:text-sm">
                         <SelectValue placeholder="Kategoriya tanlang" />
                       </SelectTrigger>
                       <SelectContent>
@@ -365,28 +371,32 @@ function CoursesContent() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Davomiyligi</Label>
+                    <Label className="text-sm sm:text-base font-medium">Davomiyligi *</Label>
                     <Input
                       value={formData.duration}
                       onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
                       required
+                      className="h-11 sm:h-10 text-base sm:text-sm"
+                      placeholder="Masalan: 3 oy"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Narxi</Label>
+                    <Label className="text-sm sm:text-base font-medium">Narxi *</Label>
                     <Input
                       value={formData.price}
                       onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                       required
+                      className="h-11 sm:h-10 text-base sm:text-sm"
+                      placeholder="Masalan: 500000 so'm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Daraja</Label>
+                    <Label className="text-sm sm:text-base font-medium">Daraja</Label>
                     <Select
                       value={formData.level || undefined}
                       onValueChange={(value) => setFormData({ ...formData, level: value })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="h-11 sm:h-10 text-base sm:text-sm">
                         <SelectValue placeholder="Daraja tanlang" />
                       </SelectTrigger>
                       <SelectContent>
@@ -405,13 +415,13 @@ function CoursesContent() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>O'qituvchi</Label>
+                    <Label className="text-sm sm:text-base font-medium">O'qituvchi *</Label>
                     <Select
                       value={formData.teacher_id}
                       onValueChange={(value) => setFormData({ ...formData, teacher_id: value })}
                       required
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="h-11 sm:h-10 text-base sm:text-sm">
                         <SelectValue placeholder="O'qituvchi tanlang" />
                       </SelectTrigger>
                       <SelectContent>
@@ -423,15 +433,17 @@ function CoursesContent() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2 col-span-2">
-                    <Label>Jadval</Label>
+                  <div className="space-y-2">
+                    <Label className="text-sm sm:text-base font-medium">Jadval *</Label>
                     <Input
                       value={formData.schedule}
                       onChange={(e) => setFormData({ ...formData, schedule: e.target.value })}
                       required
+                      className="h-11 sm:h-10 text-base sm:text-sm"
+                      placeholder="Masalan: 14:00-16:00"
                     />
                   </div>
-                  <div className="space-y-2 col-span-2">
+                  <div className="space-y-2">
                     <ImageUpload
                       value={formData.image_url}
                       onChange={(url) => setFormData({ ...formData, image_url: url })}
@@ -445,9 +457,9 @@ function CoursesContent() {
                       id="featured"
                       checked={formData.featured || false}
                       onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                      className="h-4 w-4"
+                      className="h-4 w-4 sm:h-5 sm:w-5"
                     />
-                    <Label htmlFor="featured" className="cursor-pointer">Featured (Asosiy sahifada ko'rsatish)</Label>
+                    <Label htmlFor="featured" className="cursor-pointer text-sm sm:text-base">Featured (Asosiy sahifada ko'rsatish)</Label>
                   </div>
                   <div className="space-y-2 flex items-center gap-2">
                     <input
@@ -455,43 +467,57 @@ function CoursesContent() {
                       id="is_published"
                       checked={formData.is_published !== undefined ? formData.is_published : true}
                       onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })}
-                      className="h-4 w-4"
+                      className="h-4 w-4 sm:h-5 sm:w-5"
                     />
-                    <Label htmlFor="is_published" className="cursor-pointer">Published (Nashr qilish)</Label>
+                    <Label htmlFor="is_published" className="cursor-pointer text-sm sm:text-base">Published (Nashr qilish)</Label>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Tavsif (UZ)</Label>
+                  <Label className="text-sm sm:text-base font-medium">Tavsif (UZ) *</Label>
                   <Textarea
                     value={formData.description_uz}
                     onChange={(e) => setFormData({ ...formData, description_uz: e.target.value })}
                     required
-                    rows={3}
+                    rows={4}
+                    className="text-base sm:text-sm min-h-[100px] resize-y"
+                    placeholder="Kurs haqida batafsil ma'lumot (O'zbekcha)"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Tavsif (RU)</Label>
+                  <Label className="text-sm sm:text-base font-medium">Tavsif (RU) *</Label>
                   <Textarea
                     value={formData.description_ru}
                     onChange={(e) => setFormData({ ...formData, description_ru: e.target.value })}
                     required
-                    rows={3}
+                    rows={4}
+                    className="text-base sm:text-sm min-h-[100px] resize-y"
+                    placeholder="Kurs haqida batafsil ma'lumot (Ruscha)"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Tavsif (EN)</Label>
+                  <Label className="text-sm sm:text-base font-medium">Tavsif (EN) *</Label>
                   <Textarea
                     value={formData.description_en}
                     onChange={(e) => setFormData({ ...formData, description_en: e.target.value })}
                     required
-                    rows={3}
+                    rows={4}
+                    className="text-base sm:text-sm min-h-[100px] resize-y"
+                    placeholder="Kurs haqida batafsil ma'lumot (Inglizcha)"
                   />
                 </div>
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-2">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsDialogOpen(false)}
+                    className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm"
+                  >
                     Bekor qilish
                   </Button>
-                  <Button type="submit">
+                  <Button 
+                    type="submit"
+                    className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm"
+                  >
                     {editingCourse ? 'Yangilash' : 'Qo\'shish'}
                   </Button>
                 </div>

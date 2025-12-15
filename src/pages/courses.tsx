@@ -270,23 +270,25 @@ export default function Courses() {
             {/* Filter Section */}
             <Card className="mb-6 sm:mb-8 md:mb-12 bg-card/50 backdrop-blur-sm border-2 border-border/50 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
               <div className="p-3 sm:p-4 md:p-6">
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
-                  <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+                <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 sm:gap-2 md:gap-4">
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground w-full sm:w-auto">
                     <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                     <span className="font-medium">{t("courses.filter")}:</span>
                   </div>
-                  {categoryFilters.map((category) => (
-                    <Button
-                      key={category.value}
-                      variant={selectedCategory === category.value ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedCategory(category.value)}
-                      data-testid={`filter-${category.value}`}
-                      className="transition-all hover:scale-105 hover:shadow-lg"
-                    >
-                      {category.label}
-                    </Button>
-                  ))}
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                    {categoryFilters.map((category) => (
+                      <Button
+                        key={category.value}
+                        variant={selectedCategory === category.value ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setSelectedCategory(category.value)}
+                        data-testid={`filter-${category.value}`}
+                        className="text-xs sm:text-sm transition-all hover:scale-105 hover:shadow-lg h-8 sm:h-9 px-3 sm:px-4"
+                      >
+                        {category.label}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </Card>

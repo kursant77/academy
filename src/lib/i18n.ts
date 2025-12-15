@@ -379,15 +379,47 @@ const resources = {
   }
 };
 
+// Get initial language from localStorage or default to 'uz'
+const getInitialLanguage = () => {
+  if (typeof window !== 'undefined') {
+    const savedLang = localStorage.getItem('language');
+    if (savedLang && ['uz', 'ru', 'en'].includes(savedLang)) {
+      return savedLang;
+    }
+  }
+  return 'uz';
+};
+
 i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: localStorage.getItem('language') || 'uz',
+    lng: getInitialLanguage(),
     fallbackLng: 'uz',
+    supportedLngs: ['uz', 'ru', 'en'],
     interpolation: {
       escapeValue: false
+    },
+    react: {
+      useSuspense: false
     }
   });
+
+// Listen for storage changes to sync language across tabs
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'language' && e.newValue && ['uz', 'ru', 'en'].includes(e.newValue)) {
+      i18n.changeLanguage(e.newValue).catch(console.error);
+    }
+  });
+
+  // Listen for custom languagechange event
+  window.addEventListener('languagechange', () => {
+    const savedLang = localStorage.getItem('language');
+    if (savedLang && savedLang !== i18n.language && ['uz', 'ru', 'en'].includes(savedLang)) {
+      i18n.changeLanguage(savedLang).catch(console.error);
+    }
+  });
+}
 
 export default i18n;

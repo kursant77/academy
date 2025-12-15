@@ -98,20 +98,20 @@ export default function About() {
           <div className="absolute inset-0 bg-pattern-dots opacity-20" />
         </div>
 
-        <div className="relative py-12 md:py-16 lg:py-20">
-          <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <div className="relative py-8 sm:py-12 md:py-16 lg:py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
             {/* Hero Section */}
-            <div className="mb-12 md:mb-16 text-center animate-fade-in-down">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 mb-6 backdrop-blur-sm border border-primary/20 animate-bounce-in">
-                <Target className="w-10 h-10 text-primary" />
+            <div className="mb-8 sm:mb-10 md:mb-12 lg:mb-16 text-center animate-fade-in-down">
+              <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 mb-4 sm:mb-6 backdrop-blur-sm border border-primary/20 animate-bounce-in">
+                <Target className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
               </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient px-2">
                 {t("about.title")}
               </h1>
             </div>
 
             {/* Mission & Vision Cards */}
-            <div className="grid md:grid-cols-2 gap-6 md:gap-8 mb-12 md:mb-16">
+            <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mb-8 sm:mb-10 md:mb-12 lg:mb-16">
               <Card className="group relative overflow-hidden border-2 border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-500 hover:shadow-xl animate-fade-in-up">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <CardHeader className="relative">
@@ -148,9 +148,9 @@ export default function About() {
             </div>
 
             {/* Advantages Section */}
-            <div className="mb-12 md:mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{t("about.advantages")}</h2>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="mb-8 sm:mb-10 md:mb-12 lg:mb-16">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 sm:mb-8 text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent px-2">{t("about.advantages")}</h2>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {advantages.map((advantage, index) => (
                   <Card 
                     key={index} 
@@ -192,7 +192,7 @@ export default function About() {
 
             {/* History Section */}
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{t("about.history")}</h2>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 sm:mb-8 text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent px-2">{t("about.history")}</h2>
               <Card className="group relative overflow-hidden border-2 border-border/50 bg-card/50 backdrop-blur-sm hover:border-accent/50 transition-all duration-500 hover:shadow-xl animate-fade-in-up">
                 <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <CardContent className="relative pt-6">

@@ -25,6 +25,7 @@ import {
   Tag,
   Quote,
   Globe,
+  Settings,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -104,6 +105,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           { title: 'Yutuqlar', icon: Trophy, path: '/admin/achievements', count: stats.achievements },
           { title: 'Fikrlar', icon: Quote, path: '/admin/testimonials', count: null },
           { title: 'Kategoriyalar', icon: Tag, path: '/admin/categories', count: null },
+        ],
+      },
+      {
+        label: 'Sozlamalar',
+        icon: Settings,
+        items: [
+          { title: 'Sozlamalar', icon: Settings, path: '/admin/settings', count: null },
         ],
       },
     ],

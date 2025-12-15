@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'wouter';
 import { format, subDays, subMonths, startOfDay, startOfMonth, startOfWeek } from 'date-fns';
 import { eachDayOfInterval, eachMonthOfInterval, eachWeekOfInterval } from 'date-fns';
+// Recharts - faqat admin dashboard'da ishlatiladi, shuning uchun bu sahifa lazy load qilinadi
 import {
   Area,
   AreaChart,

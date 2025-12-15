@@ -102,23 +102,23 @@ export default function Events() {
           <div className="absolute inset-0 bg-pattern-dots opacity-20" />
         </div>
 
-        <div className="relative py-12 md:py-16 lg:py-20">
-          <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <div className="relative py-8 sm:py-12 md:py-16 lg:py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
             {/* Hero Section */}
-            <div className="mb-12 md:mb-16 text-center animate-fade-in-down">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 mb-6 backdrop-blur-sm border border-primary/20 animate-bounce-in">
-                <Calendar className="w-10 h-10 text-primary" />
+            <div className="mb-8 sm:mb-10 md:mb-12 lg:mb-16 text-center animate-fade-in-down">
+              <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 mb-4 sm:mb-6 backdrop-blur-sm border border-primary/20 animate-bounce-in">
+                <Calendar className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
               </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient px-2">
                 {t("events.title")}
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto px-2">
                 {t("events.subtitle")}
               </p>
             </div>
 
             {/* Events Grid with Carousel Animation */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {allEvents.map((event, index) => (
                 <div 
                   key={event.id} 

@@ -66,11 +66,13 @@ export const TeacherCard = memo(function TeacherCard({
               <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-primary/20 shadow-2xl transition-all duration-500 group-hover:border-primary/60 group-hover:scale-110 group-hover:shadow-primary/20">
                 <img 
                   src={imageUrl} 
-                  alt={`${name} - A+ Academy o'qituvchisi`}
-                  title={`${name} - ${specialty} | A+ Academy`}
+                  alt={`${name} - ${specialty} o'qituvchisi | A+ Academy Toshkent | ${experience} yillik tajriba`}
+                  title={`${name} - ${specialty} | A+ Academy Toshkent | ${experience} yillik tajriba`}
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-115"
                   loading="lazy"
                   decoding="async"
+                  width="128"
+                  height="128"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';

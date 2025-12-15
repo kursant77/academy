@@ -240,67 +240,79 @@ function AchievementsContent() {
                 Yangi yutuq
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
+            <DialogContent className="max-w-[95vw] sm:max-w-2xl lg:max-w-3xl max-h-[95vh] overflow-y-auto p-4 sm:p-5 md:p-6">
+              <DialogHeader className="space-y-1 sm:space-y-2 pb-2 sm:pb-3">
+                <DialogTitle className="text-base sm:text-lg md:text-xl">
                   {editingAchievement ? 'Yutuqni tahrirlash' : 'Yangi yutuq qo\'shish'}
                 </DialogTitle>
-                <DialogDescription>
+                <DialogDescription className="text-xs sm:text-sm">
                   Yutuq ma'lumotlarini to'ldiring
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 md:space-y-6">
+                <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Sarlavha (UZ)</Label>
+                    <Label className="text-sm sm:text-base font-medium">Sarlavha (UZ) *</Label>
                     <Input
                       value={formData.title_uz}
                       onChange={(e) => setFormData({ ...formData, title_uz: e.target.value })}
                       required
+                      className="h-11 sm:h-10 text-base sm:text-sm"
+                      placeholder="Yutuq sarlavhasi (O'zbekcha)"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Sarlavha (RU)</Label>
+                    <Label className="text-sm sm:text-base font-medium">Sarlavha (RU) *</Label>
                     <Input
                       value={formData.title_ru}
                       onChange={(e) => setFormData({ ...formData, title_ru: e.target.value })}
                       required
+                      className="h-11 sm:h-10 text-base sm:text-sm"
+                      placeholder="Yutuq sarlavhasi (Ruscha)"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Sarlavha (EN)</Label>
+                    <Label className="text-sm sm:text-base font-medium">Sarlavha (EN) *</Label>
                     <Input
                       value={formData.title_en}
                       onChange={(e) => setFormData({ ...formData, title_en: e.target.value })}
                       required
+                      className="h-11 sm:h-10 text-base sm:text-sm"
+                      placeholder="Yutuq sarlavhasi (Inglizcha)"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>O'quvchi ismi (UZ)</Label>
+                    <Label className="text-sm sm:text-base font-medium">O'quvchi ismi (UZ) *</Label>
                     <Input
                       value={formData.student_name_uz}
                       onChange={(e) => setFormData({ ...formData, student_name_uz: e.target.value })}
                       required
+                      className="h-11 sm:h-10 text-base sm:text-sm"
+                      placeholder="O'quvchi to'liq ismi (O'zbekcha)"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>O'quvchi ismi (RU)</Label>
+                    <Label className="text-sm sm:text-base font-medium">O'quvchi ismi (RU) *</Label>
                     <Input
                       value={formData.student_name_ru}
                       onChange={(e) => setFormData({ ...formData, student_name_ru: e.target.value })}
                       required
+                      className="h-11 sm:h-10 text-base sm:text-sm"
+                      placeholder="O'quvchi to'liq ismi (Ruscha)"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>O'quvchi ismi (EN)</Label>
+                    <Label className="text-sm sm:text-base font-medium">O'quvchi ismi (EN) *</Label>
                     <Input
                       value={formData.student_name_en}
                       onChange={(e) => setFormData({ ...formData, student_name_en: e.target.value })}
                       required
+                      className="h-11 sm:h-10 text-base sm:text-sm"
+                      placeholder="O'quvchi to'liq ismi (Inglizcha)"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Kurs</Label>
+                    <Label className="text-sm sm:text-base font-medium">Kurs</Label>
                     <Select
                       value={formData.course_id || undefined}
                       onValueChange={(value) => {
@@ -311,7 +323,7 @@ function AchievementsContent() {
                         }
                       }}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="h-11 sm:h-10 text-base sm:text-sm">
                         <SelectValue placeholder="Kurs tanlang (ixtiyoriy)" />
                       </SelectTrigger>
                       <SelectContent>
@@ -340,37 +352,51 @@ function AchievementsContent() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Tavsif (UZ)</Label>
+                  <Label className="text-sm sm:text-base font-medium">Tavsif (UZ) *</Label>
                   <Textarea
                     value={formData.description_uz}
                     onChange={(e) => setFormData({ ...formData, description_uz: e.target.value })}
                     required
-                    rows={3}
+                    rows={4}
+                    className="text-base sm:text-sm min-h-[100px] resize-y"
+                    placeholder="Yutuq haqida batafsil ma'lumot (O'zbekcha)"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Tavsif (RU)</Label>
+                  <Label className="text-sm sm:text-base font-medium">Tavsif (RU) *</Label>
                   <Textarea
                     value={formData.description_ru}
                     onChange={(e) => setFormData({ ...formData, description_ru: e.target.value })}
                     required
-                    rows={3}
+                    rows={4}
+                    className="text-base sm:text-sm min-h-[100px] resize-y"
+                    placeholder="Yutuq haqida batafsil ma'lumot (Ruscha)"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Tavsif (EN)</Label>
+                  <Label className="text-sm sm:text-base font-medium">Tavsif (EN) *</Label>
                   <Textarea
                     value={formData.description_en}
                     onChange={(e) => setFormData({ ...formData, description_en: e.target.value })}
                     required
-                    rows={3}
+                    rows={4}
+                    className="text-base sm:text-sm min-h-[100px] resize-y"
+                    placeholder="Yutuq haqida batafsil ma'lumot (Inglizcha)"
                   />
                 </div>
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-2">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsDialogOpen(false)}
+                    className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm"
+                  >
                     Bekor qilish
                   </Button>
-                  <Button type="submit">
+                  <Button 
+                    type="submit"
+                    className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm"
+                  >
                     {editingAchievement ? 'Yangilash' : 'Qo\'shish'}
                   </Button>
                 </div>
