@@ -132,7 +132,7 @@ export function Logo({
         group
         transition-all 
         duration-300
-        justify-end
+        justify-start
         ${className}
       `}
       style={{ transform: 'rotate(-1deg)' }}

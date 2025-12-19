@@ -22,7 +22,7 @@ export function Footer() {
     <footer className="w-full border-t border-border/50 bg-gradient-to-b from-background via-muted/10 to-muted/20 mt-12 sm:mt-16 md:mt-20 relative overflow-hidden">
       {/* Background pattern */}
       <div className="absolute inset-0 bg-pattern-dots opacity-5" />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-12 lg:py-16 relative z-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12 lg:gap-16">
           <div className="space-y-4 sm:space-y-5">
