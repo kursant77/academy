@@ -8,30 +8,30 @@ interface LogoProps {
   linkTo?: string;
 }
 
-export function Logo({ 
-  variant = "header", 
-  showText = true, 
+export function Logo({
+  variant = "header",
+  showText = true,
   className = "",
-  linkTo = "/"
+  linkTo = "/",
 }: LogoProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const sizeClasses = {
     header: "h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10",
     footer: "h-10 w-10 sm:h-12 sm:w-12",
-    admin: "h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10"
+    admin: "h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10",
   };
 
   const textSizeClasses = {
     header: "text-base sm:text-lg md:text-xl",
     footer: "text-xl sm:text-2xl",
-    admin: "text-sm sm:text-base"
+    admin: "text-sm sm:text-base",
   };
 
   const iconSizeClasses = {
     header: "text-xs sm:text-sm md:text-lg",
     footer: "text-lg sm:text-xl",
-    admin: "text-[10px] sm:text-xs md:text-sm"
+    admin: "text-[10px] sm:text-xs md:text-sm",
   };
 
   const LogoIcon = () => (
@@ -57,49 +57,53 @@ export function Logo({
         group-hover:shadow-primary/50
         group-hover:scale-110
         overflow-hidden
-        ${isHovered ? 'animate-pulse' : ''}
+        ${isHovered ? "animate-pulse" : ""}
       `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Animated gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      
+
       {/* Shine effect */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-in-out" />
-      
+
       {/* Glow effect */}
       <div className="absolute inset-0 bg-primary/30 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl" />
-      
+
       {/* Animated border */}
       <div className="absolute inset-0 rounded-xl border-2 border-primary/0 group-hover:border-primary/50 transition-all duration-500" />
-      
+
       {/* Rotating gradient ring */}
       <div className="absolute inset-[-2px] rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-        <div 
-          className="absolute inset-0 rounded-xl animate-spin-slow" 
-          style={{ 
-            background: 'conic-gradient(from 0deg, hsl(var(--primary)), hsl(var(--primary)) 90deg, transparent 90deg, transparent 360deg)'
-          }} 
+        <div
+          className="absolute inset-0 rounded-xl animate-spin-slow"
+          style={{
+            background:
+              "conic-gradient(from 0deg, hsl(var(--primary)), hsl(var(--primary)) 90deg, transparent 90deg, transparent 360deg)",
+          }}
         />
       </div>
-      
+
       {/* Text with glow */}
-      <span className={`
+      <span
+        className={`
         ${iconSizeClasses[variant]}
         relative z-10
         drop-shadow-lg
         group-hover:drop-shadow-2xl
         transition-all duration-300
-        ${isHovered ? 'scale-110' : 'scale-100'}
-      `}>
+        ${isHovered ? "scale-110" : "scale-100"}
+      `}
+      >
         A+
       </span>
     </div>
   );
 
   const LogoText = () => (
-    <span className={`
+    <span
+      className={`
       ${textSizeClasses[variant]}
       font-bold
       relative
@@ -114,15 +118,16 @@ export function Logo({
       transition-all 
       duration-500
       group-hover:scale-105
-    `}>
-      {variant === "footer" ? "A+ Academy" : "Academy"}
+    `}
+    >
+      {variant === "footer" ? "Academy" : "Academy"}
       {/* Text glow effect */}
       <span className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
     </span>
   );
 
   const content = (
-    <div 
+    <div
       className={`
         flex 
         items-center 
@@ -135,7 +140,7 @@ export function Logo({
         justify-start
         ${className}
       `}
-      style={{ transform: 'rotate(-1deg)' }}
+      style={{ transform: "rotate(-1deg)" }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -146,8 +151,8 @@ export function Logo({
 
   if (linkTo && variant !== "admin") {
     return (
-      <Link 
-        href={linkTo} 
+      <Link
+        href={linkTo}
         className="hover-elevate rounded-lg px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 md:py-2 transition-all duration-300 hover:scale-105"
       >
         {content}
@@ -157,4 +162,3 @@ export function Logo({
 
   return content;
 }
-
