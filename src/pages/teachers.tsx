@@ -122,16 +122,16 @@ export default function Teachers() {
                         i18n.language === "uz"
                           ? teacher.specialty_uz
                           : i18n.language === "ru"
-                          ? teacher.specialty_ru
-                          : teacher.specialty_en
+                            ? teacher.specialty_ru
+                            : teacher.specialty_en
                       }
                       experience={teacher.experience}
                       bio={
                         i18n.language === "uz"
                           ? teacher.bio_uz
                           : i18n.language === "ru"
-                          ? teacher.bio_ru
-                          : teacher.bio_en
+                            ? teacher.bio_ru
+                            : teacher.bio_en
                       }
                       imageUrl={teacher.image_url || undefined}
                       linkedIn={teacher.linked_in || undefined}

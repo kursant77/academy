@@ -15,12 +15,12 @@ export function Hero() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.15),transparent_50%)] -z-10" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(16,185,129,0.15),transparent_50%)] -z-10" />
       <div className="absolute inset-0 bg-pattern-dots opacity-20 -z-10" />
-      
+
       {/* Decorative elements */}
       <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl -z-10 animate-pulse" />
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl -z-10 animate-pulse" style={{ animationDelay: '1s' }} />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-secondary/5 rounded-full blur-3xl -z-10 animate-float" />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 relative z-10">
         <div className="flex flex-col items-center text-center gap-6 sm:gap-8 md:gap-10 max-w-6xl mx-auto w-full">
           {/* Badge */}
@@ -40,9 +40,9 @@ export function Hero() {
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto animate-fade-in-up px-2 sm:px-0" style={{ animationDelay: '0.2s' }}>
             <Link href="/register" className="w-full sm:w-auto">
-              <Button 
-                size="lg" 
-                className="gap-2 w-full sm:w-auto text-sm sm:text-base px-5 sm:px-6 md:px-8 py-5 sm:py-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 whitespace-nowrap" 
+              <Button
+                size="lg"
+                className="gap-2 w-full sm:w-auto text-sm sm:text-base px-5 sm:px-6 md:px-8 py-5 sm:py-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 whitespace-nowrap"
                 data-testid="button-hero-register"
               >
                 <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
@@ -50,10 +50,10 @@ export function Hero() {
               </Button>
             </Link>
             <Link href="/courses" className="w-full sm:w-auto">
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="gap-2 w-full sm:w-auto text-sm sm:text-base px-5 sm:px-6 md:px-8 py-5 sm:py-6 border-2 hover:bg-primary/5 transition-all duration-300 hover:scale-105 whitespace-nowrap" 
+              <Button
+                size="lg"
+                variant="outline"
+                className="gap-2 w-full sm:w-auto text-sm sm:text-base px-5 sm:px-6 md:px-8 py-5 sm:py-6 border-2 hover:bg-primary/5 transition-all duration-300 hover:scale-105 whitespace-nowrap"
                 data-testid="button-hero-courses"
               >
                 <span className="truncate sm:whitespace-normal">{content.secondary_cta || t("hero.viewCoursesBtn")}</span>

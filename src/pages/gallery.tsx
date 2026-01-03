@@ -63,13 +63,13 @@ export default function Achievements() {
       const delta = e.deltaY > 0 ? -0.15 : 0.15;
       const newZoom = Math.max(0.5, Math.min(5, currentZoom + delta));
       setZoom(newZoom);
-      
+
       // Zoom center'da bo'lishi uchun
       if (container && imageRef.current) {
         const containerRect = container.getBoundingClientRect();
         const mouseX = e.clientX - containerRect.left;
         const mouseY = e.clientY - containerRect.top;
-        
+
         const scaleChange = newZoom / currentZoom;
         setPosition({
           x: mouseX - (mouseX - currentPosition.x) * scaleChange,
@@ -194,7 +194,7 @@ export default function Achievements() {
                   <Card
                     key={achievement.id}
                     className="group relative overflow-hidden border-2 border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-500 hover:shadow-xl hover:scale-[1.03] animate-fade-in-up"
-                    style={{ 
+                    style={{
                       animationDelay: `${index * 0.08}s`,
                       animation: `slideInUp 0.8s ease-out ${index * 0.08}s both, float 8s ease-in-out infinite ${index * 0.3}s`
                     }}
@@ -202,54 +202,54 @@ export default function Achievements() {
                   >
                     {/* Animated gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-0" />
-                  {achievement.image_url && (
-                    <div 
-                      className="aspect-video w-full overflow-hidden relative group cursor-pointer"
-                      onClick={() => {
-                        const title = i18n.language === "ru"
-                          ? achievement.title_ru
-                          : i18n.language === "en"
-                          ? achievement.title_en
-                          : achievement.title_uz;
-                        const studentName = i18n.language === "ru"
-                          ? achievement.student_name_ru
-                          : i18n.language === "en"
-                          ? achievement.student_name_en
-                          : achievement.student_name_uz;
-                        setSelectedImage({
-                          url: achievement.image_url!,
-                          title,
-                          studentName
-                        });
-                      }}
-                    >
-                      <img
-                        src={achievement.image_url}
-                        alt={i18n.language === "ru"
-                          ? achievement.title_ru
-                          : i18n.language === "en"
-                          ? achievement.title_en
-                          : achievement.title_uz}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-                        loading="lazy"
-                        decoding="async"
-                        onError={(e) => {
-                          // Agar rasm yuklanmasa, fallback ko'rsatish
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                          target.parentElement!.innerHTML = '<div class="aspect-video w-full bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center"><svg class="h-12 w-12 text-primary/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg></div>';
+                    {achievement.image_url && (
+                      <div
+                        className="aspect-video w-full overflow-hidden relative group cursor-pointer"
+                        onClick={() => {
+                          const title = i18n.language === "ru"
+                            ? achievement.title_ru
+                            : i18n.language === "en"
+                              ? achievement.title_en
+                              : achievement.title_uz;
+                          const studentName = i18n.language === "ru"
+                            ? achievement.student_name_ru
+                            : i18n.language === "en"
+                              ? achievement.student_name_en
+                              : achievement.student_name_uz;
+                          setSelectedImage({
+                            url: achievement.image_url!,
+                            title,
+                            studentName
+                          });
                         }}
-                      />
-                      {/* Overlay with zoom icon */}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <div className="bg-background/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
-                            <ZoomIn className="h-6 w-6 text-primary" />
+                      >
+                        <img
+                          src={achievement.image_url}
+                          alt={i18n.language === "ru"
+                            ? achievement.title_ru
+                            : i18n.language === "en"
+                              ? achievement.title_en
+                              : achievement.title_uz}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                          loading="lazy"
+                          decoding="async"
+                          onError={(e) => {
+                            // Agar rasm yuklanmasa, fallback ko'rsatish
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            target.parentElement!.innerHTML = '<div class="aspect-video w-full bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center"><svg class="h-12 w-12 text-primary/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg></div>';
+                          }}
+                        />
+                        {/* Overlay with zoom icon */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="bg-background/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
+                              <ZoomIn className="h-6 w-6 text-primary" />
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                     <CardHeader className="relative z-10">
                       <div className="flex items-start gap-3">
                         <div className="rounded-full bg-gradient-to-br from-primary/20 to-primary/10 p-2 group-hover:scale-110 transition-transform duration-300">
@@ -260,15 +260,15 @@ export default function Achievements() {
                             {i18n.language === "ru"
                               ? achievement.title_ru
                               : i18n.language === "en"
-                              ? achievement.title_en
-                              : achievement.title_uz}
+                                ? achievement.title_en
+                                : achievement.title_uz}
                           </CardTitle>
                           <p className="text-sm text-muted-foreground mt-1">
                             {i18n.language === "ru"
                               ? achievement.student_name_ru
                               : i18n.language === "en"
-                              ? achievement.student_name_en
-                              : achievement.student_name_uz}
+                                ? achievement.student_name_en
+                                : achievement.student_name_uz}
                           </p>
                         </div>
                       </div>
@@ -278,12 +278,12 @@ export default function Achievements() {
                         {i18n.language === "ru"
                           ? achievement.description_ru
                           : i18n.language === "en"
-                          ? achievement.description_en
-                          : achievement.description_uz}
+                            ? achievement.description_en
+                            : achievement.description_uz}
                       </p>
                     </CardContent>
-                </Card>
-                  ))}
+                  </Card>
+                ))}
               </div>
             )}
           </div>
@@ -291,8 +291,8 @@ export default function Achievements() {
       </div>
 
       {/* Image Modal with Zoom */}
-      <Dialog 
-        open={!!selectedImage} 
+      <Dialog
+        open={!!selectedImage}
         onOpenChange={(open) => {
           if (!open) {
             setSelectedImage(null);

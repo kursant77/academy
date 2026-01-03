@@ -1,5 +1,5 @@
 # robots.txt for IELTS Imperia
-# https://aplusacademy.uz/robots.txt
+# https://ieltsimperia.uz/robots.txt
 # Last updated: 2025-01-28
 
 # Allow all search engines to crawl the site
@@ -12,7 +12,7 @@ Disallow: /*?*_token=*
 Disallow: /*?*_key=*
 
 # Sitemap location
-Sitemap: https://aplusacademy.uz/sitemap.xml
+Sitemap: https://ieltsimperia.uz/sitemap.xml
 
 # Google Search Engine
 User-agent: Googlebot

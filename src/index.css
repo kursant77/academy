@@ -4,15 +4,16 @@
 
 /* LIGHT MODE */
 :root {
-  --button-outline: rgba(0,0,0, .10);
-  --badge-outline: rgba(0,0,0, .05);
+  --button-outline: rgba(0, 0, 0, .10);
+  --badge-outline: rgba(0, 0, 0, .05);
 
   /* Automatic computation of border around primary / danger buttons */
-  --opaque-button-border-intensity: -8; /* In terms of percentages */
+  --opaque-button-border-intensity: -8;
+  /* In terms of percentages */
 
   /* Backgrounds applied on top of other backgrounds when hovered/active */
-  --elevate-1: rgba(0,0,0, .03);
-  --elevate-2: rgba(0,0,0, .08);
+  --elevate-1: rgba(0, 0, 0, .03);
+  --elevate-2: rgba(0, 0, 0, .08);
 
   --background: 0 0% 98%;
 
@@ -60,9 +61,9 @@
 
   --muted-foreground: 210 15% 35%;
 
-  --accent: 150 18% 88%;
-
-  --accent-foreground: 150 60% 25%;
+  --accent: 45 100% 50%;
+  /* Royal Gold */
+  --accent-foreground: 45 100% 10%;
 
   --destructive: 0 70% 50%;
 
@@ -79,7 +80,8 @@
   --font-sans: Inter, Open Sans, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
-  --radius: .5rem; /* 8px */
+  --radius: .5rem;
+  /* 8px */
   --shadow-2xs: 0px 1px 2px 0px hsl(210 20% 50% / 0.05);
   --shadow-xs: 0px 1px 3px 0px hsl(210 20% 50% / 0.08);
   --shadow-sm: 0px 2px 4px 0px hsl(210 20% 50% / 0.06), 0px 1px 2px -1px hsl(210 20% 50% / 0.08);
@@ -123,14 +125,15 @@
 }
 
 .dark {
-  --button-outline: rgba(255,255,255, .10);
-  --badge-outline: rgba(255,255,255, .05);
+  --button-outline: rgba(255, 255, 255, .10);
+  --badge-outline: rgba(255, 255, 255, .05);
 
-  --opaque-button-border-intensity: 9;  /* In terms of percentages */
+  --opaque-button-border-intensity: 9;
+  /* In terms of percentages */
 
   /* Backgrounds applied on top of other backgrounds when hovered/active */
-  --elevate-1: rgba(255,255,255, .04);
-  --elevate-2: rgba(255,255,255, .09);
+  --elevate-1: rgba(255, 255, 255, .04);
+  --elevate-2: rgba(255, 255, 255, .09);
 
   --background: 220 15% 10%;
 
@@ -340,6 +343,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -350,6 +354,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -361,6 +366,7 @@
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -372,6 +378,7 @@
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -383,6 +390,7 @@
     opacity: 0;
     transform: translateX(20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -394,6 +402,7 @@
     opacity: 0;
     transform: translateY(-30px) scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -405,13 +414,16 @@
     opacity: 0;
     transform: scale(0.3);
   }
+
   50% {
     opacity: 1;
     transform: scale(1.05);
   }
+
   70% {
     transform: scale(0.9);
   }
+
   100% {
     transform: scale(1);
   }
@@ -422,6 +434,7 @@
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -432,15 +445,19 @@
   0% {
     background-position: -1000px 0;
   }
+
   100% {
     background-position: 1000px 0;
   }
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -475,6 +492,7 @@
     transform: translateY(-20px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -495,12 +513,10 @@
 
 .animate-shimmer {
   animation: shimmer 2s infinite linear;
-  background: linear-gradient(
-    to right,
-    hsl(var(--muted)) 0%,
-    hsl(var(--muted) / 0.5) 50%,
-    hsl(var(--muted)) 100%
-  );
+  background: linear-gradient(to right,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted) / 0.5) 50%,
+      hsl(var(--muted)) 100%);
   background-size: 1000px 100%;
 }
 
@@ -549,23 +565,44 @@ button:hover {
   animation: fadeIn 0.3s ease-out forwards;
 }
 
-.stagger-item:nth-child(1) { animation-delay: 0.02s; }
-.stagger-item:nth-child(2) { animation-delay: 0.04s; }
-.stagger-item:nth-child(3) { animation-delay: 0.06s; }
-.stagger-item:nth-child(4) { animation-delay: 0.08s; }
-.stagger-item:nth-child(5) { animation-delay: 0.1s; }
-.stagger-item:nth-child(6) { animation-delay: 0.12s; }
-.stagger-item:nth-child(7) { animation-delay: 0.14s; }
-.stagger-item:nth-child(8) { animation-delay: 0.16s; }
+.stagger-item:nth-child(1) {
+  animation-delay: 0.02s;
+}
+
+.stagger-item:nth-child(2) {
+  animation-delay: 0.04s;
+}
+
+.stagger-item:nth-child(3) {
+  animation-delay: 0.06s;
+}
+
+.stagger-item:nth-child(4) {
+  animation-delay: 0.08s;
+}
+
+.stagger-item:nth-child(5) {
+  animation-delay: 0.1s;
+}
+
+.stagger-item:nth-child(6) {
+  animation-delay: 0.12s;
+}
+
+.stagger-item:nth-child(7) {
+  animation-delay: 0.14s;
+}
+
+.stagger-item:nth-child(8) {
+  animation-delay: 0.16s;
+}
 
 /* Loading skeleton */
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    hsl(var(--muted)) 0%,
-    hsl(var(--muted) / 0.5) 50%,
-    hsl(var(--muted)) 100%
-  );
+  background: linear-gradient(90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted) / 0.5) 50%,
+      hsl(var(--muted)) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -595,6 +632,7 @@ button:hover {
 
 /* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -644,9 +682,12 @@ button:hover {
   }
 
   @keyframes gradient {
-    0%, 100% {
+
+    0%,
+    100% {
       background-position: 0% center;
     }
+
     50% {
       background-position: 100% center;
     }
@@ -657,6 +698,7 @@ button:hover {
       opacity: 0;
       transform: translateY(30px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -664,9 +706,12 @@ button:hover {
   }
 
   @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: translateY(0px);
     }
+
     50% {
       transform: translateY(-10px);
     }
@@ -677,18 +722,24 @@ button:hover {
   }
 
   @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: translateY(0px);
     }
+
     50% {
       transform: translateY(-20px);
     }
   }
 
   @keyframes glow {
-    0%, 100% {
+
+    0%,
+    100% {
       box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
     }
+
     50% {
       box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
     }
@@ -698,6 +749,7 @@ button:hover {
     from {
       transform: rotate(0deg);
     }
+
     to {
       transform: rotate(360deg);
     }
@@ -708,13 +760,16 @@ button:hover {
       opacity: 0;
       transform: scale(0.3);
     }
+
     50% {
       opacity: 1;
       transform: scale(1.05);
     }
+
     70% {
       transform: scale(0.9);
     }
+
     100% {
       transform: scale(1);
     }
@@ -725,6 +780,7 @@ button:hover {
       opacity: 0;
       transform: translateY(50px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -736,6 +792,7 @@ button:hover {
       opacity: 0;
       transform: scale(0.8);
     }
+
     to {
       opacity: 1;
       transform: scale(1);
@@ -746,16 +803,20 @@ button:hover {
     0% {
       background-position: -1000px 0;
     }
+
     100% {
       background-position: 1000px 0;
     }
   }
 
   @keyframes pulse-glow {
-    0%, 100% {
+
+    0%,
+    100% {
       opacity: 1;
       box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
     }
+
     50% {
       opacity: 0.8;
       box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
@@ -802,6 +863,27 @@ button:hover {
     transform: translateY(0);
   }
 
+  /* Premium Imperia Text Gradient */
+  .text-imperia {
+    @apply bg-gradient-to-r from-[#ffd700] via-[#ffae00] to-[#ffd700] bg-clip-text text-transparent animate-gradient;
+    background-size: 200% auto;
+  }
+
+  /* Premium Card Lift */
+  .card-premium {
+    @apply relative overflow-hidden rounded-2xl border border-white/10 bg-card p-6 shadow-lg transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-2;
+  }
+
+  .card-premium::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 transition-opacity duration-500;
+  }
+
+  .card-premium:hover::before {
+    @apply opacity-100;
+  }
+
+
   /* Parallax effect */
   .parallax {
     transition: transform 0.3s ease-out;
@@ -832,12 +914,10 @@ button:hover {
 
   /* Shimmer loading effect */
   .shimmer-loading {
-    background: linear-gradient(
-      90deg,
-      hsl(var(--muted)) 0%,
-      hsl(var(--muted) / 0.5) 50%,
-      hsl(var(--muted)) 100%
-    );
+    background: linear-gradient(90deg,
+        hsl(var(--muted)) 0%,
+        hsl(var(--muted) / 0.5) 50%,
+        hsl(var(--muted)) 100%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
   }
@@ -864,12 +944,29 @@ button:hover {
   }
 
   /* Stagger animation delays */
-  .stagger-1 { animation-delay: 0.1s; }
-  .stagger-2 { animation-delay: 0.2s; }
-  .stagger-3 { animation-delay: 0.3s; }
-  .stagger-4 { animation-delay: 0.4s; }
-  .stagger-5 { animation-delay: 0.5s; }
-  .stagger-6 { animation-delay: 0.6s; }
+  .stagger-1 {
+    animation-delay: 0.1s;
+  }
+
+  .stagger-2 {
+    animation-delay: 0.2s;
+  }
+
+  .stagger-3 {
+    animation-delay: 0.3s;
+  }
+
+  .stagger-4 {
+    animation-delay: 0.4s;
+  }
+
+  .stagger-5 {
+    animation-delay: 0.5s;
+  }
+
+  .stagger-6 {
+    animation-delay: 0.6s;
+  }
 
   /* Enhanced hover effects */
   .hover-scale {
@@ -891,7 +988,7 @@ button:hover {
   }
 
   .bg-pattern-grid {
-    background-image: 
+    background-image:
       linear-gradient(hsl(var(--muted-foreground) / 0.05) 1px, transparent 1px),
       linear-gradient(90deg, hsl(var(--muted-foreground) / 0.05) 1px, transparent 1px);
     background-size: 20px 20px;

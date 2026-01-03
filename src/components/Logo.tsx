@@ -41,13 +41,13 @@ export function Logo({
         relative
         rounded-xl
         bg-gradient-to-br 
-        from-primary 
-        via-primary/95 
-        to-primary/85
+        from-[#ffd700] 
+        via-[#ffae00] 
+        to-[#ffd700]
         flex 
         items-center 
         justify-center 
-        text-primary-foreground 
+        text-black 
         font-bold 
         tracking-tight
         shadow-lg
@@ -93,8 +93,9 @@ export function Logo({
         group-hover:drop-shadow-2xl
         transition-all duration-300
         ${isHovered ? 'scale-110' : 'scale-100'}
+        font-black
       `}>
-        A+
+        II
       </span>
     </div>
   );
@@ -117,7 +118,7 @@ export function Logo({
       duration-500
       group-hover:scale-105
     `}>
-      {variant === "footer" ? "A+ Academy" : "Academy"}
+      {"IELTS Imperia"}
       {/* Text glow effect */}
       <span className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
     </span>
@@ -134,7 +135,7 @@ export function Logo({
         group
         transition-all 
         duration-300
-        justify-end
+        justify-start
         ${className}
       `}
       style={{ transform: "rotate(-1deg)" }}
@@ -142,6 +143,8 @@ export function Logo({
       onMouseLeave={() => setIsHovered(false)}
     >
 
+      {/* Glowing ring */}
+      <div className="absolute inset-[-1px] rounded-xl bg-[#ffd700] opacity-0 group-hover:opacity-20 blur-sm transition-opacity duration-500" />
       {showText && <LogoText />}
     </div>
   );
