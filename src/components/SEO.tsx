@@ -18,10 +18,10 @@ interface SEOProps {
 }
 
 export function SEO({
-  title = `${SITE_NAME} — Professional IT, IELTS & CEFR Kurslar`,
-  description = 'IELTS Imperia — IT, tillar va abituriyentlar uchun zamonaviy ta\'lim. Professional o\'qituvchilar bilan yuqori natija kafolatlanadi. IELTS, CEFR, dasturlash va boshqa kurslar.',
-  keywords = 'IELTS, CEFR, IT kurslar, dasturlash, ingliz tili, ta\'lim, o\'quv markazi, Toshkent, IELTS Imperia',
-  image = '/og-image.jpg',
+  title = `${SITE_NAME} — Professional IELTS Tayyorlov Kurslari`,
+  description = 'IELTS Imperia — Xorazmdagi eng zo\'r IELTS o\'quv markazi. Professional ekspertlar bilan IELTS 8.0+ natijani qo\'lga kiriting. Speaking, Writing va Mock imtihonlari.',
+  keywords = 'IELTS, IELTS Xorazm, IELTS Urganch, IELTS tayyorlov, IELTS 8.0, IELTS kursi, ingliz tili, speaking, writing, mock exam, IELTS Imperia',
+  image = 'https://i.postimg.cc/6p3hXq3L/IELTS-Imperia-logo.jpg',
   url = typeof window !== 'undefined' ? window.location.href : '',
   type = 'website',
   author = SITE_NAME,
@@ -40,13 +40,11 @@ export function SEO({
 
   // Enhanced keywords with common search terms - SEO optimized
   const enhancedKeywords = keywords +
-    ', IELTS Imperia, Toshkent, o\'quv markazi, ta\'lim markazi, IT o\'quv markazi, ' +
-    'IELTS o\'quv markazi, ingliz tili kurslari, dasturlash kurslari, ' +
-    'frontend kurslar, backend kurslar, fullstack kurslar, ' +
-    'CEFR kurslar, IELTS Toshkent, IT kurslar Toshkent, ' +
-    'React kurslar, JavaScript kurslar, Python kurslar, Node.js kurslar, ' +
-    'professional ta\'lim, zamonaviy ta\'lim, sertifikat, bitiruvchilar, ' +
-    'o\'qituvchilar, tajribali mutaxassislar, kafolatlangan natija';
+    ', IELTS Imperia, Xorazm, Urganch, o\'quv markazi, IELTS o\'quv markazi, ' +
+    'ingliz tili kurslari, speaking club, writing task, mock exam, ' +
+    'IELTS instructor, 8.0, 7.5, band score, ' +
+    'professional ta\'lim, sertifikat, natijalar, ' +
+    'o\'qituvchilar, ekspertlar, kafolatlangan natija';
 
   useEffect(() => {
     // Document title

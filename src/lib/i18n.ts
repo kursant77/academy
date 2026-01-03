@@ -6,47 +6,47 @@ const resources = {
     translation: {
       nav: {
         home: "Bosh sahifa",
-        courses: "Kurslar",
-        teachers: "O'qituvchilar",
+        courses: "IELTS Kurslari",
+        teachers: "Ekspertlar",
         about: "Biz haqimizda",
-        events: "Tadbirlar",
-        schedule: "Jadval",
-        achievements: "Yutuqlar",
+        events: "Mock Exam",
+        schedule: "Dars Jadvali",
+        achievements: "Natijalar",
         contact: "Aloqa",
-        register: "Kursga yozilish"
+        register: "Sinov Darsiga Yozilish"
       },
       hero: {
-        title: "Kelajagingiz uchun bilim",
-        subtitle: "Professional o'qituvchilar, zamonaviy dastur va kafolatlangan natija",
-        registerBtn: "Kurslarga yozilish",
-        viewCoursesBtn: "Kurslarni ko'rish",
-        badge: "Professional ta'lim",
-        live: "Jonli darslar",
-        certified: "Muvaffaqiyatli O'quvchilar",
-        flexible: "Moslashuvchan jadval"
+        title: "IELTS 8.0+ Sari Yo'l",
+        subtitle: "Xorazmdagi eng kuchli IELTS ekspertlari bilan yuqori natijani qo'lga kiriting",
+        registerBtn: "Sinov Darsiga Yozilish",
+        viewCoursesBtn: "Kurslarni Ko'rish",
+        badge: "Professional IELTS Markazi",
+        live: "Speaking Club",
+        certified: "8.0+ Natijalar",
+        flexible: "Mock Exams"
       },
       stats: {
         students: "O'quvchilar",
-        years: "Yillik tajriba",
-        courses: "Kurslar",
-        graduates: "Bitiruvchilar"
+        years: "Yillik Tajriba",
+        courses: "Darajalar",
+        graduates: "8.0+ Olganlar"
       },
       courses: {
-        title: "Bizning kurslar",
-        subtitle: "Turli yo'nalishlar bo'yicha professional ta'lim",
+        title: "IELTS Kurslari",
+        subtitle: "Beginner darajasidan 8.0 gacha",
         filter: "Filter",
         all: "Barchasi",
-        it: "IT kurslari",
-        languages: "Tillar",
-        exams: "Abituriyentlar uchun",
+        it: "Foundation",
+        languages: "Pre-IELTS",
+        exams: "IELTS Standard",
         duration: "Davomiyligi",
         price: "Narxi",
         level: "Daraja",
-        teacher: "O'qituvchi",
+        teacher: "Instructor",
         viewDetails: "Batafsil",
-        beginner: "Boshlang'ich",
-        intermediate: "O'rta",
-        advanced: "Yuqori",
+        beginner: "Foundation",
+        intermediate: "Pre-IELTS",
+        advanced: "IELTS Rocket",
         noCourses: "Kurslar topilmadi"
       },
       common: {
@@ -131,70 +131,70 @@ const resources = {
     translation: {
       nav: {
         home: "Главная",
-        courses: "Курсы",
-        teachers: "Преподаватели",
+        courses: "Курсы IELTS",
+        teachers: "Эксперты",
         about: "О нас",
-        events: "События",
+        events: "Mock Exam",
         schedule: "Расписание",
-        achievements: "Достижения",
+        achievements: "Результаты",
         contact: "Контакты",
-        register: "Записаться на курс"
+        register: "Пробный Урок"
       },
       hero: {
-        title: "Знания для вашего будущего",
-        subtitle: "Профессиональные преподаватели, современная программа и гарантированный результат",
-        registerBtn: "Записаться на курсы",
-        viewCoursesBtn: "Посмотреть курсы",
-        badge: "Профессиональное образование",
-        live: "Живые занятия",
-        certified: "Успешные студенты",
-        flexible: "Гибкий график"
+        title: "Путь к IELTS 8.0+",
+        subtitle: "Достигните высоких результатов с лучшими экспертами Хорезма",
+        registerBtn: "Записаться на Пробный",
+        viewCoursesBtn: "Посмотреть Курсы",
+        badge: "Профессиональный Центр IELTS",
+        live: "Speaking Club",
+        certified: "Результаты 8.0+",
+        flexible: "Mock Exams"
       },
       stats: {
         students: "Студентов",
-        years: "Лет опыта",
-        courses: "Курсов",
-        graduates: "Выпускников"
+        years: "Лет Опыта",
+        courses: "Уровни",
+        graduates: "Получили 8.0+"
       },
       courses: {
-        title: "Наши курсы",
-        subtitle: "Профессиональное обучение по различным направлениям",
+        title: "Курсы IELTS",
+        subtitle: "От Beginner до 8.0",
         filter: "Фильтр",
         all: "Все",
-        it: "IT курсы",
-        languages: "Языки",
-        exams: "Для абитуриентов",
+        it: "Foundation",
+        languages: "Pre-IELTS",
+        exams: "IELTS Standard",
         duration: "Длительность",
         price: "Цена",
         level: "Уровень",
-        teacher: "Преподаватель",
+        teacher: "Инструктор",
         viewDetails: "Подробнее",
-        beginner: "Начальный",
-        intermediate: "Средний",
-        advanced: "Продвинутый",
+        beginner: "Foundation",
+        intermediate: "Pre-IELTS",
+        advanced: "IELTS Rocket",
         noCourses: "Курсы не найдены"
       },
       common: {
         loading: "Загрузка..."
       },
       teachers: {
-        title: "Наши преподаватели",
-        subtitle: "Квалифицированные и опытные специалисты",
+        title: "Наши Эксперты",
+        subtitle: "Инструкторы с сертификатом 8.5+",
         experience: "лет опыта",
         viewProfile: "Подробнее"
       },
       testimonials: {
         title: "Отзывы студентов",
-        subtitle: "Что говорят наши выпускники"
+        subtitle: "Истории успеха 8.0+"
       },
       events: {
-        title: "События и новости",
-        subtitle: "Последние новости нашего учебного центра",
+        title: "Mock Exams",
+        subtitle: "Расписание пробных экзаменов",
         readMore: "Читать далее"
       },
       register: {
-        title: "Записаться на курсы",
-        subtitle: "Зарегистрируйтесь и начните обучение",
+        title: "Записаться на IELTS",
+        subtitle: "Начните подготовку сегодня",
         fullName: "Полное имя",
         age: "Возраст",
         phone: "Номер телефона",
@@ -206,7 +206,7 @@ const resources = {
       },
       contact: {
         title: "Свяжитесь с нами",
-        subtitle: "Есть вопросы? Свяжитесь с нами",
+        subtitle: "Есть вопросы по IELTS? Напишите нам",
         address: "Адрес",
         phone: "Телефон",
         email: "Email",
@@ -224,11 +224,11 @@ const resources = {
         vision: "Наше видение",
         history: "История",
         advantages: "Наши преимущества",
-        team: "Наша команда"
+        team: "Наши Эксперты"
       },
       schedule: {
         title: "Расписание занятий",
-        subtitle: "Недельное расписание",
+        subtitle: "Расписание групп IELTS",
         monday: "Понедельник",
         tuesday: "Вторник",
         wednesday: "Среда",
@@ -241,11 +241,11 @@ const resources = {
         room: "Комната"
       },
       achievements: {
-        title: "Достижения",
-        subtitle: "Достижения наших студентов",
+        title: "Наши Результаты",
+        subtitle: "Сертификаты наших студентов",
       },
       footer: {
-        about: "IELTS Imperia - современный учебный центр",
+        about: "IELTS Imperia - центр подготовки к IELTS",
         quickLinks: "Быстрые ссылки",
         followUs: "Социальные сети",
         rights: "Все права защищены"
@@ -256,74 +256,74 @@ const resources = {
     translation: {
       nav: {
         home: "Home",
-        courses: "Courses",
-        teachers: "Teachers",
+        courses: "IELTS Courses",
+        teachers: "Experts",
         about: "About",
-        events: "Events",
+        events: "Mock Exam",
         schedule: "Schedule",
-        achievements: "Achievements",
+        achievements: "Results",
         contact: "Contact",
-        register: "Enroll in Course"
+        register: "Trial Lesson"
       },
       hero: {
-        title: "Knowledge for Your Future",
-        subtitle: "Professional teachers, modern curriculum, and guaranteed results",
-        registerBtn: "Enroll in Courses",
+        title: "Path to IELTS 8.0+",
+        subtitle: "Achieve high scores with the best experts in Khorezm",
+        registerBtn: "Trial Lesson",
         viewCoursesBtn: "View Courses",
-        badge: "Professional Education",
-        live: "Live Classes",
-        certified: "Successful Students",
-        flexible: "Flexible Schedule"
+        badge: "Professional IELTS Center",
+        live: "Speaking Club",
+        certified: "8.0+ Results",
+        flexible: "Mock Exams"
       },
       stats: {
         students: "Students",
         years: "Years Experience",
-        courses: "Courses",
-        graduates: "Graduates"
+        courses: "Levels",
+        graduates: "Scored 8.0+"
       },
       courses: {
-        title: "Our Courses",
-        subtitle: "Professional education in various fields",
+        title: "IELTS Courses",
+        subtitle: "From Beginner to 8.0",
         filter: "Filter",
         all: "All",
-        it: "IT Courses",
-        languages: "Languages",
-        exams: "For Applicants",
+        it: "Foundation",
+        languages: "Pre-IELTS",
+        exams: "IELTS Standard",
         duration: "Duration",
         price: "Price",
         level: "Level",
-        teacher: "Teacher",
+        teacher: "Instructor",
         viewDetails: "View Details",
-        beginner: "Beginner",
-        intermediate: "Intermediate",
-        advanced: "Advanced",
+        beginner: "Foundation",
+        intermediate: "Pre-IELTS",
+        advanced: "IELTS Rocket",
         noCourses: "No courses found"
       },
       common: {
         loading: "Loading..."
       },
       teachers: {
-        title: "Our Teachers",
-        subtitle: "Qualified and experienced specialists",
+        title: "Our Experts",
+        subtitle: "Instructors with 8.5+ Band Score",
         experience: "years experience",
-        viewProfile: "View More"
+        viewProfile: "View Profile"
       },
       testimonials: {
         title: "Student Reviews",
-        subtitle: "What our graduates say about us"
+        subtitle: "Success stories of 8.0+ scorers"
       },
       events: {
-        title: "Events and News",
-        subtitle: "Latest news from our learning center",
+        title: "Mock Exams",
+        subtitle: "Schedule of upcoming mock exams",
         readMore: "Read More"
       },
       register: {
-        title: "Enroll in Courses",
-        subtitle: "Register and start learning",
+        title: "Book IELTS Course",
+        subtitle: "Start your preparation today",
         fullName: "Full Name",
         age: "Age",
         phone: "Phone Number",
-        selectCourse: "Select Course",
+        selectCourse: "Select Level",
         submit: "Submit",
         success: "Your application has been submitted! We will contact you soon.",
         error: "Error",
@@ -331,7 +331,7 @@ const resources = {
       },
       contact: {
         title: "Contact Us",
-        subtitle: "Have questions? Get in touch with us",
+        subtitle: "Questions about IELTS? Get in touch",
         address: "Address",
         phone: "Phone",
         email: "Email",
@@ -348,12 +348,12 @@ const resources = {
         mission: "Our Mission",
         vision: "Our Vision",
         history: "History",
-        advantages: "Our Advantages",
-        team: "Our Team"
+        advantages: "Why Choose Us",
+        team: "Our Experts"
       },
       schedule: {
         title: "Class Schedule",
-        subtitle: "Weekly class schedule",
+        subtitle: "IELTS group schedule",
         monday: "Monday",
         tuesday: "Tuesday",
         wednesday: "Wednesday",
@@ -366,11 +366,11 @@ const resources = {
         room: "Room"
       },
       achievements: {
-        title: "Achievements",
-        subtitle: "Our students' achievements",
+        title: "Results",
+        subtitle: "Our students' band scores",
       },
       footer: {
-        about: "IELTS Imperia - modern learning center",
+        about: "IELTS Imperia - Professional IELTS Center",
         quickLinks: "Quick Links",
         followUs: "Follow Us",
         rights: "All rights reserved"
