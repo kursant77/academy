@@ -120,7 +120,7 @@ const resources = {
         subtitle: "Bizning o'quvchilarimizning erishgan natijalari",
       },
       footer: {
-        about: "A+ Academy - zamonaviy o'quv markazi",
+        about: "IELTS Imperia - zamonaviy o'quv markazi",
         quickLinks: "Tezkor havolalar",
         followUs: "Ijtimoiy tarmoqlar",
         rights: "Barcha huquqlar himoyalangan"
@@ -245,7 +245,7 @@ const resources = {
         subtitle: "Достижения наших студентов",
       },
       footer: {
-        about: "A+ Academy - современный учебный центр",
+        about: "IELTS Imperia - современный учебный центр",
         quickLinks: "Быстрые ссылки",
         followUs: "Социальные сети",
         rights: "Все права защищены"
@@ -370,7 +370,7 @@ const resources = {
         subtitle: "Our students' achievements",
       },
       footer: {
-        about: "A+ Academy - modern learning center",
+        about: "IELTS Imperia - modern learning center",
         quickLinks: "Quick Links",
         followUs: "Follow Us",
         rights: "All rights reserved"

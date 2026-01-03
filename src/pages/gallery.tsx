@@ -120,15 +120,15 @@ export default function Achievements() {
   return (
     <>
       <SEO
-        title="Yutuqlar va Galereya — A+ Academy | Talabalar Muvaffaqiyatlari Toshkent"
-        description="A+ Academy o'quvchilarining yutuqlari va galereya. Bitiruvchilarimizning muvaffaqiyatlari, sertifikatlar va markaz hayoti. 1800+ bitiruvchi, 2500+ talaba. Toshkent."
-        keywords="yutuqlar, galereya, A+ Academy, bitiruvchilar, muvaffaqiyatlar, talabalar yutuqlari, sertifikatlar, o'quv markazi galereya, Toshkent, bitiruvchilar muvaffaqiyatlari"
+        title="Yutuqlar va Galereya — IELTS Imperia | Talabalar Muvaffaqiyatlari Toshkent"
+        description="IELTS Imperia o'quvchilarining yutuqlari va galereya. Bitiruvchilarimizning muvaffaqiyatlari, sertifikatlar va markaz hayoti. 1800+ bitiruvchi, 2500+ talaba. Toshkent."
+        keywords="yutuqlar, galereya, IELTS Imperia, bitiruvchilar, muvaffaqiyatlar, talabalar yutuqlari, sertifikatlar, o'quv markazi galereya, Toshkent, bitiruvchilar muvaffaqiyatlari"
         url="/achievements"
         structuredData={{
           "@context": "https://schema.org",
           "@type": "CollectionPage",
-          "name": "A+ Academy Yutuqlar va Galereya",
-          "description": "A+ Academy o'quvchilarining yutuqlari va galereya",
+          "name": "IELTS Imperia Yutuqlar va Galereya",
+          "description": "IELTS Imperia o'quvchilarining yutuqlari va galereya",
           "mainEntity": {
             "@type": "ItemList",
             "itemListElement": achievements.map((achievement, index) => ({

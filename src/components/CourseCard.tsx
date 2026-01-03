@@ -62,8 +62,8 @@ export const CourseCard = memo(function CourseCard({
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-t-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <img 
               src={imageUrl} 
-              alt={`${name} kursi - A+ Academy Toshkent | ${category} | ${level} | Professional ta'lim`}
-              title={`${name} kursi - A+ Academy Toshkent | ${category} | ${level}`}
+              alt={`${name} kursi - IELTS Imperia Toshkent | ${category} | ${level} | Professional ta'lim`}
+              title={`${name} kursi - IELTS Imperia Toshkent | ${category} | ${level}`}
               className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-115 relative z-10"
               loading="lazy"
               decoding="async"

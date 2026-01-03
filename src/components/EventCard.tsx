@@ -45,8 +45,8 @@ export const EventCard = memo(function EventCard({
           <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-t-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <img 
             src={imageUrl} 
-            alt={`${title} - ${category} tadbiri | A+ Academy Toshkent | ${format(date, "dd MMMM yyyy")}`}
-            title={`${title} - ${category} tadbiri | A+ Academy Toshkent | ${format(date, "dd MMMM yyyy")}`}
+            alt={`${title} - ${category} tadbiri | IELTS Imperia Toshkent | ${format(date, "dd MMMM yyyy")}`}
+            title={`${title} - ${category} tadbiri | IELTS Imperia Toshkent | ${format(date, "dd MMMM yyyy")}`}
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-115 relative z-10"
             loading="lazy"
             decoding="async"

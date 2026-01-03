@@ -182,7 +182,7 @@ export function Header() {
                   <ThemeToggle />
                 </div>
                 <p className="text-xs text-muted-foreground font-medium">
-                  © {new Date().getFullYear()} A+ Academy. All rights reserved.
+                  © {new Date().getFullYear()} IELTS Imperia. All rights reserved.
                 </p>
               </div>
             </div>

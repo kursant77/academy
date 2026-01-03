@@ -19,8 +19,8 @@ interface SEOProps {
 
 export function SEO({
   title = `${SITE_NAME} — Professional IT, IELTS & CEFR Kurslar`,
-  description = 'A+ Academy — IT, tillar va abituriyentlar uchun zamonaviy ta\'lim. Professional o\'qituvchilar bilan yuqori natija kafolatlanadi. IELTS, CEFR, dasturlash va boshqa kurslar.',
-  keywords = 'IELTS, CEFR, IT kurslar, dasturlash, ingliz tili, ta\'lim, o\'quv markazi, Toshkent, A+ Academy',
+  description = 'IELTS Imperia — IT, tillar va abituriyentlar uchun zamonaviy ta\'lim. Professional o\'qituvchilar bilan yuqori natija kafolatlanadi. IELTS, CEFR, dasturlash va boshqa kurslar.',
+  keywords = 'IELTS, CEFR, IT kurslar, dasturlash, ingliz tili, ta\'lim, o\'quv markazi, Toshkent, IELTS Imperia',
   image = '/og-image.jpg',
   url = typeof window !== 'undefined' ? window.location.href : '',
   type = 'website',
@@ -37,10 +37,10 @@ export function SEO({
   const fullImageUrl = image.startsWith('http') ? image : `${siteUrl}${image}`;
   const fullUrl = url.startsWith('http') ? url : `${siteUrl}${url}`;
   const canonicalUrl = canonical || fullUrl;
-  
+
   // Enhanced keywords with common search terms - SEO optimized
-  const enhancedKeywords = keywords + 
-    ', A+ Academy, Toshkent, o\'quv markazi, ta\'lim markazi, IT o\'quv markazi, ' +
+  const enhancedKeywords = keywords +
+    ', IELTS Imperia, Toshkent, o\'quv markazi, ta\'lim markazi, IT o\'quv markazi, ' +
     'IELTS o\'quv markazi, ingliz tili kurslari, dasturlash kurslari, ' +
     'frontend kurslar, backend kurslar, fullstack kurslar, ' +
     'CEFR kurslar, IELTS Toshkent, IT kurslar Toshkent, ' +
@@ -107,7 +107,7 @@ export function SEO({
       metaLang.setAttribute('lang', 'uz');
       metaLang.setAttribute('xml:lang', 'uz');
     }
-    
+
     // Content language
     let contentLang = document.querySelector('meta[http-equiv="content-language"]');
     if (!contentLang) {
@@ -116,7 +116,7 @@ export function SEO({
       document.head.appendChild(contentLang);
     }
     contentLang.setAttribute('content', 'uz, ru, en');
-    
+
     // Theme color for mobile browsers
     let themeColor = document.querySelector('meta[name="theme-color"]');
     if (!themeColor) {
@@ -125,7 +125,7 @@ export function SEO({
       document.head.appendChild(themeColor);
     }
     themeColor.setAttribute('content', '#3b82f6');
-    
+
     // Mobile web app capable
     let mobileWebApp = document.querySelector('meta[name="mobile-web-app-capable"]');
     if (!mobileWebApp) {
@@ -134,7 +134,7 @@ export function SEO({
       document.head.appendChild(mobileWebApp);
     }
     mobileWebApp.setAttribute('content', 'yes');
-    
+
     // Apple mobile web app
     let appleMobileWebApp = document.querySelector('meta[name="apple-mobile-web-app-capable"]');
     if (!appleMobileWebApp) {
@@ -143,7 +143,7 @@ export function SEO({
       document.head.appendChild(appleMobileWebApp);
     }
     appleMobileWebApp.setAttribute('content', 'yes');
-    
+
     // Apple mobile web app title
     let appleMobileWebAppTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
     if (!appleMobileWebAppTitle) {
@@ -163,7 +163,7 @@ export function SEO({
       { property: 'og:image:alt', content: fullTitle },
       { property: 'og:url', content: fullUrl },
       { property: 'og:type', content: type },
-      { property: 'og:site_name', content: 'A+ Academy' },
+      { property: 'og:site_name', content: 'IELTS Imperia' },
       { property: 'og:locale', content: 'uz_UZ' },
       { property: 'og:locale:alternate', content: 'ru_RU' },
       { property: 'og:locale:alternate', content: 'en_US' },
@@ -198,8 +198,8 @@ export function SEO({
       { name: 'twitter:description', content: description },
       { name: 'twitter:image', content: fullImageUrl },
       { name: 'twitter:image:alt', content: fullTitle },
-      { name: 'twitter:site', content: '@aplusacademy' },
-      { name: 'twitter:creator', content: '@aplusacademy' },
+      { name: 'twitter:site', content: '@ieltsimperia' },
+      { name: 'twitter:creator', content: '@ieltsimperia' },
     ];
 
     twitterTags.forEach(({ name, content }) => {
@@ -220,7 +220,7 @@ export function SEO({
 
       // Array bo'lsa, har birini alohida qo'shamiz
       const schemas = Array.isArray(structuredData) ? structuredData : [structuredData];
-      
+
       schemas.forEach((schema) => {
         const script = document.createElement('script');
         script.type = 'application/ld+json';

@@ -129,7 +129,7 @@ export function Footer() {
 
         <div className="border-t mt-6 sm:mt-8 md:mt-12 pt-6 sm:pt-8 text-center">
           <p className="text-xs sm:text-sm text-muted-foreground">
-            © {new Date().getFullYear()} A+ Academy. {t("footer.rights")}
+            © {new Date().getFullYear()} IELTS Imperia. {t("footer.rights")}
           </p>
         </div>
       </div>

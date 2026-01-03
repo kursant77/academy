@@ -50,8 +50,8 @@ export default function Events() {
       <>
         <SEO
           title="Tadbirlar va Yangiliklar"
-          description="A+ Academy tadbirlari, workshoplar, seminarlar va musobaqalar. Eng so'nggi yangiliklar va voqealar haqida bilib oling."
-          keywords="tadbirlar, workshop, seminar, musobaqa, A+ Academy yangiliklari"
+          description="IELTS Imperia tadbirlari, workshoplar, seminarlar va musobaqalar. Eng so'nggi yangiliklar va voqealar haqida bilib oling."
+          keywords="tadbirlar, workshop, seminar, musobaqa, IELTS Imperia yangiliklari"
           url="/events"
         />
         <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
@@ -68,14 +68,14 @@ export default function Events() {
   return (
     <>
       <SEO
-        title="Tadbirlar va Yangiliklar — A+ Academy | Workshoplar, Seminarlar Toshkent"
-        description="A+ Academy tadbirlari, workshoplar, seminarlar va musobaqalar. Eng so'nggi yangiliklar va voqealar haqida bilib oling. Toshkent. Qatnashish uchun ro'yxatdan o'ting!"
-        keywords="tadbirlar, workshop, seminar, musobaqa, A+ Academy yangiliklari, Toshkent tadbirlar, IT tadbirlar, ta'lim tadbirlar, o'quv markazi tadbirlar, yangiliklar, voqealar, IT workshop, dasturlash tadbirlari, ta'lim tadbirlari"
+        title="Tadbirlar va Yangiliklar — IELTS Imperia | Workshoplar, Seminarlar Toshkent"
+        description="IELTS Imperia tadbirlari, workshoplar, seminarlar va musobaqalar. Eng so'nggi yangiliklar va voqealar haqida bilib oling. Toshkent. Qatnashish uchun ro'yxatdan o'ting!"
+        keywords="tadbirlar, workshop, seminar, musobaqa, IELTS Imperia yangiliklari, Toshkent tadbirlar, IT tadbirlar, ta'lim tadbirlar, o'quv markazi tadbirlar, yangiliklar, voqealar, IT workshop, dasturlash tadbirlari, ta'lim tadbirlari"
         url="/events"
         structuredData={{
           "@context": "https://schema.org",
           "@type": "ItemList",
-          "name": "A+ Academy Tadbirlari",
+          "name": "IELTS Imperia Tadbirlari",
           "description": "Workshoplar, seminarlar va musobaqalar",
           "itemListElement": allEvents.map((event, index) => ({
             "@type": "ListItem",
@@ -87,7 +87,7 @@ export default function Events() {
               "startDate": event.date,
               "organizer": {
                 "@type": "Organization",
-                "name": "A+ Academy"
+                "name": "IELTS Imperia"
               }
             }
           }))

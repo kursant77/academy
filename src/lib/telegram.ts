@@ -5,7 +5,7 @@
 
 // Telegram Bot sozlamalari - .env faylida saqlang
 const TELEGRAM_BOT_TOKEN = import.meta.env.VITE_TELEGRAM_BOT_TOKEN || '';
-const TELEGRAM_CHAT_ID = import.meta.env.VITE_TELEGRAM_CHAT_ID || '';
+const TELEGRAM_CHAT_ID = (import.meta.env.VITE_TELEGRAM_CHAT_ID || '').toString().trim().split(',')[0]; // Faqat birinchi Chat ID ni olish
 
 /**
  * Sends a message directly to Telegram bot
@@ -19,6 +19,17 @@ export async function sendTelegramMessage(text: string): Promise<boolean> {
     return false;
   }
 
+  // Chat ID ni tozalash va tekshirish - faqat raqamlar bo'lishi kerak
+  const chatIdClean = TELEGRAM_CHAT_ID.toString().trim();
+  if (!/^-?\d+$/.test(chatIdClean)) {
+    if (import.meta.env.DEV) {
+      console.warn('⚠️ Telegram: Chat ID noto\'g\'ri format!');
+      console.warn(`Chat ID: "${TELEGRAM_CHAT_ID}"`);
+      console.warn('Qo\'llanma: TELEGRAM_SETUP.md faylini ko\'ring');
+    }
+    return false;
+  }
+
   try {
     const response = await fetch(
       `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
@@ -28,7 +39,7 @@ export async function sendTelegramMessage(text: string): Promise<boolean> {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
+          chat_id: chatIdClean,
           text: text,
           parse_mode: 'HTML',
         }),
@@ -36,15 +47,34 @@ export async function sendTelegramMessage(text: string): Promise<boolean> {
     );
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Telegram API xatosi:', errorData);
+      const errorData = await response.json().catch(() => ({}));
+      
+      // Xatoliklarni faqat development mode'da ko'rsatish
+      if (import.meta.env.DEV) {
+        console.warn('Telegram API xatosi:', errorData);
+        
+        // Aniq xatolik xabarlarini ko'rsatish (faqat development mode'da)
+        if (errorData.error_code === 400 && errorData.description?.includes('chat not found')) {
+          console.warn('⚠️ Telegram: Chat topilmadi. Bot\'ga /start yuboring yoki Chat ID ni tekshiring');
+          console.warn(`Chat ID: ${chatIdClean}`);
+          console.warn('Qo\'llanma: TELEGRAM_SETUP.md faylini ko\'ring');
+        } else if (errorData.error_code === 401) {
+          console.warn('⚠️ Telegram: Bot token noto\'g\'ri');
+        } else if (errorData.error_code === 403) {
+          console.warn('⚠️ Telegram: Bot chatga xabar yuborish huquqiga ega emas');
+        }
+      }
+      
       return false;
     }
 
     const result = await response.json();
     return result.ok === true;
   } catch (error) {
-    console.error('Telegram xabar yuborishda xatolik:', error);
+    // Xatoliklarni faqat development mode'da ko'rsatish
+    if (import.meta.env.DEV) {
+      console.warn('Telegram xabar yuborishda xatolik:', error);
+    }
     return false;
   }
 }

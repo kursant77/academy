@@ -170,10 +170,10 @@ export default function Home() {
       course: "Frontend Development",
           text:
             i18n.language === "ru"
-              ? "Обучение в A+ Academy изменило мою жизнь. Благодаря профессиональным преподавателям и современной программе я устроился на работу мечты."
+              ? "Обучение в IELTS Imperia изменило мою жизнь. Благодаря профессиональным преподавателям и современной программе я устроился на работу мечты."
               : i18n.language === "en"
-              ? "Studying at A+ Academy changed my life. Thanks to professional teachers and modern curriculum, I got my dream job."
-              : "A+ Academy o'quv markazida o'qish mening hayotimni o'zgartirdi. Professional o'qituvchilar va zamonaviy dastur tufayli men orzuimdagi ishga joylashdim.",
+              ? "Studying at IELTS Imperia changed my life. Thanks to professional teachers and modern curriculum, I got my dream job."
+              : "IELTS Imperia o'quv markazida o'qish mening hayotimni o'zgartirdi. Professional o'qituvchilar va zamonaviy dastur tufayli men orzuimdagi ishga joylashdim.",
         },
       ];
     }
@@ -196,8 +196,8 @@ export default function Home() {
     return (
       <>
         <SEO 
-          title="A+ Academy — Professional IT, IELTS & CEFR Kurslar"
-          description="A+ Academy — IT, tillar va abituriyentlar uchun zamonaviy ta'lim markazi. Professional o'qituvchilar bilan yuqori natija kafolatlanadi."
+          title="IELTS Imperia — Professional IT, IELTS & CEFR Kurslar"
+          description="IELTS Imperia — IT, tillar va abituriyentlar uchun zamonaviy ta'lim markazi. Professional o'qituvchilar bilan yuqori natija kafolatlanadi."
           structuredData={structuredData}
         />
         <div className="min-h-screen flex items-center justify-center">
@@ -210,9 +210,9 @@ export default function Home() {
   return (
     <>
       <SEO 
-        title="A+ Academy — Professional IT, IELTS & CEFR Kurslar | Toshkent O'quv Markazi"
-        description="A+ Academy — Toshkentdagi eng yaxshi IT, IELTS, CEFR va dasturlash kurslari. Professional o'qituvchilar, zamonaviy dasturlar, kafolatlangan natija. 2500+ talaba, 1800+ bitiruvchi. Ro'yxatdan o'ting!"
-        keywords="A+ Academy, Toshkent o'quv markazi, IT kurslar Toshkent, IELTS Toshkent, CEFR kurslar, dasturlash kurslari, frontend kurslar, backend kurslar, fullstack kurslar, ingliz tili kurslari, ta'lim markazi Toshkent, o'quv markazi Toshkent, IT o'quv markazi, IELTS o'quv markazi, professional ta'lim, zamonaviy ta'lim, React kurslar, JavaScript kurslar, Python kurslar, Node.js kurslar"
+        title="IELTS Imperia — Professional IT, IELTS & CEFR Kurslar | Toshkent O'quv Markazi"
+        description="IELTS Imperia — Toshkentdagi eng yaxshi IT, IELTS, CEFR va dasturlash kurslari. Professional o'qituvchilar, zamonaviy dasturlar, kafolatlangan natija. 2500+ talaba, 1800+ bitiruvchi. Ro'yxatdan o'ting!"
+        keywords="IELTS Imperia, Toshkent o'quv markazi, IT kurslar Toshkent, IELTS Toshkent, CEFR kurslar, dasturlash kurslari, frontend kurslar, backend kurslar, fullstack kurslar, ingliz tili kurslari, ta'lim markazi Toshkent, o'quv markazi Toshkent, IT o'quv markazi, IELTS o'quv markazi, professional ta'lim, zamonaviy ta'lim, React kurslar, JavaScript kurslar, Python kurslar, Node.js kurslar"
         structuredData={structuredData}
       />
       <div className="min-h-screen relative overflow-hidden">

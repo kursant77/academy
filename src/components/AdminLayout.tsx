@@ -124,16 +124,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       <div className="flex min-h-screen w-full">
         <Sidebar collapsible="offcanvas" className="bg-gradient-to-b from-background to-muted/30 transition-all duration-300">
           <SidebarContent className="overflow-y-auto">
-            <div className="px-2 sm:px-3 md:px-4 py-3 sm:py-4 md:py-5 animate-fade-in-down">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <Logo variant="admin" showText={false} linkTo={undefined} />
-                <div className="min-w-0 flex-1 hidden sm:block">
-                  <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground truncate">A+ Academy</p>
-                  <p className="font-semibold leading-tight text-foreground text-[10px] sm:text-xs md:text-sm truncate">
-                    Control Center
-                  </p>
-                </div>
-                <SidebarTrigger className="ml-auto lg:hidden transition-opacity duration-200 hover:opacity-80 flex-shrink-0 h-7 w-7 sm:h-8 sm:w-8" />
+            <div className="px-3 sm:px-4 md:px-6 py-6 sm:py-7 md:py-8 animate-fade-in-down border-b border-border/50">
+              <div className="flex items-center justify-center">
+                <Logo variant="admin" showText={true} linkTo="/admin" />
               </div>
             </div>
             {menuGroups.map((group) => (
@@ -148,9 +141,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                       const isActive = location === item.path || (item.path === '/admin' && location === '/admin');
                       return (
                         <SidebarMenuItem key={item.path} className="stagger-item" style={{ animationDelay: `${index * 0.03}s` }}>
-                          <SidebarMenuButton 
-                            onClick={() => setLocation(item.path)} 
-                            isActive={isActive} 
+                          <SidebarMenuButton
+                            onClick={() => setLocation(item.path)}
+                            isActive={isActive}
                             tooltip={item.title}
                             className="transition-all duration-200 hover:translate-x-1 text-[11px] sm:text-xs md:text-sm px-2 sm:px-3"
                           >
@@ -192,7 +185,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               <SidebarTrigger className="lg:hidden transition-opacity duration-200 hover:opacity-80 flex-shrink-0 h-8 w-8 sm:h-9 sm:w-9" />
               <div className="min-w-0 flex-1">
                 <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-foreground truncate">
-                  A+ Academy Admin
+                  IELTS Imperia Admin
                 </h1>
                 <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground hidden sm:block">Monitoring va boshqaruv</p>
               </div>

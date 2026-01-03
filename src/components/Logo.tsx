@@ -19,19 +19,19 @@ export function Logo({
   const sizeClasses = {
     header: "h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10",
     footer: "h-10 w-10 sm:h-12 sm:w-12",
-    admin: "h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10",
+    admin: "h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10"
   };
 
   const textSizeClasses = {
     header: "text-base sm:text-lg md:text-xl",
     footer: "text-xl sm:text-2xl",
-    admin: "text-sm sm:text-base",
+    admin: "text-sm sm:text-base"
   };
 
   const iconSizeClasses = {
     header: "text-xs sm:text-sm md:text-lg",
     footer: "text-lg sm:text-xl",
-    admin: "text-[10px] sm:text-xs md:text-sm",
+    admin: "text-[10px] sm:text-xs md:text-sm"
   };
 
   const LogoIcon = () => (
@@ -79,8 +79,7 @@ export function Logo({
         <div
           className="absolute inset-0 rounded-xl animate-spin-slow"
           style={{
-            background:
-              "conic-gradient(from 0deg, hsl(var(--primary)), hsl(var(--primary)) 90deg, transparent 90deg, transparent 360deg)",
+            background: 'conic-gradient(from 0deg, hsl(var(--primary)), hsl(var(--primary)) 90deg, transparent 90deg, transparent 360deg)'
           }}
         />
       </div>
@@ -93,9 +92,8 @@ export function Logo({
         drop-shadow-lg
         group-hover:drop-shadow-2xl
         transition-all duration-300
-        ${isHovered ? "scale-110" : "scale-100"}
-      `}
-      >
+        ${isHovered ? 'scale-110' : 'scale-100'}
+      `}>
         A+
       </span>
     </div>
@@ -118,9 +116,8 @@ export function Logo({
       transition-all 
       duration-500
       group-hover:scale-105
-    `}
-    >
-      {variant === "footer" ? "Academy" : "Academy"}
+    `}>
+      {variant === "footer" ? "A+ Academy" : "Academy"}
       {/* Text glow effect */}
       <span className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
     </span>
@@ -137,14 +134,14 @@ export function Logo({
         group
         transition-all 
         duration-300
-        justify-start
+        justify-end
         ${className}
       `}
       style={{ transform: "rotate(-1deg)" }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <LogoIcon />
+
       {showText && <LogoText />}
     </div>
   );

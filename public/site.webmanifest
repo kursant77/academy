@@ -1,7 +1,7 @@
 {
-  "name": "A+ Academy",
-  "short_name": "A+ Academy",
-  "description": "A+ Academy — IT, tillar va abituriyentlar uchun zamonaviy ta'lim markazi",
+  "name": "IELTS Imperia",
+  "short_name": "IELTS Imperia",
+  "description": "IELTS Imperia — IT, tillar va abituriyentlar uchun zamonaviy ta'lim markazi",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

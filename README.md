@@ -1,4 +1,4 @@
-# A+ Academy - O'quv Markazi
+# IELTS Imperia - O'quv Markazi
 
 Professional o'quv markazi uchun to'liq funksionallik bilan websayt va admin panel.
 

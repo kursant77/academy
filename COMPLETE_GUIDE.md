@@ -1,4 +1,4 @@
-# A+ Academy - To'liq Qo'llanma 📚
+# IELTS Imperia - To'liq Qo'llanma 📚
 
 Bu qo'llanma loyihani to'liq sozlash, ishga tushirish va boshqarish uchun barcha kerakli ma'lumotlarni o'z ichiga oladi.
 
@@ -407,7 +407,7 @@ Production ga deploy qilganda environment variables qo'shing:
    ```
    VITE_SUPABASE_URL=your_project_url
    VITE_SUPABASE_ANON_KEY=your_anon_key
-   VITE_SITE_URL=https://aplusacademy.uz
+   VITE_SITE_URL=https://ieltsimperia.uz
    ```
 
 ### 8.2. Build
@@ -430,7 +430,7 @@ Vercel dashboard'da quyidagi environment variables'ni sozlash kerak:
 ```
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGci... (Supabase dashboard'dan oling)
-VITE_SITE_URL=https://aplusacademy.uz
+VITE_SITE_URL=https://ieltsimperia.uz
 ```
 
 3. Har bir variable uchun **Production, Preview, Development** ni tanlang
@@ -491,7 +491,7 @@ npm run build
 #### Server'ga yuklash:
 ```bash
 # SCP orqali
-scp -r dist/* user@your-server.com:/var/www/aplusacademy/
+scp -r dist/* user@your-server.com:/var/www/ieltsimperia/
 
 # Yoki FTP/SFTP orqali
 # dist/ papkasidagi barcha fayllarni server'ga yuklang
@@ -502,7 +502,7 @@ scp -r dist/* user@your-server.com:/var/www/aplusacademy/
 ```nginx
 server {
     listen 80;
-    server_name aplusacademy.uz www.aplusacademy.uz;
+    server_name ieltsimperia.uz www.ieltsimperia.uz;
     
     # Redirect to HTTPS
     return 301 https://$server_name$request_uri;
@@ -510,13 +510,13 @@ server {
 
 server {
     listen 443 ssl http2;
-    server_name aplusacademy.uz www.aplusacademy.uz;
+    server_name ieltsimperia.uz www.ieltsimperia.uz;
     
     # SSL certificates
     ssl_certificate /path/to/cert.pem;
     ssl_certificate_key /path/to/key.pem;
     
-    root /var/www/aplusacademy/dist;
+    root /var/www/ieltsimperia/dist;
     index index.html;
     
     # Gzip compression
@@ -838,7 +838,7 @@ export default function MyPage() {
   return (
     <>
       <SEO 
-        title="Sahifa Nomi — A+ Academy"
+        title="Sahifa Nomi — IELTS Imperia"
         description="Sahifa tavsifi..."
         keywords="kalit sozlar..."
         structuredData={{
@@ -865,7 +865,7 @@ export default function MyPage() {
 
 1. Google Search Console ga kiring
 2. Loyihani qo'shing
-3. Sitemap yuklang: `https://aplusacademy.uz/sitemap.xml`
+3. Sitemap yuklang: `https://ieltsimperia.uz/sitemap.xml`
 4. Indexlash tezligini kuzating
 
 ### 12.6. Test Qilish

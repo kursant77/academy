@@ -6,7 +6,7 @@ export default function TestimonialSliderExample() {
       id: "1",
       name: "Ali Karimov",
       course: "Frontend Development",
-      text: "A+ Academy o'quv markazida o'qish mening hayotimni o'zgartirdi. Professional o'qituvchilar va zamonaviy dastur tufayli men orzuimdagi ishga joylashdim.",
+      text: "IELTS Imperia o'quv markazida o'qish mening hayotimni o'zgartirdi. Professional o'qituvchilar va zamonaviy dastur tufayli men orzuimdagi ishga joylashdim.",
     },
     {
       id: "2",

@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useContent } from "@/hooks/use-content";
 import { supabase } from "@/lib/supabase";
+import { sendTelegramMessage, formatContactMessage } from "@/lib/telegram";
 import { SEO } from "@/components/SEO";
 
 export default function Contact() {
@@ -24,7 +25,7 @@ export default function Contact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
       toast({
         title: t("register.error") || "Xatolik",
@@ -46,12 +47,23 @@ export default function Contact() {
         });
 
       if (dbError) {
-        console.error("Contact message saqlashda xatolik:", dbError);
+        if (import.meta.env.DEV) {
+          console.error("Contact message saqlashda xatolik:", dbError);
+        }
         throw dbError;
       }
 
-      // Database trigger avtomatik Telegram xabar yuboradi
-      // (TELEGRAM_TRIGGER_SQL.sql faylida sozlangan)
+      // Telegram botga xabar yuborish (frontend'dan to'g'ridan-to'g'ri)
+      const telegramMessage = formatContactMessage({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        message: formData.message.trim(),
+      });
+
+      sendTelegramMessage(telegramMessage).catch((err) => {
+        // Telegram xatolik foydalanuvchiga ko'rinmaydi, faqat console'da
+        console.warn('Telegram xabar yuborilmadi:', err);
+      });
 
       toast({
         title: t("contact.send"),
@@ -60,11 +72,12 @@ export default function Contact() {
       setFormData({ name: "", email: "", message: "" });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.error('Contact form error:', errorMessage);
-      console.error("Contact form submission error:", error);
+      if (import.meta.env.DEV) {
+        console.error('Contact form error:', errorMessage);
+      }
       toast({
         title: t("register.error") || "Xatolik",
-        description: error.message || "Xatolik yuz berdi. Iltimos, qayta urinib ko'ring.",
+        description: errorMessage || "Xatolik yuz berdi. Iltimos, qayta urinib ko'ring.",
         variant: "destructive",
       });
     } finally {
@@ -75,18 +88,18 @@ export default function Contact() {
   return (
     <>
       <SEO
-        title="Bog'lanish — A+ Academy | Telefon, Email, Manzil Toshkent"
-        description="A+ Academy bilan bog'laning. Manzil: Toshkent, Bunyodkor Avenue 12. Telefon, email va ish vaqtlari. Savollaringiz bo'lsa, bizga yozing!"
-        keywords="bog'lanish, A+ Academy, telefon, email, manzil, Toshkent, aloqa, kontakt, telefon raqam, email manzil, manzil Toshkent, o'quv markazi manzili"
+        title="Bog'lanish — IELTS Imperia | Telefon, Email, Manzil Toshkent"
+        description="IELTS Imperia bilan bog'laning. Manzil: Toshkent, Bunyodkor Avenue 12. Telefon, email va ish vaqtlari. Savollaringiz bo'lsa, bizga yozing!"
+        keywords="bog'lanish, IELTS Imperia, telefon, email, manzil, Toshkent, aloqa, kontakt, telefon raqam, email manzil, manzil Toshkent, o'quv markazi manzili"
         url="/contact"
         structuredData={{
           "@context": "https://schema.org",
           "@type": "ContactPage",
-          "name": "A+ Academy - Bog'lanish",
-          "description": "A+ Academy bilan bog'lanish",
+          "name": "IELTS Imperia - Bog'lanish",
+          "description": "IELTS Imperia bilan bog'lanish",
           "mainEntity": {
             "@type": "Organization",
-            "name": "A+ Academy",
+            "name": "IELTS Imperia",
             "address": {
               "@type": "PostalAddress",
               "streetAddress": "Bunyodkor Avenue 12",
@@ -94,7 +107,7 @@ export default function Contact() {
               "addressCountry": "UZ"
             },
             "telephone": "+998901234567",
-            "email": "info@aplusacademy.uz"
+            "email": "info@ieltsimperia.uz"
           }
         }}
       />
@@ -229,7 +242,7 @@ export default function Contact() {
                           className="hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300 hover:scale-110"
                         >
                           <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                           </svg>
                         </Button>
                       )}
@@ -242,7 +255,7 @@ export default function Contact() {
                           className="hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300 hover:scale-110"
                         >
                           <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
                           </svg>
                         </Button>
                       )}
@@ -255,7 +268,7 @@ export default function Contact() {
                           className="hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300 hover:scale-110"
                         >
                           <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                           </svg>
                         </Button>
                       )}
@@ -318,10 +331,10 @@ export default function Contact() {
                       />
                     </div>
 
-                    <Button 
-                      type="submit" 
-                      className="w-full h-11 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed" 
-                      data-testid="button-contact-submit" 
+                    <Button
+                      type="submit"
+                      className="w-full h-11 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                      data-testid="button-contact-submit"
                       disabled={submitting}
                       style={{ marginTop: '35px' }}
                     >

@@ -73,19 +73,19 @@ export default function About() {
   const historyText =
     content.history ??
     (i18n.language === "ru"
-      ? "Учебный центр A+ Academy был основан в 2012 году. Сегодня 2500+ студентов обучаются у нас, а более 1800 выпускников уже построили карьеру в международных компаниях."
+      ? "Учебный центр IELTS Imperia был основан в 2012 году. Сегодня 2500+ студентов обучаются у нас, а более 1800 выпускников уже построили карьеру в международных компаниях."
       : i18n.language === "en"
-      ? "A+ Academy was founded in 2012. Today 2500+ students study with us and 1800+ graduates have already built careers in international companies."
-      : "A+ Academy 2012 yilda tashkil topgan. Bugun 2500+ talaba biz bilan tahsil olmoqda va 1800+ bitiruvchi xalqaro kompaniyalarda faoliyat yuritmoqda.");
+      ? "IELTS Imperia was founded in 2012. Today 2500+ students study with us and 1800+ graduates have already built careers in international companies."
+      : "IELTS Imperia 2012 yilda tashkil topgan. Bugun 2500+ talaba biz bilan tahsil olmoqda va 1800+ bitiruvchi xalqaro kompaniyalarda faoliyat yuritmoqda.");
 
   const structuredData = generateOrganizationStructuredData();
 
   return (
     <>
       <SEO
-        title="Biz Haqimizda — A+ Academy | Toshkent O'quv Markazi | 2012 yildan"
-        description="A+ Academy — 2012 yildan beri IT, tillar va abituriyentlar uchun zamonaviy ta'lim markazi. 2500+ talaba, 1800+ bitiruvchi, professional o'qituvchilar. Toshkent. Batafsil ma'lumot."
-        keywords="A+ Academy, ta'lim markazi, Toshkent o'quv markazi, IT kurslar, ingliz tili, IELTS, CEFR, o'quv markazi, 2012 yildan, professional ta'lim, zamonaviy ta'lim, Toshkent, o'quv markazi haqida, ta'lim markazi haqida"
+        title="Biz Haqimizda — IELTS Imperia | Toshkent O'quv Markazi | 2012 yildan"
+        description="IELTS Imperia — 2012 yildan beri IT, tillar va abituriyentlar uchun zamonaviy ta'lim markazi. 2500+ talaba, 1800+ bitiruvchi, professional o'qituvchilar. Toshkent. Batafsil ma'lumot."
+        keywords="IELTS Imperia, ta'lim markazi, Toshkent o'quv markazi, IT kurslar, ingliz tili, IELTS, CEFR, o'quv markazi, 2012 yildan, professional ta'lim, zamonaviy ta'lim, Toshkent, o'quv markazi haqida, ta'lim markazi haqida"
         url="/about"
         structuredData={structuredData}
       />

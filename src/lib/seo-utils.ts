@@ -13,8 +13,8 @@ export interface SEOData {
 }
 
 // Site base URL
-export const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://aplusacademy.uz';
-export const SITE_NAME = 'A+ Academy';
+export const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://ieltsimperia.uz';
+export const SITE_NAME = 'IELTS Imperia';
 
 // Generate structured data for courses - Enhanced
 export function generateCourseStructuredData(course: {
@@ -35,7 +35,7 @@ export function generateCourseStructuredData(course: {
   url?: string;
 }) {
   const courseUrl = course.url || `${SITE_URL}/courses`;
-  
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Course',
@@ -103,8 +103,8 @@ export function generateOrganizationStructuredData() {
     '@type': 'EducationalOrganization',
     '@id': `${SITE_URL}#organization`,
     name: SITE_NAME,
-    alternateName: ['A+ Academy', 'A Plus Academy', 'A+ Academy Toshkent'],
-    description: 'A+ Academy — IT, tillar va abituriyentlar uchun zamonaviy ta\'lim markazi. Professional o\'qituvchilar bilan IELTS, CEFR, dasturlash va boshqa kurslar.',
+    alternateName: ['IELTS Imperia', 'IELTS Imperia Toshkent'],
+    description: 'IELTS Imperia — IT, tillar va abituriyentlar uchun zamonaviy ta\'lim markazi. Professional o\'qituvchilar bilan IELTS, CEFR, dasturlash va boshqa kurslar.',
     url: SITE_URL,
     logo: {
       '@type': 'ImageObject',
@@ -127,20 +127,20 @@ export function generateOrganizationStructuredData() {
       longitude: '69.2401',
     },
     telephone: '+998901234567',
-    email: 'info@aplusacademy.uz',
+    email: 'info@ieltsimperia.uz',
     foundingDate: '2012',
     sameAs: [
-      'https://www.facebook.com/aplusacademy',
-      'https://www.instagram.com/aplusacademy',
-      'https://t.me/aplusacademy',
-      'https://www.linkedin.com/company/aplusacademy',
+      'https://www.facebook.com/ieltsimperia',
+      'https://www.instagram.com/ieltsimperia',
+      'https://t.me/ieltsimperia',
+      'https://www.linkedin.com/company/ieltsimperia',
     ],
     contactPoint: [
       {
         '@type': 'ContactPoint',
         contactType: 'Customer Service',
         telephone: '+998901234567',
-        email: 'info@aplusacademy.uz',
+        email: 'info@ieltsimperia.uz',
         availableLanguage: ['Uzbek', 'Russian', 'English'],
         areaServed: 'UZ',
       },

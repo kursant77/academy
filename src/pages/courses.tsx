@@ -84,17 +84,17 @@ export default function Courses() {
           }
           return true; // Agar ustun mavjud bo'lmasa, barchasini ko'rsatamiz
         });
-        
+
         // Category ma'lumotlarini qo'shamiz (client-side join)
         // Kurslarda category maydoni name_uz sifatida saqlanadi, shuning uchun name_uz orqali solishtiramiz
         const coursesWithCategories = filtered.map(course => {
           // category maydoni name_uz qiymatini o'z ichiga oladi (admin panelda tanlanadi)
-          const categoryData = categoriesRes.data?.find(cat => 
+          const categoryData = categoriesRes.data?.find(cat =>
             cat.name_uz === course.category ||
             cat.name_ru === course.category ||
             cat.name_en === course.category
           );
-          
+
           return {
             ...course,
             categories: categoryData ? {
@@ -107,7 +107,7 @@ export default function Courses() {
             category_id: categoryData?.id || course.category_id || null
           };
         });
-        
+
         setAllCourses(coursesWithCategories);
       }
     } catch (error) {
@@ -131,8 +131,8 @@ export default function Courses() {
           i18n.language === "ru"
             ? category.name_ru
             : i18n.language === "en"
-            ? category.name_en
-            : category.name_uz,
+              ? category.name_en
+              : category.name_uz,
       })),
     ];
   }, [categories, i18n.language, t]);
@@ -141,25 +141,25 @@ export default function Courses() {
     if (selectedCategory === "all") {
       return allCourses;
     }
-    
+
     // Tanlangan kategoriya ma'lumotlarini topamiz
     const selectedCategoryData = categories.find(cat => cat.id === selectedCategory);
     if (!selectedCategoryData) {
       return allCourses; // Agar kategoriya topilmasa, barcha kurslarni ko'rsatamiz
     }
-    
+
     // Category ID yoki category nomi orqali filter qilish
     const filtered = allCourses.filter((course) => {
       // 1. Joined category ma'lumotlari orqali tekshiramiz (eng ishonchli)
       if (course.categories?.id === selectedCategory) {
         return true;
       }
-      
+
       // 2. category_id orqali tekshiramiz (to'g'ridan-to'g'ri UUID solishtirish)
       if (course.category_id === selectedCategory) {
         return true;
       }
-      
+
       // 3. category maydoni orqali tekshiramiz (admin panelda name_uz sifatida saqlanadi)
       // Barcha tildagi variantlarni tekshiramiz
       const categoryNames = [
@@ -167,15 +167,15 @@ export default function Courses() {
         selectedCategoryData.name_ru,
         selectedCategoryData.name_en
       ];
-      
+
       if (course.category && categoryNames.includes(course.category)) {
         return true;
       }
-      
+
       return false;
     });
-    
-    
+
+
     return filtered;
   }, [allCourses, selectedCategory, categories, i18n.language]);
 
@@ -185,14 +185,14 @@ export default function Courses() {
       {
         "@context": "https://schema.org",
         "@type": "ItemList",
-        "name": "A+ Academy - Barcha Kurslar | IT, IELTS, CEFR Kurslar Toshkent",
+        "name": "IELTS Imperia - Barcha Kurslar | IT, IELTS, CEFR Kurslar Toshkent",
         "description": "Professional IT, IELTS, CEFR va boshqa kurslar. Toshkentdagi eng yaxshi o'quv markazi.",
-        "url": typeof window !== 'undefined' ? window.location.href : 'https://aplusacademy.uz/courses',
+        "url": typeof window !== 'undefined' ? window.location.href : 'https://ieltsimperia.uz/courses',
         "numberOfItems": filteredCourses.length,
         "itemListElement": filteredCourses.map((course, index) => {
           const courseName = i18n.language === "uz" ? course.name_uz : i18n.language === "ru" ? course.name_ru : course.name_en;
           const courseDesc = i18n.language === "uz" ? course.description_uz : i18n.language === "ru" ? course.description_ru : course.description_en;
-          
+
           return {
             "@type": "ListItem",
             "position": index + 1,
@@ -200,11 +200,11 @@ export default function Courses() {
               "@type": "Course",
               "name": courseName,
               "description": courseDesc,
-              "url": typeof window !== 'undefined' ? `${window.location.origin}/courses` : 'https://aplusacademy.uz/courses',
+              "url": typeof window !== 'undefined' ? `${window.location.origin}/courses` : 'https://ieltsimperia.uz/courses',
               "provider": {
                 "@type": "EducationalOrganization",
-                "name": "A+ Academy",
-                "url": "https://aplusacademy.uz"
+                "name": "IELTS Imperia",
+                "url": "https://ieltsimperia.uz"
               },
               "offers": {
                 "@type": "Offer",
@@ -212,7 +212,7 @@ export default function Courses() {
                 "priceCurrency": "UZS"
               },
               ...(course.image_url && {
-                "image": course.image_url.startsWith('http') ? course.image_url : `https://aplusacademy.uz${course.image_url}`
+                "image": course.image_url.startsWith('http') ? course.image_url : `https://ieltsimperia.uz${course.image_url}`
               })
             }
           };
@@ -224,9 +224,9 @@ export default function Courses() {
   if (loading) {
     return (
       <>
-        <SEO 
-          title="Kurslar — A+ Academy"
-          description="Professional IT, IELTS, CEFR va boshqa kurslar. A+ Academy da o'qing va martaba quring."
+        <SEO
+          title="Kurslar — IELTS Imperia"
+          description="Professional IT, IELTS, CEFR va boshqa kurslar. IELTS Imperia da o'qing va martaba quring."
         />
         <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -237,10 +237,10 @@ export default function Courses() {
 
   return (
     <>
-      <SEO 
-        title="Kurslar — A+ Academy | IT, IELTS, CEFR, Dasturlash Kurslari Toshkent"
-        description="A+ Academy kurslari: IT, IELTS, CEFR, dasturlash (React, JavaScript, Python, Node.js), ingliz tili. Professional o'qituvchilar, zamonaviy dasturlar. Toshkent. Ro'yxatdan o'ting!"
-        keywords="kurslar, IT kurslar, IELTS kurslar, CEFR kurslar, dasturlash kurslari, frontend kurslar, backend kurslar, fullstack kurslar, React kurslar, JavaScript kurslar, Python kurslar, Node.js kurslar, ingliz tili kurslari, Toshkent kurslar, o'quv markazi kurslar, A+ Academy kurslar, professional kurslar, zamonaviy kurslar"
+      <SEO
+        title="Kurslar — IELTS Imperia | IT, IELTS, CEFR, Dasturlash Kurslari Toshkent"
+        description="IELTS Imperia kurslari: IT, IELTS, CEFR, dasturlash (React, JavaScript, Python, Node.js), ingliz tili. Professional o'qituvchilar, zamonaviy dasturlar. Toshkent. Ro'yxatdan o'ting!"
+        keywords="kurslar, IT kurslar, IELTS kurslar, CEFR kurslar, dasturlash kurslari, frontend kurslar, backend kurslar, fullstack kurslar, React kurslar, JavaScript kurslar, Python kurslar, Node.js kurslar, ingliz tili kurslari, Toshkent kurslar, o'quv markazi kurslar, IELTS Imperia kurslar, professional kurslar, zamonaviy kurslar"
         structuredData={structuredData}
       />
       <div className="min-h-screen relative overflow-hidden">
@@ -309,10 +309,10 @@ export default function Courses() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
                 {filteredCourses.map((course, index) => (
-                  <div 
-                    key={course.id} 
+                  <div
+                    key={course.id}
                     className="group animate-fade-in-up card-hover-lift hover:z-10"
-                    style={{ 
+                    style={{
                       animationDelay: `${index * 0.08}s`
                     }}
                   >
@@ -320,13 +320,13 @@ export default function Courses() {
                       id={course.id}
                       name={
                         i18n.language === "uz" ? course.name_uz :
-                        i18n.language === "ru" ? course.name_ru :
-                        course.name_en
+                          i18n.language === "ru" ? course.name_ru :
+                            course.name_en
                       }
                       description={
                         i18n.language === "uz" ? course.description_uz :
-                        i18n.language === "ru" ? course.description_ru :
-                        course.description_en
+                          i18n.language === "ru" ? course.description_ru :
+                            course.description_en
                       }
                       category={course.category}
                       duration={course.duration}

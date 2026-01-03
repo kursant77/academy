@@ -22,12 +22,12 @@ import { supabase } from "@/lib/supabase";
 import { sendTelegramMessage, formatRegistrationMessage } from "@/lib/telegram";
 import type { Course } from "@shared/schema";
 import { SEO } from "@/components/SEO";
-import { 
-  User, 
-  Phone, 
-  Calendar, 
-  BookOpen, 
-  CheckCircle2, 
+import {
+  User,
+  Phone,
+  Calendar,
+  BookOpen,
+  CheckCircle2,
   Sparkles,
   ArrowRight,
   Loader2,
@@ -72,7 +72,9 @@ export default function Register() {
         }
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.error('Registration error:', errorMessage);
+        if (import.meta.env.DEV) {
+          console.error('Registration error:', errorMessage);
+        }
         toast({
           title: t("register.error") || "Xatolik",
           description: error.message || "Ma'lumotlar yuklanmadi",
@@ -87,12 +89,12 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Agar allaqachon submitting bo'lsa, qaytaramiz
     if (submitting || isSubmittingRef.current) {
       return;
     }
-    
+
     isSubmittingRef.current = true;
 
     if (!formData.courseId) {
@@ -142,8 +144,8 @@ export default function Register() {
         ? i18n.language === "uz"
           ? selectedCourse.name_uz
           : i18n.language === "ru"
-          ? selectedCourse.name_ru
-          : selectedCourse.name_en
+            ? selectedCourse.name_ru
+            : selectedCourse.name_en
         : "Kurs";
 
       const { error: appError } = await supabase.from("applications").insert({
@@ -161,7 +163,9 @@ export default function Register() {
       });
 
       if (appError) {
-        console.error("Application insert error:", appError);
+        if (import.meta.env.DEV) {
+          console.error("Application insert error:", appError);
+        }
         throw appError;
       }
 
@@ -173,27 +177,27 @@ export default function Register() {
         courseName: courseName,
         parentPhone: formData.parentPhone.trim() || undefined,
       });
-      
+
       sendTelegramMessage(telegramMessage).catch((err) => {
         console.warn('Telegram xabar yuborilmadi:', err);
       });
 
       setSuccess(true);
-      
+
       // Toast faqat bitta marta ko'rsatilishi uchun
       if (!toastShownRef.current) {
         toastShownRef.current = true;
-        
+
         // Barcha ochiq toast'larni yopish
         dismiss();
-        
+
         // Kichik delay bilan yangi toast ko'rsatish (barcha toast'lar yopilishi uchun)
         setTimeout(() => {
           toast({
             title: t("register.success") || "Arizangiz yuborildi! Tez orada siz bilan bog'lanamiz.",
           });
         }, 100);
-        
+
         // 3 soniyadan keyin toastShownRef'ni reset qilish
         setTimeout(() => {
           toastShownRef.current = false;
@@ -227,20 +231,20 @@ export default function Register() {
   return (
     <>
       <SEO
-        title="Ro'yxatdan O'tish — A+ Academy | Kursga Yozilish Toshkent"
-        description="A+ Academy kurslariga ro'yxatdan o'ting. IT, IELTS, CEFR va dasturlash kurslari. Professional o'qituvchilar bilan sifatli ta'lim. Toshkent. Tezkor ro'yxatdan o'tish!"
-        keywords="ro'yxatdan o'tish, kursga yozilish, A+ Academy, IT kurslar, IELTS, CEFR, dasturlash kurslariga yozilish, Toshkent kurslar, o'quv markaziga yozilish, online ro'yxatdan o'tish"
+        title="Ro'yxatdan O'tish — IELTS Imperia | Kursga Yozilish Toshkent"
+        description="IELTS Imperia kurslariga ro'yxatdan o'ting. IT, IELTS, CEFR va dasturlash kurslari. Professional o'qituvchilar bilan sifatli ta'lim. Toshkent. Tezkor ro'yxatdan o'tish!"
+        keywords="ro'yxatdan o'tish, kursga yozilish, IELTS Imperia, IT kurslar, IELTS, CEFR, dasturlash kurslariga yozilish, Toshkent kurslar, o'quv markaziga yozilish, online ro'yxatdan o'tish"
         url="/register"
         structuredData={{
           "@context": "https://schema.org",
           "@type": "WebPage",
-          "name": "Ro'yxatdan O'tish - A+ Academy",
-          "description": "A+ Academy kurslariga ro'yxatdan o'tish",
+          "name": "Ro'yxatdan O'tish - IELTS Imperia",
+          "description": "IELTS Imperia kurslariga ro'yxatdan o'tish",
           "potentialAction": {
             "@type": "RegisterAction",
             "target": {
               "@type": "EntryPoint",
-              "urlTemplate": "https://aplusacademy.uz/register"
+              "urlTemplate": "https://ieltsimperia.uz/register"
             }
           }
         }}
@@ -250,7 +254,7 @@ export default function Register() {
         <div className="fixed inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5 -z-10 pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)] -z-10" />
         <div className="absolute inset-0 bg-pattern-dots opacity-20 -z-10" />
-        
+
         {/* Animated Background Elements */}
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse -z-10" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
@@ -266,9 +270,9 @@ export default function Register() {
               {t("register.title") || "Ro'yxatdan o'tish"}
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto px-2">
-              {t("register.subtitle") || "A+ Academy kurslariga ro'yxatdan o'ting va professional ta'lim oling"}
+              {t("register.subtitle") || "IELTS Imperia kurslariga ro'yxatdan o'ting va professional ta'lim oling"}
             </p>
-            
+
             {/* Benefits */}
             <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 mt-6 sm:mt-8 px-2">
               <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-primary/10 text-primary text-xs sm:text-sm">
@@ -433,8 +437,8 @@ export default function Register() {
                                   {i18n.language === "uz"
                                     ? course.name_uz
                                     : i18n.language === "ru"
-                                    ? course.name_ru
-                                    : course.name_en}
+                                      ? course.name_ru
+                                      : course.name_en}
                                 </div>
                               </SelectItem>
                             ))
@@ -479,7 +483,7 @@ export default function Register() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-primary" />
-                    Nima uchun A+ Academy?
+                    Nima uchun IELTS Imperia?
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -540,8 +544,8 @@ export default function Register() {
                   </p>
                   <div className="flex flex-col gap-2">
                     {contactContent.phone && (
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         className="justify-start"
                         onClick={() => window.open(`tel:${contactContent.phone?.replace(/\s/g, '')}`, '_self')}
                       >
@@ -550,8 +554,8 @@ export default function Register() {
                       </Button>
                     )}
                     {socialContent.telegram && (
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         className="justify-start"
                         onClick={() => window.open(socialContent.telegram as string, '_blank')}
                       >

@@ -42,8 +42,8 @@ export default function Teachers() {
       <>
         <SEO
           title="O'qituvchilar"
-          description="A+ Academy professional o'qituvchilari. IT, IELTS, CEFR va boshqa kurslar bo'yicha tajribali mutaxassislar."
-          keywords="o'qituvchilar, A+ Academy, IT o'qituvchilari, IELTS o'qituvchilari"
+          description="IELTS Imperia professional o'qituvchilari. IT, IELTS, CEFR va boshqa kurslar bo'yicha tajribali mutaxassislar."
+          keywords="o'qituvchilar, IELTS Imperia, IT o'qituvchilari, IELTS o'qituvchilari"
           url="/teachers"
         />
         <div className="min-h-screen flex items-center justify-center">
@@ -56,14 +56,14 @@ export default function Teachers() {
   return (
     <>
       <SEO
-        title="O'qituvchilar — A+ Academy | Professional O'qituvchilar Toshkent"
-        description="A+ Academy professional o'qituvchilari. IT, IELTS, CEFR va dasturlash bo'yicha 5+ yillik tajribaga ega mutaxassislar. Toshkent. Batafsil ma'lumot."
-        keywords="o'qituvchilar, A+ Academy o'qituvchilari, IT o'qituvchilari, IELTS o'qituvchilari, dasturlash o'qituvchilari, professional o'qituvchilar, Toshkent o'qituvchilar, tajribali o'qituvchilar, mutaxassislar"
+        title="O'qituvchilar — IELTS Imperia | Professional O'qituvchilar Toshkent"
+        description="IELTS Imperia professional o'qituvchilari. IT, IELTS, CEFR va dasturlash bo'yicha 5+ yillik tajribaga ega mutaxassislar. Toshkent. Batafsil ma'lumot."
+        keywords="o'qituvchilar, IELTS Imperia o'qituvchilari, IT o'qituvchilari, IELTS o'qituvchilari, dasturlash o'qituvchilari, professional o'qituvchilar, Toshkent o'qituvchilar, tajribali o'qituvchilar, mutaxassislar"
         url="/teachers"
         structuredData={{
           "@context": "https://schema.org",
           "@type": "ItemList",
-          "name": "A+ Academy O'qituvchilari",
+          "name": "IELTS Imperia O'qituvchilari",
           "description": "Professional o'qituvchilar ro'yxati",
           "itemListElement": teachers.map((teacher, index) => ({
             "@type": "ListItem",
@@ -74,7 +74,7 @@ export default function Teachers() {
               "jobTitle": i18n.language === "uz" ? teacher.specialty_uz : i18n.language === "ru" ? teacher.specialty_ru : teacher.specialty_en,
               "worksFor": {
                 "@type": "EducationalOrganization",
-                "name": "A+ Academy"
+                "name": "IELTS Imperia"
               }
             }
           }))

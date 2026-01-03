@@ -1,4 +1,4 @@
-# Netlify Configuration for A+ Academy
+# Netlify Configuration for IELTS Imperia
 
 [build]
   command = "npm run build"

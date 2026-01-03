@@ -1,4 +1,4 @@
-# robots.txt for A+ Academy
+# robots.txt for IELTS Imperia
 # https://aplusacademy.uz/robots.txt
 # Last updated: 2025-01-28
 
