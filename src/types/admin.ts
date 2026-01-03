@@ -1,4 +1,4 @@
-export type TeacherStatus = 'active' | 'inactive';
+export type TeacherStatus = 'active' | 'inactive' | 'suspended';
 
 export interface TeacherProfile {
   id: string;
@@ -19,7 +19,7 @@ export interface TeacherProfile {
 
 export type TeacherPayload = Omit<TeacherProfile, 'id' | 'groups'>;
 
-export type PaymentStatus = 'paid' | 'unpaid';
+export type PaymentStatus = 'paid' | 'unpaid' | 'pending' | 'overdue' | 'cancelled';
 
 export interface PaymentHistoryEntry {
   id: string;
@@ -41,7 +41,7 @@ export interface MonthlyPayment {
   amount: number;
   paymentDate: string;
   method: 'cash' | 'card' | 'transfer';
-  status: 'paid' | 'pending' | 'overdue';
+  status: PaymentStatus;
   note?: string;
 }
 
@@ -99,7 +99,7 @@ export interface StudentPaymentInfo {
   isExpired: boolean;
 }
 
-export type GroupStatus = 'active' | 'closed';
+export type GroupStatus = 'active' | 'closed' | 'completed' | 'cancelled';
 
 export interface GroupProfile {
   id: string;

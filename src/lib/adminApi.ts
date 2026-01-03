@@ -26,8 +26,8 @@ const mapTeacherFromDb = (dbTeacher: DbTeacher): TeacherProfile => ({
   subject: dbTeacher.specialty || dbTeacher.specialty_uz || '',
   experience: dbTeacher.experience || 0,
   phone: dbTeacher.phone || '',
-  monthlySalary: parseFloat(dbTeacher.monthly_salary || '0'),
-  status: dbTeacher.status || 'active',
+  monthlySalary: parseFloat((dbTeacher.monthly_salary || '0').toString()),
+  status: (dbTeacher.status || 'active') as 'active' | 'inactive',
   photoUrl: dbTeacher.image_url || undefined,
   bio: dbTeacher.bio || dbTeacher.bio_uz || '',
   groups: [], // Will be populated separately
@@ -59,13 +59,13 @@ const mapGroupFromDb = (dbGroup: DbGroup, teacherName?: string, courseName?: str
   teacherName: teacherName || 'Unassigned',
   courseId: dbGroup.course_id || null,
   courseName: courseName || dbGroup.courses?.name_uz || undefined,
-  schedule: dbGroup.schedule,
-  room: dbGroup.room,
+  schedule: dbGroup.schedule || '',
+  room: dbGroup.room || '',
   maxStudents: dbGroup.max_students || 0,
   currentStudents: dbGroup.current_students || 0,
-  status: dbGroup.status || 'active',
+  status: (dbGroup.status || 'active') as 'active' | 'completed' | 'cancelled',
   attendanceRate: dbGroup.attendance_rate || 0,
-  monthlyRevenue: parseFloat(dbGroup.monthly_revenue || '0'),
+  monthlyRevenue: parseFloat((dbGroup.monthly_revenue || '0').toString()),
 });
 
 // Helper function to convert GroupProfile to database format
@@ -86,7 +86,7 @@ const mapGroupToDb = (group: Partial<GroupPayload>) => ({
 const mapStudentFromDb = (dbStudent: any, group?: GroupProfile, teacherName?: string): StudentProfile => {
   const paymentValidUntil = dbStudent.payment_valid_until;
   const createdAt = dbStudent.created_at;
-  
+
   // To'lov eskirgan deb hisoblash: kursga yozilganiga 1 oydan o'tgan, lekin hali to'lov qilmagan
   let isExpired = false;
   if (createdAt) {
@@ -95,7 +95,7 @@ const mapStudentFromDb = (dbStudent: any, group?: GroupProfile, teacherName?: st
     const firstPaymentMonth = new Date(enrollmentDate.getFullYear(), enrollmentDate.getMonth() + 1, 1);
     const now = new Date();
     const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    
+
     // Agar birinchi to'lov oyi o'tib ketgan bo'lsa va to'lov qilinmagan bo'lsa
     if (firstPaymentMonth < currentMonth) {
       // Agar payment_valid_until yo'q bo'lsa yoki o'tib ketgan bo'lsa, eskirgan deb hisoblash
@@ -107,11 +107,11 @@ const mapStudentFromDb = (dbStudent: any, group?: GroupProfile, teacherName?: st
     // Agar qo'shilgan sana yo'q bo'lsa, eski logikani ishlatish
     isExpired = paymentValidUntil ? new Date(paymentValidUntil) < new Date() : true;
   }
-  
-  const daysRemaining = paymentValidUntil 
+
+  const daysRemaining = paymentValidUntil
     ? Math.ceil((new Date(paymentValidUntil).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
     : 0;
-  
+
   return {
     id: dbStudent.id,
     fullName: dbStudent.name || dbStudent.full_name,
@@ -145,8 +145,8 @@ const mapMonthlyPaymentFromDb = (dbPayment: any): MonthlyPayment => ({
   monthNumber: dbPayment.month_number,
   amount: parseFloat(dbPayment.amount || '0'),
   paymentDate: dbPayment.payment_date,
-  method: dbPayment.method,
-  status: dbPayment.status,
+  method: dbPayment.method as 'cash' | 'card' | 'transfer',
+  status: dbPayment.status as 'paid' | 'pending' | 'cancelled',
   note: dbPayment.note || undefined,
 });
 
@@ -162,22 +162,22 @@ const mapStudentToDb = (student: Partial<StudentPayload>) => {
     photo_url: student.photoUrl || null,
     notes: student.notes || null,
   };
-  
+
   // courseName ni qo'shish
   if (student.courseName) {
     dbData.course_name = student.courseName;
   }
-  
+
   // payment_valid_until ni qo'shish
   if (student.paymentValidUntil) {
     dbData.payment_valid_until = student.paymentValidUntil;
   }
-  
+
   // last_paid_month ni qo'shish
   if (student.lastPaidMonth) {
     dbData.last_paid_month = student.lastPaidMonth;
   }
-  
+
   return dbData;
 };
 
@@ -185,10 +185,10 @@ const mapStudentToDb = (student: Partial<StudentPayload>) => {
 const mapPaymentFromDb = (dbPayment: DbPayment): PaymentHistoryEntry => ({
   id: dbPayment.id,
   studentId: dbPayment.student_id,
-  amount: parseFloat(dbPayment.amount || '0'),
+  amount: parseFloat((dbPayment.amount || '0').toString()),
   date: dbPayment.date,
-  status: dbPayment.status,
-  method: dbPayment.method,
+  status: dbPayment.status as 'paid' | 'pending' | 'cancelled',
+  method: dbPayment.method as 'cash' | 'card' | 'transfer',
   note: dbPayment.note || undefined,
 });
 
@@ -205,7 +205,7 @@ const mapPaymentToDb = (payment: Omit<PaymentHistoryEntry, 'id' | 'studentId'>) 
 const mapRevenueFromDb = (dbRevenue: DbRevenue): RevenueRecord => ({
   id: dbRevenue.id,
   source: dbRevenue.source,
-  amount: parseFloat(dbRevenue.amount || '0'),
+  amount: parseFloat((dbRevenue.amount || '0').toString()),
   month: dbRevenue.month,
   note: dbRevenue.note || undefined,
 });
@@ -214,10 +214,10 @@ const mapRevenueFromDb = (dbRevenue: DbRevenue): RevenueRecord => ({
 const mapExpenseFromDb = (dbExpense: DbExpense): ExpenseRecord => ({
   id: dbExpense.id,
   category: dbExpense.category,
-  amount: parseFloat(dbExpense.amount || '0'),
+  amount: parseFloat((dbExpense.amount || '0').toString()),
   month: dbExpense.month,
   description: dbExpense.description || undefined,
-  type: dbExpense.type || 'variable',
+  type: (dbExpense.type || 'variable') as 'fixed' | 'variable',
 });
 
 // Helper to sync group metrics (current_students and monthly_revenue)
@@ -330,13 +330,13 @@ export const adminApi = {
       // Get courses separately if course_id exists
       const courseIds = groups?.filter(g => g.course_id).map(g => g.course_id) || [];
       let coursesMap: Record<string, any> = {};
-      
+
       if (courseIds.length > 0) {
         const { data: coursesData } = await supabase
           .from('courses')
           .select('id, name_uz, name_ru, name_en')
           .in('id', courseIds);
-        
+
         if (coursesData) {
           coursesMap = coursesData.reduce((acc: Record<string, { name_uz?: string; name_ru?: string; name_en?: string }>, course: { id: string; name_uz?: string; name_ru?: string; name_en?: string }) => {
             acc[course.id] = course;
@@ -492,13 +492,13 @@ export const adminApi = {
       // Get courses separately if course_id exists
       const courseIds = groups?.filter(g => g.course_id).map(g => g.course_id) || [];
       let coursesMap: Record<string, any> = {};
-      
+
       if (courseIds.length > 0) {
         const { data: courses } = await supabase
           .from('courses')
           .select('id, name_uz, name_ru, name_en')
           .in('id', courseIds);
-        
+
         if (courses) {
           coursesMap = courses.reduce((acc: Record<string, { name_uz?: string; name_ru?: string; name_en?: string }>, course: { id: string; name_uz?: string; name_ru?: string; name_en?: string }) => {
             acc[course.id] = course;
@@ -512,8 +512,8 @@ export const adminApi = {
 
       return (groups || []).map((g: DbGroup) =>
         mapGroupFromDb(
-          g, 
-          g.teachers?.name || 'Unassigned',
+          g,
+          (Array.isArray(g.teachers) ? g.teachers[0]?.name : (g.teachers as any)?.name) || 'Unassigned',
           g.course_id ? coursesMap[g.course_id]?.name_uz : undefined
         )
       );
@@ -553,7 +553,7 @@ export const adminApi = {
       }
 
       return mapGroupFromDb(
-        group, 
+        group,
         group.teachers?.name || 'Unassigned',
         courseName
       );
@@ -588,7 +588,7 @@ export const adminApi = {
 
       await syncGroupMetrics(data.id);
       return mapGroupFromDb(
-        data, 
+        data,
         data.teachers?.name || 'Unassigned',
         courseName
       );
@@ -624,7 +624,7 @@ export const adminApi = {
 
       await syncGroupMetrics(id);
       return mapGroupFromDb(
-        data, 
+        data,
         data.teachers?.name || 'Unassigned',
         courseName
       );
@@ -733,10 +733,7 @@ export const adminApi = {
       const { data: groups } = await supabase
         .from('groups')
         .select(`
-          id,
-          name,
-          schedule,
-          teacher_id,
+          *,
           teachers:teacher_id (
             name
           )
@@ -762,10 +759,10 @@ export const adminApi = {
         const group = groups?.find((g: any) => g.id === student.group_id);
         const studentPayments = payments?.filter((p) => p.student_id === student.id) || [];
         const studentMonthlyPayments = monthlyPayments?.filter((p) => p.student_id === student.id) || [];
-        const teacherName = group?.teachers 
-          ? (Array.isArray(group.teachers) 
-              ? (Array.isArray(group.teachers) ? group.teachers[0]?.name : (group.teachers as { name: string } | null)?.name)
-              : (group.teachers as { name: string } | null)?.name) 
+        const teacherName = group?.teachers
+          ? (Array.isArray(group.teachers)
+            ? (Array.isArray(group.teachers) ? group.teachers[0]?.name : (group.teachers as any)?.name)
+            : (group.teachers as any)?.name)
           : undefined;
         return {
           ...mapStudentFromDb(student, group ? mapGroupFromDb(group, teacherName) : undefined, teacherName),
@@ -900,10 +897,10 @@ export const adminApi = {
       const paymentMonth = month || new Date().toISOString().slice(0, 7);
       const year = parseInt(paymentMonth.slice(0, 4));
       const monthNumber = parseInt(paymentMonth.slice(5, 7));
-      
+
       // To'lov muddati - keyingi oyning shu sanasi
       const expiryDate = new Date(year, monthNumber, 1); // Keyingi oyning 1-sanasi
-      
+
       // Insert payment record
       const dbData = mapPaymentToDb(entry);
       const { data: payment, error: paymentError } = await supabase
@@ -935,7 +932,7 @@ export const adminApi = {
       // Update student payment status
       const { data: student, error: studentError } = await supabase
         .from('students')
-        .update({ 
+        .update({
           payment_status: entry.status,
           payment_valid_until: expiryDate.toISOString().slice(0, 10),
           last_paid_month: paymentMonth,
@@ -1013,7 +1010,7 @@ export const adminApi = {
   async getStudentPaymentInfo(studentId: string): Promise<StudentPaymentInfo> {
     try {
       const currentMonth = new Date().toISOString().slice(0, 7);
-      
+
       // Talaba ma'lumotlari
       const { data: student, error: studentError } = await supabase
         .from('students')
@@ -1043,8 +1040,8 @@ export const adminApi = {
       const paidMonthSet = new Set(paidMonths?.map(p => p.month) || []);
       const monthsNeeded = months.filter(m => !paidMonthSet.has(m));
 
-      const isExpired = student.payment_valid_until 
-        ? new Date(student.payment_valid_until) < new Date() 
+      const isExpired = student.payment_valid_until
+        ? new Date(student.payment_valid_until) < new Date()
         : true;
 
       return {
@@ -1241,7 +1238,7 @@ export const adminApi = {
       let teacherSalaries = 0;
 
       if (teachers && teachers.length > 0) {
-        const teacherIds = teachers.map(t => t.id);
+        const teacherIds = teachers.map((t: { id: string }) => t.id);
         const { data: teacherGroups } = await supabase
           .from('groups')
           .select('teacher_id, monthly_revenue')
@@ -1311,7 +1308,7 @@ export const adminApi = {
       if (studentsError && studentsError.code !== 'PGRST116') {
         console.warn('Error loading students for dashboard:', studentsError);
       }
-      const paidStudents = students?.filter((s) => s.payment_status === 'paid').length || 0;
+      const paidStudents = (students || []).filter((s) => s.payment_status === 'paid').length || 0;
       const unpaidStudents = studentCount - paidStudents;
 
       const currentMonth = new Date().toISOString().slice(0, 7);
@@ -1329,8 +1326,8 @@ export const adminApi = {
       const revenueAmount = revenue?.reduce((sum, r) => sum + parseFloat(r.amount || '0'), 0) || 0;
 
       const studentPayments =
-        students
-          ?.filter((s) => s.payment_status === 'paid')
+        (students || [])
+          .filter((s) => s.payment_status === 'paid')
           .reduce((sum, s) => sum + parseFloat(s.monthly_payment || '0'), 0) || 0;
 
       const monthlyRevenue = revenueAmount + studentPayments;
@@ -1349,7 +1346,7 @@ export const adminApi = {
       // Har bir o'qituvchining groups'lari bo'yicha daromadlarni yig'amiz
       let teacherSalaryExpense = 0;
       if (activeTeachers && activeTeachers.length > 0) {
-        const teacherIds = activeTeachers.map(t => t.id);
+        const teacherIds = activeTeachers.map((t: { id: string }) => t.id);
         const { data: teacherGroups } = await supabase
           .from('groups')
           .select('teacher_id, monthly_revenue')
@@ -1420,7 +1417,7 @@ export const adminApi = {
       // Har bir oy uchun o'qituvchilar oyligini hisoblash
       // Har bir oy uchun o'qituvchilarning groups daromadlarini yig'ib, payoutRate ga ko'paytiramiz
       const monthlyTeacherSalaries = new Map<string, number>();
-      
+
       // Faqat joriy oy uchun to'liq hisob-kitob mavjud
       // Boshqa oylar uchun o'qituvchilar oyligini faqat joriy oy uchun qo'llaymiz
       // (Real application'da har oy uchun alohida history saqlash kerak)
@@ -1461,12 +1458,12 @@ export const adminApi = {
       // Get groups data with error handling
       let groupsData: any[] = [];
       let teachersData: any[] = [];
-      
+
       try {
         const { data: groups, error: groupsError } = await supabase
           .from('groups')
           .select('id, name, current_students, max_students, monthly_revenue, attendance_rate, teacher_id');
-        
+
         if (groupsError && groupsError.code !== 'PGRST116') {
           console.warn('Error loading groups for dashboard:', groupsError);
         } else if (groups) {
@@ -1480,7 +1477,7 @@ export const adminApi = {
         const { data: allTeachers, error: allTeachersError } = await supabase
           .from('teachers')
           .select('id, name');
-        
+
         if (allTeachersError && allTeachersError.code !== 'PGRST116') {
           console.warn('Error loading teachers for dashboard:', allTeachersError);
         } else if (allTeachers) {
@@ -1490,9 +1487,9 @@ export const adminApi = {
         console.error('Error loading teachers:', error);
       }
 
-      const studentsPerGroup = (groupsData || []).map((g: DbGroup) => ({ 
+      const studentsPerGroup = (groupsData || []).map((g: DbGroup) => ({
         name: (g.name || 'Noma\'lum').substring(0, 20), // Truncate long names
-        value: Number(g.current_students) || 0 
+        value: Number(g.current_students) || 0
       }));
 
       const teachersPerGroup = (teachersData || []).map((teacher: DbTeacher) => ({

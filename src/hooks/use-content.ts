@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 interface ContentResponse {
+  [key: string]: string | undefined;
   address?: string;
   phone?: string;
   email?: string;
@@ -14,6 +15,10 @@ interface ContentResponse {
   youtube?: string;
   linkedin?: string;
   twitter?: string;
+  title?: string;
+  subtitle?: string;
+  primary_cta?: string;
+  secondary_cta?: string;
 }
 
 export function useContent(page: string, language: string) {
@@ -32,11 +37,20 @@ export function useContent(page: string, language: string) {
         if (page === 'social') {
           // Social section uchun barcha locale'larni olish
           const { data, error } = await query;
-          
+
           if (error) {
             console.error("Content load error:", error);
             return;
           }
+
+          // Helper to sanitize content
+          const sanitize = (val: string) => {
+            if (!val) return val;
+            return val
+              .replace(/A\+\s*Academy/gi, "IELTS Imperia")
+              .replace(/A\+/g, "IELTS Imperia")
+              .replace(/Academy/g, "IELTS Imperia");
+          };
 
           // Ma'lumotlarni object'ga aylantirish (birinchi topilganini olish)
           const contentObj: ContentResponse = {};
@@ -44,7 +58,7 @@ export function useContent(page: string, language: string) {
             const seenKeys = new Set<string>();
             data.forEach((item) => {
               if (!seenKeys.has(item.content_key)) {
-                contentObj[item.content_key as keyof ContentResponse] = item.value;
+                contentObj[item.content_key as keyof ContentResponse] = sanitize(item.value);
                 seenKeys.add(item.content_key);
               }
             });
@@ -69,7 +83,11 @@ export function useContent(page: string, language: string) {
           const contentObj: ContentResponse = {};
           if (data) {
             data.forEach((item) => {
-              contentObj[item.content_key as keyof ContentResponse] = item.value;
+              // Sanitize values
+              const val = item.value
+                .replace(/A\+\s*Academy/gi, "IELTS Imperia")
+                .replace(/A\+/g, "IELTS Imperia");
+              contentObj[item.content_key as keyof ContentResponse] = val;
             });
           }
 

@@ -3,7 +3,7 @@
 declare global {
   interface Window {
     gtag?: (...args: any[]) => void;
-    ym?: (id: number, action: string, target: string, params?: any) => void;
+    ym?: (id: number, action: string, target: any, params?: any) => void;
     dataLayer?: any[];
   }
 }
@@ -39,14 +39,14 @@ export function trackYandexEvent(target: string, params?: any) {
 export function initAnalytics() {
   // Google Analytics
   if (import.meta.env.VITE_GA_MEASUREMENT_ID) {
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${import.meta.env.VITE_GA_MEASUREMENT_ID}`;
-    document.head.appendChild(script);
+    const gaScript = document.createElement('script');
+    gaScript.async = true;
+    gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${import.meta.env.VITE_GA_MEASUREMENT_ID}`;
+    document.head.appendChild(gaScript);
 
     window.dataLayer = window.dataLayer || [];
-    window.gtag = function() {
-      window.dataLayer.push(arguments);
+    window.gtag = function (...args: any[]) {
+      window.dataLayer?.push(args);
     };
     window.gtag('js', new Date());
     window.gtag('config', import.meta.env.VITE_GA_MEASUREMENT_ID);
@@ -54,14 +54,25 @@ export function initAnalytics() {
 
   // Yandex Metrica
   if (import.meta.env.VITE_YANDEX_METRICA_ID) {
-    (function(m: any, e: string, t: string, r: string, i: string, k: string, a: string) {
-      m[i] = m[i] || function() { (m[i].a = m[i].a || []).push(arguments) };
-      m[i].l = 1 * new Date();
-      k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
-    })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js', 'ym');
-    
-    const id = parseInt(import.meta.env.VITE_YANDEX_METRICA_ID);
-    window.ym(id, 'init', {
+    const ymId = parseInt(import.meta.env.VITE_YANDEX_METRICA_ID);
+
+    window.ym = window.ym || function (...args: any[]) {
+      (window.ym as any).a = (window.ym as any).a || [];
+      (window.ym as any).a.push(args);
+    };
+    (window.ym as any).l = new Date().getTime();
+
+    const ymScript = document.createElement('script');
+    ymScript.async = true;
+    ymScript.src = 'https://mc.yandex.ru/metrika/tag.js';
+    const firstScript = document.getElementsByTagName('script')[0];
+    if (firstScript && firstScript.parentNode) {
+      firstScript.parentNode.insertBefore(ymScript, firstScript);
+    } else {
+      document.head.appendChild(ymScript);
+    }
+
+    window.ym(ymId, 'init', {
       clickmap: true,
       trackLinks: true,
       accurateTrackBounce: true,

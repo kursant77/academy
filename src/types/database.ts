@@ -25,8 +25,8 @@ export interface DbGroup {
   name: string;
   teacher_id: string;
   course_id?: string | null;
-  schedule?: string | null;
-  room?: string | null;
+  schedule: string; // Changed from optional to required based on adminApi usage, or keep optional and fix adminApi
+  room: string;     // Changed from optional to required based on adminApi usage
   max_students?: number;
   current_students?: number;
   status?: string;
@@ -44,10 +44,20 @@ export interface DbGroup {
 
 export interface DbStudent {
   id: string;
-  full_name: string;
+  full_name: string; // or name? adminApi uses name || full_name
+  name?: string;     // Added name as well since adminApi checks for it
   age?: number;
   phone?: string;
   group_id?: string | null;
+  parent_name?: string;
+  parent_contact?: string;
+  monthly_payment?: string | number;
+  payment_status?: string;
+  payment_valid_until?: string;
+  last_paid_month?: string;
+  photo_url?: string;
+  notes?: string;
+  course_name?: string;
   status?: string;
   created_at?: string;
   updated_at?: string;
@@ -57,28 +67,33 @@ export interface DbPayment {
   id: string;
   student_id: string;
   amount: string | number;
-  payment_date: string;
-  payment_method?: string;
-  status?: string;
+  date: string;       // Was missing (previously payment_date?)
+  method: string;     // Was missing (previously payment_method?)
+  status: string;     // Was optional
+  note?: string;      // Was missing
   created_at?: string;
 }
 
 export interface DbMonthlyPayment {
   id: string;
   student_id: string;
-  group_id: string;
   month: string;
+  year: number;
+  month_number: number;
   amount: string | number;
-  status?: string;
+  payment_date: string;
+  method: string;
+  status: string;
+  note?: string;
   created_at?: string;
 }
 
 export interface DbRevenue {
   id: string;
-  group_id: string;
+  source: string;     // Was group_id
   amount: string | number;
-  revenue_date: string;
-  description?: string;
+  month: string;      // Was revenue_date
+  note?: string;      // Was description
   created_at?: string;
 }
 
@@ -86,8 +101,9 @@ export interface DbExpense {
   id: string;
   category: string;
   amount: string | number;
-  expense_date: string;
+  month: string;      // Was expense_date
   description?: string;
+  type?: string;      // Was missing
   created_at?: string;
 }
 
