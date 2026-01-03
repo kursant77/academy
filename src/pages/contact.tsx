@@ -37,22 +37,6 @@ export default function Contact() {
 
     setSubmitting(true);
     try {
-      // Contact message ni database'ga saqlash (trigger avtomatik Telegram xabar yuboradi)
-      const { error: dbError } = await supabase
-        .from('contact_messages')
-        .insert({
-          name: formData.name.trim(),
-          email: formData.email.trim(),
-          message: formData.message.trim(),
-        });
-
-      if (dbError) {
-        if (import.meta.env.DEV) {
-          console.error("Contact message saqlashda xatolik:", dbError);
-        }
-        throw dbError;
-      }
-
       // Telegram botga xabar yuborish (frontend'dan to'g'ridan-to'g'ri)
       const telegramMessage = formatContactMessage({
         name: formData.name.trim(),
@@ -60,10 +44,22 @@ export default function Contact() {
         message: formData.message.trim(),
       });
 
-      sendTelegramMessage(telegramMessage).catch((err) => {
-        // Telegram xatolik foydalanuvchiga ko'rinmaydi, faqat console'da
-        console.warn('Telegram xabar yuborilmadi:', err);
-      });
+      // Parallel ravishda bajarish: Telegram va Database
+      const [telegramResult, dbResult] = await Promise.allSettled([
+        sendTelegramMessage(telegramMessage),
+        supabase
+          .from('contact_messages')
+          .insert({
+            name: formData.name.trim(),
+            email: formData.email.trim(),
+            message: formData.message.trim(),
+          })
+      ]);
+
+      // DB xatosi bo'lsa ham davom etamiz (log qilamiz)
+      if (dbResult.status === 'rejected' || (dbResult.status === 'fulfilled' && dbResult.value.error)) {
+        console.warn("Contact DB save error:", dbResult.status === 'rejected' ? dbResult.reason : dbResult.value.error);
+      }
 
       toast({
         title: t("contact.send"),

@@ -148,28 +148,7 @@ export default function Register() {
             : selectedCourse.name_en
         : "Kurs";
 
-      const { error: appError } = await supabase.from("applications").insert({
-        full_name: formData.fullName.trim(),
-        age: Number(formData.age),
-        phone: formData.phone.trim(),
-        course_id: formData.courseId || null,
-        category_id: null,
-        interests: `Kursga yozilish: ${courseName}`,
-        status: "pending",
-        data: {
-          locale: i18n.language,
-          parent_phone: formData.parentPhone.trim() || null,
-        },
-      });
-
-      if (appError) {
-        if (import.meta.env.DEV) {
-          console.error("Application insert error:", appError);
-        }
-        throw appError;
-      }
-
-      // Telegram botga xabar yuborish
+      // Telegram botga xabar yuborish (Backend/Supabase ga bog'liq emas)
       const telegramMessage = formatRegistrationMessage({
         fullName: formData.fullName.trim(),
         age: formData.age,
@@ -178,9 +157,35 @@ export default function Register() {
         parentPhone: formData.parentPhone.trim() || undefined,
       });
 
-      sendTelegramMessage(telegramMessage).catch((err) => {
-        console.warn('Telegram xabar yuborilmadi:', err);
-      });
+      // Parallel ravishda bajarish: Telegram va Database
+      const [telegramResult, dbResult] = await Promise.allSettled([
+        sendTelegramMessage(telegramMessage),
+        supabase.from("applications").insert({
+          full_name: formData.fullName.trim(),
+          age: Number(formData.age),
+          phone: formData.phone.trim(),
+          course_id: formData.courseId || null,
+          category_id: null,
+          interests: `Kursga yozilish: ${courseName}`,
+          status: "pending",
+          data: {
+            locale: i18n.language,
+            parent_phone: formData.parentPhone.trim() || null,
+          },
+        })
+      ]);
+
+      // Database xatoligini tekshirish (agar kerak bo'lsa)
+      if (dbResult.status === 'rejected' || (dbResult.status === 'fulfilled' && dbResult.value.error)) {
+        const error = dbResult.status === 'rejected' ? dbResult.reason : dbResult.value.error;
+        console.warn("Database save error (non-blocking):", error);
+        // Supabase xatosi endi jarayonni to'xtatmaydi, chunki asosiy maqsad Telegram
+      }
+
+      // Telegram xatoligini tekshirish
+      if (telegramResult.status === 'rejected' || (telegramResult.status === 'fulfilled' && !telegramResult.value)) {
+        console.warn("Telegram send warning: Message might not have been sent");
+      }
 
       setSuccess(true);
 
