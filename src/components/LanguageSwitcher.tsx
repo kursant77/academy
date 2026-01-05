@@ -11,7 +11,7 @@ import { useState, useEffect } from "react";
 
 export function LanguageSwitcher() {
   const { i18n, ready } = useTranslation();
-  const [currentLang, setCurrentLang] = useState(i18n.language || 'uz');
+  const [currentLang, setCurrentLang] = useState(i18n.language || 'en');
 
   const languages = [
     { code: "uz", label: "O'zbekcha", flag: "🇺🇿" },
