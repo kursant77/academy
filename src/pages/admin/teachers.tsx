@@ -38,6 +38,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import type { Teacher } from '@shared/schema';
 import { ImageUpload } from '@/components/ImageUpload';
+import { useTranslation } from 'react-i18next';
 import { Plus, Pencil, Trash2, Loader2, Star, User, Briefcase, Phone, Globe, Linkedin, Send, Instagram } from 'lucide-react';
 
 function TeachersContent() {
@@ -64,6 +65,7 @@ function TeachersContent() {
     featured: false,
   });
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadTeachers();
@@ -460,13 +462,13 @@ function TeachersContent() {
             {loading ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
-                <p className="text-sm text-muted-foreground">Yuklanmoqda...</p>
+                <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
               </div>
             ) : teachers.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <User className="h-12 w-12 text-muted-foreground/50 mb-3" />
-                <p className="text-sm font-medium text-foreground mb-1">Hozircha o'qituvchilar yo'q</p>
-                <p className="text-xs text-muted-foreground">Yangi o'qituvchi qo'shish uchun yuqoridagi tugmani bosing</p>
+                <p className="text-sm font-medium text-foreground mb-1">{t("teachers.noTeachers")}</p>
+                <p className="text-xs text-muted-foreground">{t("teachers.addTeacherHint")}</p>
               </div>
             ) : (
               <>

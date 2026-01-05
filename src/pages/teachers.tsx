@@ -102,9 +102,9 @@ export default function Teachers() {
             {/* Teachers Grid */}
             {teachers.length === 0 ? (
               <div className="text-center py-12 sm:py-16 md:py-20">
-                <h3 className="text-lg sm:text-xl font-semibold mb-2">O'qituvchilar hozircha yo'q</h3>
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">{t("teachers.noTeachers")}</h3>
                 <p className="text-sm sm:text-base text-muted-foreground">
-                  O'qituvchilar ro'yxati tez orada qo'shiladi. Kuting!
+                  {t("teachers.noTeachersDesc")}
                 </p>
               </div>
             ) : (

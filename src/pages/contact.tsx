@@ -188,7 +188,7 @@ export default function Contact() {
                       <div className="text-sm text-muted-foreground space-y-1">
                         <div>{t("contact.mondayFriday")}: {content.hours_week || "09:00 - 18:00"}</div>
                         <div>{t("contact.saturday")}: {content.hours_sat || "09:00 - 14:00"}</div>
-                        <div>{t("contact.sunday")}: {content.hours_sun || t("contact.sunday")}</div>
+                        <div>{t("contact.sunday")}: {content.hours_sun || t("contact.closed")}</div>
                       </div>
                     </div>
                   </div>

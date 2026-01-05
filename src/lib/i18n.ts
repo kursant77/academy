@@ -57,7 +57,10 @@ const resources = {
         title: "Bizning o'qituvchilar",
         subtitle: "Malakali va tajribali mutaxassislar",
         experience: "yil tajriba",
-        viewProfile: "Ko'proq"
+        viewProfile: "Ko'proq",
+        noTeachers: "O'qituvchilar hozircha yo'q",
+        noTeachersDesc: "O'qituvchilar ro'yxati tez orada qo'shiladi. Kuting!",
+        addTeacherHint: "Yangi o'qituvchi qo'shish uchun yuqoridagi tugmani bosing"
       },
       testimonials: {
         title: "O'quvchilar fikrlari",
@@ -92,6 +95,7 @@ const resources = {
         mondayFriday: "Dushanba - Juma",
         saturday: "Shanba",
         sunday: "Yakshanba",
+        closed: "Yopiq",
         name: "Ismingiz",
         message: "Xabar",
         send: "Yuborish"
@@ -195,7 +199,10 @@ const resources = {
         title: "Наши Эксперты",
         subtitle: "Инструкторы с сертификатом 8.5+",
         experience: "лет опыта",
-        viewProfile: "Подробнее"
+        viewProfile: "Подробнее",
+        noTeachers: "Эксперты отсутствуют",
+        noTeachersDesc: "Список экспертов пока пуст. Скоро будут добавлены.",
+        addTeacherHint: "Чтобы добавить нового эксперта, нажмите кнопку выше"
       },
       testimonials: {
         title: "Отзывы студентов",
@@ -229,7 +236,8 @@ const resources = {
         workHours: "Рабочие часы",
         mondayFriday: "Понедельник - Пятница",
         saturday: "Суббота",
-        sunday: "Воскресенье: Выходной",
+        sunday: "Воскресенье",
+        closed: "Выходной",
         name: "Ваше имя",
         message: "Сообщение",
         send: "Отправить"
@@ -333,7 +341,10 @@ const resources = {
         title: "Our Experts",
         subtitle: "Instructors with 8.5+ Band Score",
         experience: "years experience",
-        viewProfile: "View Profile"
+        viewProfile: "View Profile",
+        noTeachers: "No teachers found",
+        noTeachersDesc: "The teachers list is currently empty. New teachers coming soon.",
+        addTeacherHint: "Click the button above to add a new teacher"
       },
       testimonials: {
         title: "Student Reviews",
@@ -367,7 +378,8 @@ const resources = {
         workHours: "Working Hours",
         mondayFriday: "Monday - Friday",
         saturday: "Saturday",
-        sunday: "Sunday: Closed",
+        sunday: "Sunday",
+        closed: "Closed",
         name: "Your Name",
         message: "Message",
         send: "Send"

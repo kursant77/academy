@@ -30,39 +30,46 @@ export function useContent(page: string, language: string) {
         // Social section uchun locale'ni e'tiborsiz qoldirish
         let query = supabase
           .from('content_blocks')
-          .select('content_key, value, locale')
+          .select('content_key, value, locale, updated_at')
           .eq('section', page);
 
         // Social section bo'lsa, locale'ni e'tiborsiz qoldirish
         if (page === 'social') {
-          // Social section uchun barcha locale'larni olish
-          const { data, error } = await query;
+          // Social section uchun barcha locale'larni olish, eng so'nggi yangilanganidan boshlab
+          const { data, error } = await query.order('updated_at', { ascending: false });
 
           if (error) {
             console.error("Content load error:", error);
             return;
           }
 
-          // Helper to sanitize content
-          const sanitize = (val: string) => {
-            if (!val) return val;
-            return val
+          // Helper to sanitize content (trims and returns undefined for empty values)
+          const sanitize = (val: string | null | undefined) => {
+            if (val == null) return undefined;
+            const trimmed = String(val).trim();
+            if (!trimmed) return undefined;
+            return trimmed
               .replace(/A\+\s*Academy/gi, "IELTS Imperia")
               .replace(/A\+/g, "IELTS Imperia")
               .replace(/Academy/g, "IELTS Imperia");
           };
 
-          // Ma'lumotlarni object'ga aylantirish (birinchi topilganini olish)
+          // Ma'lumotlarni object'ga aylantirish (eng yangi to'liq qiymatni olish)
           const contentObj: ContentResponse = {};
           if (data) {
-            const seenKeys = new Set<string>();
             data.forEach((item) => {
-              if (!seenKeys.has(item.content_key)) {
-                contentObj[item.content_key as keyof ContentResponse] = sanitize(item.value);
-                seenKeys.add(item.content_key);
+              const key = item.content_key as keyof ContentResponse;
+              // agar allaqachon qiymat mavjud bo'lsa o'tib ketamiz (oldindan eng yangi qiymat saqlangan)
+              if (contentObj[key]) return;
+              const sanitized = sanitize(item.value);
+              if (sanitized !== undefined) {
+                contentObj[key] = sanitized;
               }
             });
           }
+
+          // DEBUG: log social content to help diagnose missing links
+          // console.debug('Loaded social content:', contentObj);
 
           setContent(contentObj);
         } else {
