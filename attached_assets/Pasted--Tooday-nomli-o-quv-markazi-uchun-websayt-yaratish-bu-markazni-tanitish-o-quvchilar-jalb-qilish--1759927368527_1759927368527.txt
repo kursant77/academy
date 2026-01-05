@@ -1,0 +1,207 @@
+“Tooday” nomli o‘quv markazi uchun websayt yaratish — bu markazni tanitish, o‘quvchilar jalb qilish va online xizmatlarni taklif qilishning eng yaxshi usullaridan biri. Quyida to‘liq professional o‘quv markazi websaytida bo‘lishi kerak bo‘lgan sahifalar, bo‘limlar va ma’lumotlar ro‘yxatini senga bosqichma-bosqich tushuntirib beraman 👇
+
+🏠 1. Bosh sahifa (Home)
+
+Bu saytning yuzidir. Eng birinchi taassurot shu sahifada hosil bo‘ladi.
+
+Bo‘lishi kerak:
+
+Hero bo‘lim (markaz nomi, shior: “Knowledge for your future” kabi)
+
+CTA tugma (“Kurslarga yozilish” yoki “Bog‘lanish”)
+
+O‘quv markazi haqida qisqacha tanishtiruv
+
+Kurs turlari preview (har bir kurs uchun kartochka)
+
+O‘quvchilar va o‘qituvchilar soni, yillik tajriba, bitiruvchilar statistikasi
+
+Video yoki rasm galereyasi preview
+
+Sharhlar (talabalar fikri) qisqacha
+
+Ijtimoiy tarmoqlar havolalari
+
+📚 2. Biz haqimizda (About)
+
+O‘quv markazning kimligi, maqsadi, qadriyatlari haqida batafsil ma’lumot.
+
+Bo‘lishi kerak:
+
+Markaz tarixi (qachon tashkil topgan, kim asos solgan)
+
+Missiya va vizion (maqsad va kelajak yo‘nalishi)
+
+Jamoa — o‘qituvchilar, asoschilar, adminlar (rasmlar bilan)
+
+Markazning afzalliklari (nima uchun Tooday?)
+
+Sertifikat va litsenziyalar (rasmlar bilan)
+
+🎓 3. Kurslar (Courses)
+
+Saytning eng muhim qismi. Har bir kurs haqida batafsil ma’lumot beriladi.
+
+Bo‘lishi kerak:
+
+Kurslar ro‘yxati (HTML/CSS/IELTS/Matematika/Ingliz tili va boshqalar)
+
+Har bir kurs uchun:
+
+Kurs nomi
+
+Davomiyligi
+
+Narxi
+
+O‘qituvchi ismi
+
+Dars jadvali
+
+O‘quvchilar soni yoki daraja (Beginner, Intermediate, Advanced)
+
+Ro‘yxatdan o‘tish tugmasi
+
+Filter (masalan, "IT kurslari", "Tillar", "Abituriyentlar uchun")
+
+🧑‍🏫 4. O‘qituvchilar (Teachers / Instructors)
+
+Har bir o‘qituvchi haqida alohida karta.
+
+Bo‘lishi kerak:
+
+Ism, familiya
+
+Mutaxassisligi (Ingliz tili, Frontend, Matematika...)
+
+Tajribasi
+
+Rasm
+
+Qisqacha bio
+
+Ijtimoiy tarmoq havolalari (LinkedIn, Telegram, Instagram)
+
+🕒 5. Dars jadvali (Schedule)
+
+Talabalar uchun qulay bo‘lishi uchun haftalik yoki kursga qarab jadval.
+
+Bo‘lishi kerak:
+
+Haftaning kunlari bo‘yicha darslar
+
+Vaqt oralig‘i (masalan, 10:00–12:00)
+
+Xonalar yoki onlayn/offline statusi
+
+Jadvalni PDF ko‘rinishida yuklab olish imkoniyati
+
+📝 6. Ro‘yxatdan o‘tish / Ariza (Apply / Registration)
+
+Sayt orqali o‘quvchilarning online yozilish imkoniyati.
+
+Bo‘lishi kerak:
+
+Ism, familiya, yosh
+
+Telefon raqam
+
+Kurs tanlash (dropdown)
+
+Qiziqishlari / maqsadi
+
+“Yuborish” tugmasi (form submission → admin panelga yoki emailga)
+
+Tasdiqlovchi xabar ("Arizangiz yuborildi!")
+
+🗓 7. Tadbirlar va yangiliklar (Events & News)
+
+Markazdagi yangiliklar va faoliyatlar uchun bo‘lim.
+
+Bo‘lishi kerak:
+
+Tadbirlar (sertifikat topshirish, imtihonlar, master-klasslar)
+
+Har bir yangilik uchun:
+
+Sarlavha
+
+Sana
+
+Rasm
+
+Batafsil ma’lumot (→ alohida sahifa)
+
+Arxiv yoki "Ko‘proq o‘qish" tugmasi
+
+💬 8. Sharhlar (Testimonials)
+
+Bitiruvchilar yoki o‘quvchilarning fikrlarini ko‘rsatish.
+
+Bo‘lishi kerak:
+
+O‘quvchi rasmi, ismi
+
+O‘qigan kursi
+
+Qisqa fikri (max 2–3 jumla)
+
+Slayder orqali harakatlanuvchi dizayn (JS animatsiya bilan)
+
+🖼 9. Galereya (Gallery)
+
+Markazdagi real hayotni ko‘rsatuvchi rasm va video bo‘lim.
+
+Bo‘lishi kerak:
+
+Dars jarayonlari
+
+Tadbirlar
+
+Sertifikat topshirish marosimlari
+
+Joylashuv fotosuratlari
+
+Filtr bilan (Masalan: “Darslar”, “Tadbirlar”, “Bitiruvchilar”)
+
+📍 10. Bog‘lanish (Contact)
+
+Foydalanuvchilar markaz bilan bevosita aloqa qilish uchun.
+
+Bo‘lishi kerak:
+
+Manzil (Google Maps bilan)
+
+Telefon raqam
+
+Email
+
+Ijtimoiy tarmoqlar havolalari
+
+Aloqa formasi (ism, email, xabar)
+
+Ish vaqti
+
+⚙️ 11. Admin panel (agar dinamik qilmoqchi bo‘lsang)
+
+Login tizimi (masalan, toodayAdmin / parol)
+
+Kurslar CRUD (qo‘shish, o‘chirish, tahrirlash)
+
+Yangiliklar CRUD
+
+O‘qituvchilar CRUD
+
+O‘quvchilar arizalarini ko‘rish
+
+Statistik panel (o‘quvchi soni, faol kurslar soni)
+
+🔒 12. Qo‘shimcha bo‘limlar (istalgancha qo‘shish mumkin)
+
+FAQ (Ko‘p so‘raladigan savollar)
+
+Blog — ta’limga oid maqolalar
+
+Online test — o‘quvchilar uchun mini test
+
+Partnerlar — hamkor tashkilotlar logosi

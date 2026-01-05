@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+  
+  <!-- Homepage - Highest Priority -->
+  <url>
+    <loc>https://ieltsimperia.uz/</loc>
+    <lastmod>2025-01-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://ieltsimperia.uz/og-image.jpg</image:loc>
+      <image:title>IELTS Imperia — Professional IT, IELTS &amp; CEFR Kurslar</image:title>
+      <image:caption>IELTS Imperia — Toshkentdagi eng yaxshi o'quv markazi</image:caption>
+    </image:image>
+  </url>
+  
+  <!-- Register - High Priority -->
+  <url>
+    <loc>https://ieltsimperia.uz/register</loc>
+    <lastmod>2025-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <!-- Courses - High Priority -->
+  <url>
+    <loc>https://ieltsimperia.uz/courses</loc>
+    <lastmod>2025-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <!-- Teachers - Medium-High Priority -->
+  <url>
+    <loc>https://ieltsimperia.uz/teachers</loc>
+    <lastmod>2025-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Events - Medium-High Priority -->
+  <url>
+    <loc>https://ieltsimperia.uz/events</loc>
+    <lastmod>2025-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- About - Medium Priority -->
+  <url>
+    <loc>https://ieltsimperia.uz/about</loc>
+    <lastmod>2025-01-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <!-- Achievements/Gallery - Medium Priority -->
+  <url>
+    <loc>https://ieltsimperia.uz/achievements</loc>
+    <lastmod>2025-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <!-- Contact - Medium-Low Priority -->
+  <url>
+    <loc>https://ieltsimperia.uz/contact</loc>
+    <lastmod>2025-01-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+</urlset>
+

@@ -1,0 +1,75 @@
+# robots.txt for IELTS Imperia
+# https://ieltsimperia.uz/robots.txt
+# Last updated: 2025-01-28
+
+# Allow all search engines to crawl the site
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /*.json$
+Disallow: /*?*_token=*
+Disallow: /*?*_key=*
+
+# Sitemap location
+Sitemap: https://ieltsimperia.uz/sitemap.xml
+
+# Google Search Engine
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Crawl-delay: 0
+
+# Google Image Bot
+User-agent: Googlebot-Image
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# Bing Search Engine
+User-agent: Bingbot
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Crawl-delay: 0
+
+# Yandex Search Engine
+User-agent: Yandex
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Crawl-delay: 0
+
+# Yahoo Search Engine
+User-agent: Slurp
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# Baidu Search Engine
+User-agent: Baiduspider
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# DuckDuckGo Bot
+User-agent: DuckDuckBot
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# Explicitly allow important pages for all bots
+User-agent: *
+Allow: /courses
+Allow: /teachers
+Allow: /events
+Allow: /about
+Allow: /contact
+Allow: /register
+Allow: /achievements
+
+# Performance optimization
+# No crawl delay for faster indexing
+# All pages are optimized for fast crawling and SEO
+
